@@ -1,4 +1,5 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
+import { saveNow, startAutosave } from '@/persistence/autosave';
 import { useEditorStore } from '@/state/editorStore';
 import { toast } from '@/state/toastStore';
 import { EditorCanvas } from '../Canvas/EditorCanvas';
@@ -17,9 +18,17 @@ import { TopBar } from './TopBar';
 export function EditorLayout() {
   const requestBlockDelete = useEditorStore((state) => state.requestBlockDelete);
 
+  // השמירה האוטומטית נרשמת ברמת הפריסה ולא ב-App: היא צריכה לרוץ רק כשיש
+  // לומדה פתוחה, ומסך הפתיחה אינו מרנדר את הרכיב הזה
+  useEffect(() => startAutosave(), []);
+
   useKeyboardShortcuts({
-    // שמירה ידנית מגיעה בשלב 6; עד אז הקיצור לפחות לא נחטף על ידי הדפדפן
-    onSave: useCallback(() => toast('שמירת פרויקט תתווסף בשלב הבא'), []),
+    // Ctrl+S שומר מיד לדפדפן. הורדת קובץ פרויקט היא פעולה נפרדת בסרגל,
+    // כי היא יוצרת עותק ואינה "השמירה" שהמשתמש סומך עליה בזמן עבודה.
+    onSave: useCallback(async () => {
+      const saved = await saveNow();
+      toast(saved ? 'הפרויקט נשמר' : 'השמירה נכשלה', { tone: saved ? 'success' : 'error' });
+    }, []),
     onDeleteBlock: requestBlockDelete,
   });
 

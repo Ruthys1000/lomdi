@@ -10,6 +10,7 @@ import {
   TextField,
   type Option,
 } from '@/editor/controls/Field';
+import { AssetField } from '@/editor/Assets/AssetField';
 import { contrastRatio } from '@/renderer/theme/themeToCssVars';
 import type { HeroContent } from './content';
 
@@ -82,6 +83,11 @@ export function HeroSettings({ block, onChange }: SettingsProps) {
 
         {content.backgroundType === 'image' && (
           <>
+            <AssetField
+              label="תמונת הרקע"
+              assetId={content.imageAssetId}
+              onChange={(imageAssetId) => update({ imageAssetId })}
+            />
             <SliderField
               label="כהות שכבת הכיסוי"
               value={Math.round(content.overlayOpacity * 100)}
@@ -91,7 +97,6 @@ export function HeroSettings({ block, onChange }: SettingsProps) {
               unit="%"
               onChange={(value) => update({ overlayOpacity: value / 100 })}
             />
-            <FieldNote>בחירת תמונת רקע תתאפשר בשלב הבא, עם ספריית הנכסים.</FieldNote>
           </>
         )}
 

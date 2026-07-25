@@ -1,10 +1,15 @@
+import { useRef, useState } from 'react';
 import { BookOpen, FolderOpen, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { openProjectFile } from '@/persistence/session';
 import { courseTemplates } from '@/templates';
 import type { Course } from '@/model/types';
+import { RecentProjects } from './RecentProjects';
 
 interface WelcomeScreenProps {
   onStart: (course: Course) => void;
+  /** נקרא כשפרויקט קיים נטען ישירות ל-stores, בלי לעבור דרך onStart */
+  onOpened: () => void;
 }
 
 /**
@@ -14,9 +19,24 @@ interface WelcomeScreenProps {
  * מוסתרות: כך רואים לאן המוצר הולך בלי להיתקל בכרטיס שנראה עובד ואינו
  * עושה דבר.
  */
-export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
+export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
   const ready = courseTemplates.filter((template) => template.create);
   const planned = courseTemplates.filter((template) => !template.create);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [fileErrors, setFileErrors] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const handleFile = async (file: File) => {
+    setLoading(true);
+    setFileErrors([]);
+
+    const result = await openProjectFile(file);
+    setLoading(false);
+
+    if (result.ok) onOpened();
+    else setFileErrors(result.errors);
+  };
 
   return (
     <main className="min-h-full overflow-y-auto bg-slate-50">
@@ -87,16 +107,47 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
           </div>
         </section>
 
+        <RecentProjects onOpened={onOpened} />
+
         <section className="mt-10 rounded-2xl border border-dashed border-slate-200 p-5">
           <div className="flex items-start gap-3">
             <FolderOpen className="mt-0.5 size-5 shrink-0 text-slate-400" aria-hidden />
-            <div>
-              <h2 className="text-sm font-semibold text-slate-500">פתיחת פרויקט שמור</h2>
-              <p className="mt-1 text-xs leading-relaxed text-slate-400">
-                טעינת קובץ פרויקט מהמחשב, והמשך עבודה מאותה נקודה. יתווסף בשלב 6.
+            <div className="min-w-0 flex-1">
+              <h2 className="text-sm font-semibold text-slate-700">פתיחת קובץ פרויקט</h2>
+              <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                קובץ ‎.course.zip‎ שנשמר מהמחולל — כולל התוכן, העיצוב והתמונות.
               </p>
+
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() => fileInputRef.current?.click()}
+                className="mt-3 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-blue-300 hover:text-blue-700 disabled:opacity-50"
+              >
+                {loading ? 'טוען…' : 'בחירת קובץ'}
+              </button>
+
+              {fileErrors.length > 0 && (
+                <ul className="mt-3 space-y-1 rounded-lg bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-800">
+                  {fileErrors.map((message) => (
+                    <li key={message}>{message}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".zip"
+            className="hidden"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              event.target.value = '';
+              if (file) void handleFile(file);
+            }}
+          />
         </section>
       </div>
     </main>

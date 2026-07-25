@@ -1,21 +1,25 @@
+import { useRef, useState } from 'react';
 import {
   BookOpen,
   Download,
   Eye,
   FolderOpen,
+  Images,
   Monitor,
   Redo2,
   Save,
-  Settings,
   Smartphone,
   Tablet,
   Undo2,
 } from 'lucide-react';
+import { downloadProjectFile, openProjectFile } from '@/persistence/session';
 import { courseHistory, useCourseStore } from '@/state/courseStore';
 import { useEditorStore, type Viewport } from '@/state/editorStore';
 import { toast } from '@/state/toastStore';
+import { AssetLibraryModal } from '../Assets/AssetLibraryModal';
 import { useHistoryState } from '../shortcuts/useHistoryState';
 import { IconButton } from '../ui/IconButton';
+import { SaveIndicator } from './SaveIndicator';
 
 const viewports: { id: Viewport; label: string; icon: typeof Monitor }[] = [
   { id: 'desktop', label: 'מחשב', icon: Monitor },
@@ -26,9 +30,10 @@ const viewports: { id: Viewport; label: string; icon: typeof Monitor }[] = [
 /**
  * הסרגל העליון (סעיף 4.1).
  *
- * הפעולות שעדיין אינן ממומשות מוצגות כמושבתות ולא מוסתרות: כך המשתמש
- * רואה לאן המוצר הולך, ובו בזמן לא נתקל בכפתור שנראה עובד ואינו עושה
- * דבר. הן ייפתחו בשלבים 4, 6 ו-7.
+ * שתי פעולות השמירה נפרדות בכוונה: הפרויקט נשמר אוטומטית בדפדפן, ו"שמירת
+ * קובץ פרויקט" מורידה `.course.zip` להעברה בין מחשבים או לגיבוי. מחוון
+ * המצב לצדן הוא מה שהופך את ההפרדה למובנת — בלעדיו "שמירה" נראית כמו
+ * פעולה שהמשתמש חייב לזכור לבצע.
  */
 export function TopBar() {
   const course = useCourseStore((state) => state.course);
@@ -38,7 +43,35 @@ export function TopBar() {
   const setPreviewOpen = useEditorStore((state) => state.setPreviewOpen);
   const { canUndo, canRedo } = useHistoryState();
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [assetsOpen, setAssetsOpen] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+
   if (!course) return null;
+
+  const handleDownload = async () => {
+    setDownloading(true);
+    try {
+      await downloadProjectFile();
+      toast('קובץ הפרויקט ירד למחשב', { tone: 'success' });
+    } catch {
+      toast('יצירת קובץ הפרויקט נכשלה', { tone: 'error' });
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleOpenFile = async (file: File) => {
+    const result = await openProjectFile(file);
+
+    if (!result.ok) {
+      toast(result.errors[0], { tone: 'error' });
+      return;
+    }
+
+    for (const warning of result.warnings) toast(warning, { tone: 'error' });
+    toast('הפרויקט נטען', { tone: 'success' });
+  };
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-4">
@@ -57,9 +90,11 @@ export function TopBar() {
           value={course.title}
           onChange={(event) => updateCourse({ title: event.target.value })}
           placeholder="שם הלומדה"
-          className="w-full max-w-md truncate rounded-lg border border-transparent px-2 py-1.5 text-sm font-semibold hover:border-slate-200 focus:border-blue-500 focus:bg-white focus:outline-none"
+          className="w-full max-w-xs truncate rounded-lg border border-transparent px-2 py-1.5 text-sm font-semibold hover:border-slate-200 focus:border-blue-500 focus:bg-white focus:outline-none"
         />
       </label>
+
+      <SaveIndicator />
 
       <div className="flex items-center gap-1">
         <IconButton
@@ -103,14 +138,35 @@ export function TopBar() {
       <div className="mx-1 h-6 w-px bg-slate-200" />
 
       <div className="flex items-center gap-1">
-        <IconButton icon={Eye} label="תצוגה מקדימה" onClick={() => setPreviewOpen(true)}>
-          תצוגה מקדימה
-        </IconButton>
-        <IconButton icon={Save} label="שמירת פרויקט (בשלב 6)" disabled />
-        <IconButton icon={FolderOpen} label="טעינת פרויקט (בשלב 6)" disabled />
+        <IconButton icon={Images} label="ספריית הנכסים" onClick={() => setAssetsOpen(true)} />
+        <IconButton icon={Eye} label="תצוגה מקדימה" onClick={() => setPreviewOpen(true)} />
+        <IconButton
+          icon={Save}
+          label="שמירת קובץ פרויקט (‎.course.zip‎)"
+          disabled={downloading}
+          onClick={() => void handleDownload()}
+        />
+        <IconButton
+          icon={FolderOpen}
+          label="פתיחת קובץ פרויקט"
+          onClick={() => fileInputRef.current?.click()}
+        />
         <IconButton icon={Download} label="ייצוא HTML (בשלב 7)" disabled />
-        <IconButton icon={Settings} label="הגדרות (בשלב 3)" disabled />
       </div>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".zip"
+        className="hidden"
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          event.target.value = '';
+          if (file) void handleOpenFile(file);
+        }}
+      />
+
+      <AssetLibraryModal open={assetsOpen} onClose={() => setAssetsOpen(false)} />
     </header>
   );
 }
