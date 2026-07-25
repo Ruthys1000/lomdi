@@ -22,6 +22,13 @@ import { ImageSettings } from './image/Settings';
 import { TextImageEditor } from './textImage/Editor';
 import { TextImageSettings } from './textImage/Settings';
 import { DividerSettings } from './divider/Settings';
+import { CardsEditor } from './cards/Editor';
+import { CardsSettings } from './cards/Settings';
+import { AccordionEditor } from './accordion/Editor';
+import { AccordionSettings } from './accordion/Settings';
+import { VideoSettings } from './video/Settings';
+import { QuizEditor } from './quiz/Editor';
+import { QuizSettings } from './quiz/Settings';
 
 /**
  * הרגיסטרי של העורך — Editor, Settings ואייקונים.
@@ -61,12 +68,15 @@ const registrations: Record<string, Registration> = {
   image: { icon: ImageIcon, SettingsComponent: ImageSettings },
   textImage: { icon: Columns2, EditorComponent: TextImageEditor, SettingsComponent: TextImageSettings },
   divider: { icon: Minus, SettingsComponent: DividerSettings },
-
-  // מתווספים בשלב 5 — מופיעים בספריית הבלוקים עם האייקון שלהם בלבד
-  cards: { icon: LayoutGrid },
-  accordion: { icon: ListCollapse },
-  video: { icon: PlayCircle },
-  quiz: { icon: SquareCheckBig },
+  cards: { icon: LayoutGrid, EditorComponent: CardsEditor, SettingsComponent: CardsSettings },
+  accordion: {
+    icon: ListCollapse,
+    EditorComponent: AccordionEditor,
+    SettingsComponent: AccordionSettings,
+  },
+  // לווידאו אין עריכה ישירה: הוא נערך מהפאנל, כמו תמונה ומפריד
+  video: { icon: PlayCircle, SettingsComponent: VideoSettings },
+  quiz: { icon: SquareCheckBig, EditorComponent: QuizEditor, SettingsComponent: QuizSettings },
 };
 
 function build(type: string): EditorBlockDefinition | undefined {

@@ -79,6 +79,61 @@ function renderExportedCourse(data: unknown): Promise<RenderResult> {
   );
 }
 
+/**
+ * כלל ה-ESLint שאוסר על אזור הרנדרר לייבא קוד עורך תופס ייבוא ישיר בלבד.
+ * הוא אינו יכול לתפוס דליפה עקיפה — וזו כבר קרתה: ה-Renderer של הווידאו
+ * ייבא פונקציית עזר כערך מקובץ שמייבא zod, וכל ספריית הסכמות נכנסה
+ * לחבילה שהלומד מוריד (52KB).
+ *
+ * הבדיקה הזו רצה על התוצר הבנוי עצמו, ולכן היא היחידה שתופסת דליפה
+ * שנכנסה דרך שרשרת ייבוא ולא דרך שורת import אחת.
+ */
+describe('גבול חבילת ה-runtime', () => {
+  const FORBIDDEN = [
+    { name: 'zod', fingerprint: 'ZodError' },
+    { name: 'TipTap', fingerprint: 'tiptap' },
+    { name: 'ProseMirror', fingerprint: 'prosemirror' },
+    { name: 'dnd-kit', fingerprint: 'dnd-kit' },
+    { name: 'zustand', fingerprint: 'zustand' },
+    { name: 'JSZip', fingerprint: 'JSZip' },
+  ];
+
+  it.each(FORBIDDEN)('אינה מכילה את $name', ({ fingerprint }) => {
+    expect(bundle.toLowerCase()).not.toContain(fingerprint.toLowerCase());
+  });
+
+  it('מכילה Renderer לכל תשעת סוגי הבלוקים', () => {
+    for (const type of [
+      'hero',
+      'richText',
+      'image',
+      'textImage',
+      'divider',
+      'cards',
+      'accordion',
+      'video',
+      'quiz',
+    ]) {
+      expect(bundle).toContain(type);
+    }
+  });
+
+  it('אינה מפנה לשום מארח חיצוני מלבד שירותי הווידאו שהמשתמש בוחר', () => {
+    const hosts = new Set(
+      [...bundle.matchAll(/https?:\/\/([a-z0-9.-]+)/gi)].map((match) => match[1].toLowerCase()),
+    );
+
+    const allowed = new Set([
+      'www.youtube-nocookie.com',
+      'player.vimeo.com',
+      'react.dev', // מופיע רק בטקסט של הודעות שגיאה של React
+      'www.w3.org', // מרחבי שמות של SVG ו-MathML, לא בקשות רשת
+    ]);
+
+    expect([...hosts].filter((host) => !allowed.has(host))).toEqual([]);
+  });
+});
+
 describe('חבילת ה-runtime המיוצאת', () => {
   it('מרנדרת את הלומדה מ-JSON מוטמע תחת file:// ללא שרת וללא שגיאות קונסולה', async () => {
     const { document, messages } = await renderExportedCourse({ version: '1.0', course, assets: [] });

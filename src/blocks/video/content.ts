@@ -41,48 +41,7 @@ export const createVideoContent = (overrides: Partial<VideoContent> = {}): Video
 export const videoAssetIds = (content: VideoContent): string[] =>
   collectAssetIds(content.source === 'upload' ? content.assetId : undefined, content.posterAssetId);
 
-// ─────────── חילוץ מזהה סרטון מכתובות בפורמטים הנפוצים ───────────
-
-const YOUTUBE_PATTERNS = [
-  /(?:youtube\.com\/watch\?(?:.*&)?v=)([\w-]{11})/,
-  /(?:youtu\.be\/)([\w-]{11})/,
-  /(?:youtube\.com\/embed\/)([\w-]{11})/,
-  /(?:youtube\.com\/shorts\/)([\w-]{11})/,
-];
-
-export function parseYouTubeId(url: string): string | null {
-  for (const pattern of YOUTUBE_PATTERNS) {
-    const match = pattern.exec(url);
-    if (match) return match[1];
-  }
-  return null;
-}
-
-export function parseVimeoId(url: string): string | null {
-  const match = /vimeo\.com\/(?:video\/)?(\d+)/.exec(url);
-  return match ? match[1] : null;
-}
-
-/** כתובת ההטמעה, או null אם הקישור אינו מזוהה */
-export function videoEmbedUrl(content: VideoContent): string | null {
-  if (content.source === 'youtube') {
-    const id = parseYouTubeId(content.url);
-    if (!id) return null;
-    // nocookie מפחית מעקב אחר הלומד; הפרמטרים משקפים את הגדרות הבלוק
-    const params = new URLSearchParams({ rel: '0', modestbranding: '1' });
-    if (content.autoplay) params.set('autoplay', '1');
-    if (content.loop) params.set('loop', '1');
-    return `https://www.youtube-nocookie.com/embed/${id}?${params}`;
-  }
-
-  if (content.source === 'vimeo') {
-    const id = parseVimeoId(content.url);
-    if (!id) return null;
-    const params = new URLSearchParams({ dnt: '1' });
-    if (content.autoplay) params.set('autoplay', '1');
-    if (content.loop) params.set('loop', '1');
-    return `https://player.vimeo.com/video/${id}?${params}`;
-  }
-
-  return null;
-}
+// עוזרי הכתובות חיים ב-embed.ts, מודול נטול תלויות. ה-Renderer מייבא
+// אותם משם ולא מכאן — ייבוא ערך מקובץ שמייבא zod היה גורר את zod כולו
+// לתוך חבילת הלומדה.
+export { parseYouTubeId, parseVimeoId, videoEmbedUrl } from './embed';

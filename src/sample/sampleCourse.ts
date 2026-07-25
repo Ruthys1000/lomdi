@@ -205,10 +205,12 @@ function practiceChapter() {
       createBlock('video', {
         content: {
           source: 'youtube',
+          // ריק בכוונה: לומדת דוגמה לא צריכה לגרור תלות בסרטון של מישהו
+          // אחר. הדבקת קישור בפאנל ההגדרות תציג נגן מיד.
           url: '',
           assetId: '',
           posterAssetId: '',
-          caption: 'הוסיפו כאן קישור לסרטון הדגמה קצר',
+          caption: 'הדביקו קישור לסרטון בפאנל ההגדרות כדי לראות נגן כאן',
           aspectRatio: '16:9',
           roundness: 'medium',
           autoplay: false,
@@ -267,6 +269,29 @@ function summaryChapter() {
               'הלומדה הזו נבנתה במחולל עצמו, וניתן לערוך אותה: החליפו טקסטים, הוסיפו בלוקים, שנו את ערכת העיצוב ואז ייצאו אותה כקובץ HTML עצמאי.',
             ),
           ),
+        },
+      }),
+
+      createBlock('cards', {
+        content: {
+          columns: 2,
+          media: 'icon',
+          roundness: 'medium',
+          textAlign: 'start',
+          items: [
+            createCard({
+              icon: 'ClipboardList',
+              title: 'לפני שמתחילים לכתוב',
+              text: 'נסחו את מטרת הפרק במשפט אחד. אם זה לא מצליח — הפרק עוד לא בשל.',
+              button: { enabled: false, label: '', href: '', newTab: true },
+            }),
+            createCard({
+              icon: 'Users',
+              title: 'לפני שמפיצים',
+              text: 'הריצו את הלומדה מול שלושה אנשים מקהל היעד ובקשו מהם לחשוב בקול רם.',
+              button: { enabled: false, label: '', href: '', newTab: true },
+            }),
+          ],
         },
       }),
 

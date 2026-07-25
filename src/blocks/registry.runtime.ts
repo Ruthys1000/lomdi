@@ -5,6 +5,10 @@ import { RichTextRenderer } from './richText/Renderer';
 import { ImageRenderer } from './image/Renderer';
 import { TextImageRenderer } from './textImage/Renderer';
 import { DividerRenderer } from './divider/Renderer';
+import { CardsRenderer } from './cards/Renderer';
+import { AccordionRenderer } from './accordion/Renderer';
+import { VideoRenderer } from './video/Renderer';
+import { QuizRenderer } from './quiz/Renderer';
 
 /**
  * רגיסטרי ה-Renderers — הצד שנארז לתוך הלומדה המיוצאת.
@@ -26,7 +30,10 @@ const registry = {
   image: ImageRenderer,
   textImage: TextImageRenderer,
   divider: DividerRenderer,
-  // כרטיסים, אקורדיון, וידאו ושאלת בחירה מתווספים בשלב 5
+  cards: CardsRenderer,
+  accordion: AccordionRenderer,
+  video: VideoRenderer,
+  quiz: QuizRenderer,
 } as unknown as Record<string, BlockRendererComponent>;
 
 export const rendererRegistry = registry;

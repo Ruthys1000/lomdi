@@ -921,3 +921,332 @@
   background: var(--lc-color-background);
   box-shadow: var(--lc-shadow);
 }
+
+/* ═══════════════════ כרטיסים ═══════════════════ */
+
+.lc-cards {
+  display: grid;
+  gap: calc(var(--lc-space-unit) * 2.5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lc-cards--cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.lc-cards--cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.lc-cards--cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.lc-cards--align-start .lc-card {
+  text-align: start;
+}
+.lc-cards--align-center .lc-card {
+  text-align: center;
+  align-items: center;
+}
+
+.lc-card {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--lc-space-unit) * 1.25);
+  align-items: flex-start;
+}
+
+.lc-card__icon {
+  display: grid;
+  place-items: center;
+  inline-size: 2.6em;
+  block-size: 2.6em;
+  border-radius: var(--lc-radius-small);
+  background: color-mix(in srgb, var(--lc-color-primary) 12%, transparent);
+  color: var(--lc-color-primary);
+}
+
+.lc-card__icon > svg {
+  inline-size: 1.3em;
+  block-size: 1.3em;
+}
+
+.lc-card__image {
+  inline-size: 100%;
+}
+
+.lc-card__title {
+  font-size: 1.08em;
+}
+
+.lc-card__text {
+  color: var(--lc-color-text-muted);
+  font-size: 0.94em;
+  line-height: 1.65;
+}
+
+.lc-card__actions {
+  margin-block-start: auto;
+  padding-block-start: calc(var(--lc-space-unit) * 0.5);
+}
+
+.lc-card__link {
+  color: var(--lc-color-primary);
+  font-size: 0.92em;
+  font-weight: 600;
+}
+
+/* ═══════════════════ אקורדיון ═══════════════════ */
+
+.lc-accordion {
+  border: 1px solid var(--lc-color-border);
+  border-radius: var(--lc-radius);
+  overflow: hidden;
+}
+
+.lc-accordion__item + .lc-accordion__item {
+  border-block-start: 1px solid var(--lc-color-border);
+}
+
+.lc-accordion__heading {
+  margin: 0;
+  font-size: 1em;
+  font-weight: inherit;
+}
+
+.lc-accordion__trigger {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--lc-space-unit) * 1.5);
+  inline-size: 100%;
+  padding: calc(var(--lc-space-unit) * 2) calc(var(--lc-space-unit) * 2.5);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  text-align: start;
+  cursor: pointer;
+}
+
+.lc-accordion__trigger:hover {
+  background: var(--lc-color-surface);
+}
+
+.lc-accordion__chevron {
+  inline-size: 1.15em;
+  block-size: 1.15em;
+  flex: none;
+  color: var(--lc-color-primary);
+  transition: transform 0.18s ease;
+}
+
+/* החץ הוא חיזוק חזותי בלבד; המידע עובר דרך aria-expanded */
+.lc-accordion__item[data-open] .lc-accordion__chevron {
+  transform: rotate(180deg);
+}
+
+.lc-accordion__chevron-button {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.lc-accordion__title {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.lc-accordion__panel {
+  padding: 0 calc(var(--lc-space-unit) * 2.5) calc(var(--lc-space-unit) * 2.5);
+  padding-inline-start: calc(var(--lc-space-unit) * 5.5);
+  color: var(--lc-color-text-muted);
+}
+
+/* ═══════════════════ וידאו ═══════════════════ */
+
+.lc-video {
+  position: relative;
+  inline-size: 100%;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--lc-color-text) 8%, var(--lc-color-background));
+}
+
+.lc-video__frame {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  border: 0;
+}
+
+/* ═══════════════════ שאלת בחירה ═══════════════════ */
+
+.lc-quiz {
+  padding: calc(var(--lc-space-unit) * 3);
+  border: 1px solid var(--lc-color-border);
+  border-radius: var(--lc-radius);
+  background: var(--lc-color-surface);
+}
+
+.lc-quiz__fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.lc-quiz__question {
+  padding: 0;
+  font-size: 1.1em;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.lc-quiz__hint {
+  margin-block-start: calc(var(--lc-space-unit) * 0.75);
+  color: var(--lc-color-text-muted);
+  font-size: 0.9em;
+}
+
+.lc-quiz__options {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--lc-space-unit) * 1);
+  margin-block-start: calc(var(--lc-space-unit) * 2.5);
+}
+
+.lc-quiz__option {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--lc-space-unit) * 1.5);
+  padding: calc(var(--lc-space-unit) * 1.5) calc(var(--lc-space-unit) * 2);
+  border: 1px solid var(--lc-color-border);
+  border-radius: var(--lc-radius-small);
+  background: var(--lc-color-background);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.lc-quiz__option:hover {
+  border-color: var(--lc-color-primary);
+}
+
+/*
+ * המצב מסומן בצבע ובאייקון גם יחד (סעיף 18). הצבע לבדו אינו מספיק,
+ * ולכן הרנדרר מוסיף אייקון עם aria-label לצד כל תשובה שנחשפה.
+ */
+.lc-quiz__option[data-state='correct'] {
+  border-color: #15803d;
+  background: color-mix(in srgb, #15803d 8%, var(--lc-color-background));
+}
+
+.lc-quiz__option[data-state='incorrect'] {
+  border-color: #b91c1c;
+  background: color-mix(in srgb, #b91c1c 8%, var(--lc-color-background));
+}
+
+.lc-quiz__radio {
+  inline-size: 1.05em;
+  block-size: 1.05em;
+  flex: none;
+  accent-color: var(--lc-color-primary);
+}
+
+.lc-quiz__label {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.lc-quiz__mark {
+  inline-size: 1.15em;
+  block-size: 1.15em;
+  flex: none;
+}
+
+.lc-quiz__option[data-state='correct'] .lc-quiz__mark {
+  color: #15803d;
+}
+.lc-quiz__option[data-state='incorrect'] .lc-quiz__mark {
+  color: #b91c1c;
+}
+
+.lc-quiz__correct-toggle {
+  display: grid;
+  place-items: center;
+  inline-size: 1.5em;
+  block-size: 1.5em;
+  flex: none;
+  padding: 0;
+  border: 1px solid var(--lc-color-border);
+  border-radius: 50%;
+  background: var(--lc-color-background);
+  color: transparent;
+  cursor: pointer;
+}
+
+.lc-quiz__correct-toggle > svg {
+  inline-size: 0.85em;
+  block-size: 0.85em;
+}
+
+.lc-quiz__correct-toggle[aria-pressed='true'] {
+  border-color: #15803d;
+  background: #15803d;
+  color: #ffffff;
+}
+
+.lc-quiz__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--lc-space-unit) * 1);
+  margin-block-start: calc(var(--lc-space-unit) * 2.5);
+}
+
+.lc-quiz__feedback:empty {
+  display: none;
+}
+
+.lc-quiz__feedback-text {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(var(--lc-space-unit) * 1);
+  margin-block-start: calc(var(--lc-space-unit) * 2);
+  padding: calc(var(--lc-space-unit) * 1.75) calc(var(--lc-space-unit) * 2);
+  border-radius: var(--lc-radius-small);
+  font-size: 0.95em;
+  line-height: 1.6;
+}
+
+.lc-quiz__feedback-text[data-tone='correct'] {
+  background: color-mix(in srgb, #15803d 10%, var(--lc-color-background));
+  color: #14532d;
+}
+
+.lc-quiz__feedback-text[data-tone='incorrect'] {
+  background: color-mix(in srgb, #b91c1c 10%, var(--lc-color-background));
+  color: #7f1d1d;
+}
+
+/* ═══════════════════ מובייל ═══════════════════ */
+
+@media (max-width: 720px) {
+  .lc-cards--cols-3,
+  .lc-cards--cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .lc-cards--cols-2,
+  .lc-cards--cols-3,
+  .lc-cards--cols-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .lc-accordion__panel {
+    padding-inline-start: calc(var(--lc-space-unit) * 2.5);
+  }
+}
