@@ -49,7 +49,7 @@ export function RecentProjects({ onOpened }: { onOpened: () => void }) {
 
   if (error) {
     return (
-      <p className="rounded-xl bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-800">
+      <p className="mt-6 rounded-xl bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-800">
         {error}
       </p>
     );
@@ -58,12 +58,17 @@ export function RecentProjects({ onOpened }: { onOpened: () => void }) {
   if (projects.length === 0) return null;
 
   return (
-    <section className="mt-12" aria-labelledby="recent-heading">
-      <h2 id="recent-heading" className="text-sm font-bold text-slate-900">
+    // ה--mt-8 מרים את הכרטיס אל תוך פס הגרדיאנט של מסך הפתיחה. הכותרת
+    // יושבת בתוך הכרטיס הלבן ולא מעליו, כדי שלא תיפול על רקע כחול
+    <section className="-mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg" aria-labelledby="recent-heading">
+      <h2
+        id="recent-heading"
+        className="border-b border-slate-100 px-4 py-3 text-sm font-bold text-slate-900"
+      >
         המשך מהמקום שבו הפסקת
       </h2>
 
-      <ul className="mt-4 divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+      <ul className="divide-y divide-slate-100">
         {projects.map((project) => (
           <li key={project.id} className="group flex items-center gap-3 ps-4 pe-2">
             <button

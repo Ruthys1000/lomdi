@@ -2,6 +2,7 @@ import JSZip from 'jszip';
 import { datedFileName } from '@/lib/fileName';
 import type { EmbeddedCourseData } from '@/runtime/readCourseData';
 import { APP_NAME, APP_VERSION } from '@/version';
+import { FONT_LICENSE, emptyFontBundle, type FontBundle } from './fonts';
 import {
   CONTENT_JSON,
   INDEX_HTML,
@@ -20,6 +21,7 @@ import {
  *     content.json
  *     runtime/app.js
  *     runtime/styles.css
+ *     fonts/heebo.css + woff2 + OFL.txt   ← רק המשפחה שהערכה בחרה
  *     assets/images/asset-a1b2c3d4e5.jpg   ← בדיוק לפי AssetMeta.exportPath
  *     README.txt
  *
@@ -41,6 +43,8 @@ export interface CourseZipInput {
   /** הבלובים של הנכסים שברשימת ה-payload, לפי מזהה */
   blobs: Map<string, Blob>;
   runtime: RuntimeBundle;
+  /** הגופן שהערכה בחרה. `emptyFontBundle` כשהיא משתמשת בגופן המערכת */
+  fonts?: FontBundle;
   folderName: string;
   date?: Date;
 }
@@ -68,7 +72,8 @@ function readmeText(payload: EmbeddedCourseData, date: Date): string {
     '  פותחים את index.html בדאבל-קליק. אין צורך בשרת, בהתקנה או בחיבור לאינטרנט.',
     '',
     'מה אסור למחוק',
-    '  התיקיות runtime ו-assets חייבות להישאר לצד index.html. בלעדיהן הלומדה לא תעלה.',
+    '  התיקיות runtime, fonts ו-assets חייבות להישאר לצד index.html.',
+    '  בלעדיהן הלומדה לא תעלה, או תעלה בגופן ובלי התמונות.',
     '',
     'העלאה ל-Moodle',
     '  מעלים את התיקייה כולה (או את קובץ ה-ZIP) כמשאב מסוג "תיקייה" או "קובץ",',
@@ -87,6 +92,7 @@ export async function buildCourseZip({
   payload,
   blobs,
   runtime,
+  fonts = emptyFontBundle,
   folderName,
   date = new Date(),
 }: CourseZipInput): Promise<Blob> {
@@ -97,6 +103,13 @@ export async function buildCourseZip({
   root.file(INDEX_HTML, buildIndexHtml(payload));
   root.file(RUNTIME_SCRIPT, runtime.appJs);
   root.file(RUNTIME_STYLES, runtime.stylesCss);
+
+  if (fonts.css) {
+    root.file(fonts.css.path, fonts.css.content);
+    for (const file of fonts.files) root.file(file.path, file.blob);
+    // OFL 1.1 מחייב שהרישיון ילווה את קובצי הגופן בכל הפצה
+    if (fonts.license) root.file(FONT_LICENSE, fonts.license);
+  }
 
   // אותו payload שמוטמע ב-HTML. משמש כגיבוי כשהתיקייה מוגשת משרת, ולכן
   // הוא חייב להיות אותו אובייקט בדיוק ולא בנייה שנייה שיכולה להתפצל.

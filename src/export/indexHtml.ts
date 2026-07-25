@@ -1,6 +1,7 @@
 import { themeToCssVars } from '@/renderer/theme/themeToCssVars';
 import { COURSE_DATA_ELEMENT_ID, type EmbeddedCourseData } from '@/runtime/readCourseData';
 import { APP_NAME, APP_VERSION } from '@/version';
+import { fontCssPath } from './fonts';
 
 /**
  * `index.html` של הלומדה המיוצאת.
@@ -89,6 +90,9 @@ body { min-block-size: 100vh; background: ${colors.background}; color: ${colors.
 export function buildIndexHtml(data: EmbeddedCourseData): string {
   const { course } = data;
   const description = course.description || course.subtitle || '';
+  // הגופן נטען לפני גיליון הלומדה: כך ה-@font-face מוכר כשהכללים שמשתמשים
+  // בו נקראים, ואין רגע של טקסט בגופן ברירת המחדל שקופץ אחר כך
+  const fontCss = fontCssPath(course.theme);
 
   return `<!doctype html>
 <html lang="${escapeHtml(course.language)}" dir="${course.direction}">
@@ -98,7 +102,7 @@ export function buildIndexHtml(data: EmbeddedCourseData): string {
     <meta name="generator" content="${escapeHtml(`${APP_NAME} ${APP_VERSION}`)}" />
 ${description ? `    <meta name="description" content="${escapeHtml(description)}" />\n` : ''}    <link rel="icon" href="${faviconDataUri(course.theme.colors.primary)}" />
     <title>${escapeHtml(course.title)}</title>
-    <link rel="stylesheet" href="${RUNTIME_STYLES}" />
+${fontCss ? `    <link rel="stylesheet" href="${fontCss}" />\n` : ''}    <link rel="stylesheet" href="${RUNTIME_STYLES}" />
     <style>
 ${documentShellCss(data)}
     </style>

@@ -23,7 +23,17 @@ export const blockSettingsSchema = z.object({
 });
 
 export const themeSchema = z.object({
-  preset: z.enum(['clean', 'darkElegant', 'vivid', 'custom']),
+  // תוספת ערכה היא תוספת ל-enum בלבד: קובץ ישן עם ערכה קיימת נשאר תקין,
+  // ולכן אין כאן מיגרציה
+  preset: z.enum([
+    'clean',
+    'darkElegant',
+    'vivid',
+    'warmSand',
+    'forest',
+    'highContrast',
+    'custom',
+  ]),
   colors: z.object({
     primary: hexColor,
     secondary: hexColor,

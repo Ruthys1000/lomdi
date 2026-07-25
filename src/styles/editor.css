@@ -6,9 +6,14 @@
  * ב-Tailwind, כדי שהתוצר המיוצא יישאר עצמאי וקטן.
  */
 
+/*
+ * הגופן נטען ב-index.html מ-public/fonts/ — אותם קבצים שנארזים לתוצר.
+ * השם עם "Variable" הוא שם המשפחה של @fontsource, והשם בלעדיו הוא גיבוי
+ * למי שהגופן מותקן אצלו מקומית.
+ */
 @theme {
-  --font-sans: 'Assistant', system-ui, -apple-system, 'Segoe UI', 'Noto Sans Hebrew', Arial,
-    sans-serif;
+  --font-sans: 'Heebo Variable', Heebo, system-ui, -apple-system, 'Segoe UI', 'Noto Sans Hebrew',
+    Arial, sans-serif;
 }
 
 @layer base {

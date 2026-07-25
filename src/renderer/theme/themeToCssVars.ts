@@ -8,14 +8,19 @@ import type { Theme } from '@/model/types';
  * index.html. מקור אמת אחד — ולכן אין דרך שהעורך והתוצר ייראו שונה.
  */
 
+/**
+ * שרשראות הגופנים.
+ *
+ * שם המשפחה של @fontsource (`Heebo Variable`) ראשון, כי זה הגופן שנארז
+ * לתוך ה-ZIP ונטען מ-`fonts/` בנתיב יחסי — בלי CDN, כדי שהתוצר יעבוד
+ * גם בלי אינטרנט. השם בלי "Variable" אחריו הוא גיבוי למי שהגופן מותקן
+ * אצלו מקומית, ואחריהם גופן המערכת אם קובץ הגופן לא נטען כלל.
+ */
 const FONT_STACKS: Record<Theme['typography']['fontFamily'], string> = {
-  // הערה: הגופנים העבריים נטענים רק אם הם מותקנים אצל הלומד. אין טעינה
-  // מ-CDN כי התוצר חייב לעבוד ללא אינטרנט (סעיף 17). הטמעת woff2 בתוך
-  // ה-ZIP מתוכננת לשלב הליטוש.
   system: `system-ui, -apple-system, 'Segoe UI', 'Noto Sans Hebrew', Arial, sans-serif`,
-  assistant: `Assistant, system-ui, -apple-system, 'Segoe UI', 'Noto Sans Hebrew', Arial, sans-serif`,
-  heebo: `Heebo, system-ui, -apple-system, 'Segoe UI', 'Noto Sans Hebrew', Arial, sans-serif`,
-  rubik: `Rubik, system-ui, -apple-system, 'Segoe UI', 'Noto Sans Hebrew', Arial, sans-serif`,
+  assistant: `'Assistant Variable', Assistant, system-ui, -apple-system, 'Segoe UI', 'Noto Sans Hebrew', Arial, sans-serif`,
+  heebo: `'Heebo Variable', Heebo, system-ui, -apple-system, 'Segoe UI', 'Noto Sans Hebrew', Arial, sans-serif`,
+  rubik: `'Rubik Variable', Rubik, system-ui, -apple-system, 'Segoe UI', 'Noto Sans Hebrew', Arial, sans-serif`,
 };
 
 const SHADOWS: Record<Theme['shape']['shadow'], string> = {
@@ -78,15 +83,23 @@ export function themeToCssVars(theme: Theme, selector = '.lc-course'): string {
 
 // ─────────────────────────── ניגודיות ───────────────────────────
 
+const TEXT_DARK = '#111827';
+const TEXT_LIGHT = '#ffffff';
+
 /**
- * בוחרת טקסט כהה או בהיר מעל צבע נתון לפי בהירות יחסית (WCAG).
- * זה מה שמונע כפתור בצבע בהיר עם טקסט לבן — מצב שקורה בקלות כשמשתמש
- * בוחר צבעים ידנית ב-Theme Builder.
+ * בוחרת טקסט כהה או בהיר מעל צבע נתון.
+ *
+ * משווה את יחס הניגודיות של שתי האפשרויות ובוחרת את הגבוהה, ולא חותכת
+ * לפי סף בהירות: סף של 0.5 החזיר לבן על ענבר (`#f59e0b`) ועל ורוד
+ * (`#ec4899`) — 2.1:1 ו-3.5:1, כלומר כפתור לא קריא בשתי ערכות מוכנות.
+ * `themes.test.ts` נועל את זה עכשיו לכל ערכה.
  */
 export function readableTextOn(background: string): string {
-  const rgb = hexToRgb(background);
-  if (!rgb) return '#ffffff';
-  return relativeLuminance(rgb) > 0.5 ? '#111827' : '#ffffff';
+  if (!hexToRgb(background)) return TEXT_LIGHT;
+
+  return contrastRatio(TEXT_DARK, background) >= contrastRatio(TEXT_LIGHT, background)
+    ? TEXT_DARK
+    : TEXT_LIGHT;
 }
 
 export function hexToRgb(hex: string): [number, number, number] | null {
