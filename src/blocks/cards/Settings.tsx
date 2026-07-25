@@ -10,6 +10,7 @@ import {
   TextField,
   type Option,
 } from '@/editor/controls/Field';
+import { AssetField } from '@/editor/Assets/AssetField';
 import { SubItemList } from '@/editor/controls/SubItemList';
 import { createCard, type CardItem, type CardsContent } from './content';
 
@@ -126,6 +127,14 @@ function CardFields({
           value={item.icon}
           options={courseIconNames.map((name) => ({ value: name, label: name }))}
           onChange={(icon) => onPatch({ icon })}
+        />
+      )}
+
+      {media === 'image' && (
+        <AssetField
+          label="תמונת הכרטיס"
+          assetId={item.imageAssetId}
+          onChange={(imageAssetId) => onPatch({ imageAssetId })}
         />
       )}
 

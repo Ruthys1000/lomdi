@@ -8,6 +8,7 @@ import {
   TextField,
   type Option,
 } from '@/editor/controls/Field';
+import { AssetField } from '@/editor/Assets/AssetField';
 import type { ImageContent } from './content';
 
 const ratioOptions: Option<ImageContent['aspectRatio']>[] = [
@@ -40,7 +41,11 @@ export function ImageSettings({
   return (
     <>
       <FieldGroup title="תמונה">
-        <FieldNote>העלאת תמונות וספריית הנכסים מגיעות בשלב הבא.</FieldNote>
+        <AssetField
+          label="קובץ התמונה"
+          assetId={content.assetId}
+          onChange={(assetId) => update({ assetId })}
+        />
         <TextField
           label="טקסט חלופי"
           placeholder="מה רואים בתמונה"

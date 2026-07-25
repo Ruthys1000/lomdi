@@ -96,6 +96,9 @@ describe('גבול חבילת ה-runtime', () => {
     { name: 'dnd-kit', fingerprint: 'dnd-kit' },
     { name: 'zustand', fingerprint: 'zustand' },
     { name: 'JSZip', fingerprint: 'JSZip' },
+    // שכבת השמירה של שלב 6. לומדה מיוצאת אינה שומרת דבר ואינה נוגעת
+    // באחסון של הלומד — נגיעה כזו הייתה גם דליפת ארכיטקטורה וגם הפתעה.
+    { name: 'IndexedDB', fingerprint: 'indexedDB' },
   ];
 
   it.each(FORBIDDEN)('אינה מכילה את $name', ({ fingerprint }) => {

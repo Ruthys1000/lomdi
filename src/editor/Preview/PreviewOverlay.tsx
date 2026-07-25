@@ -1,8 +1,9 @@
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Monitor, Smartphone, Tablet, X } from 'lucide-react';
 import { CourseRenderer } from '@/renderer/CourseRenderer';
 import { useCourseStore } from '@/state/courseStore';
 import { useEditorStore, viewportWidths, type Viewport } from '@/state/editorStore';
+import { useAssetUrlResolver } from '../Assets/useAssetUrlResolver';
 import { IconButton } from '../ui/IconButton';
 
 const devices: { id: Viewport; label: string; icon: typeof Monitor }[] = [
@@ -25,7 +26,7 @@ export function PreviewOverlay() {
   const viewport = useEditorStore((state) => state.viewport);
   const setViewport = useEditorStore((state) => state.setViewport);
 
-  const resolveAssetUrl = useCallback(() => undefined, []);
+  const resolveAssetUrl = useAssetUrlResolver();
 
   useEffect(() => {
     if (!isOpen) return;

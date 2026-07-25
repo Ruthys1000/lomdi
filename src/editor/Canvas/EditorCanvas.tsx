@@ -20,6 +20,7 @@ import { CourseRenderer, type BlockWrapper } from '@/renderer/CourseRenderer';
 import { useCourseStore } from '@/state/courseStore';
 import { useEditorStore, viewportWidths } from '@/state/editorStore';
 import { toast } from '@/state/toastStore';
+import { useAssetUrlResolver } from '../Assets/useAssetUrlResolver';
 import { BlockLibraryModal } from '../BlockLibrary/BlockLibraryModal';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { InsertPoint } from './InsertPoint';
@@ -55,8 +56,7 @@ export function EditorCanvas() {
 
   const [libraryIndex, setLibraryIndex] = useState<number | null>(null);
 
-  // בשלב 6 יוחלף במיפוי אמיתי של נכסים; כרגע אין עדיין נכסים בפרויקט
-  const resolveAssetUrl = useCallback(() => undefined, []);
+  const resolveAssetUrl = useAssetUrlResolver();
 
   const sensors = useSensors(
     // סף של 6 פיקסלים: בלי זה כל לחיצה על בלוק נחשבת לתחילת גרירה

@@ -9,6 +9,7 @@ import {
   TextField,
   type Option,
 } from '@/editor/controls/Field';
+import { AssetField } from '@/editor/Assets/AssetField';
 import type { TextImageContent } from './content';
 
 const layoutOptions: Option<TextImageContent['layout']>[] = [
@@ -78,7 +79,11 @@ export function TextImageSettings({
       </FieldGroup>
 
       <FieldGroup title="תמונה">
-        <FieldNote>העלאת תמונות וספריית הנכסים מגיעות בשלב הבא.</FieldNote>
+        <AssetField
+          label="קובץ התמונה"
+          assetId={content.imageAssetId}
+          onChange={(imageAssetId) => update({ imageAssetId })}
+        />
         <TextField
           label="טקסט חלופי"
           placeholder="מה רואים בתמונה"

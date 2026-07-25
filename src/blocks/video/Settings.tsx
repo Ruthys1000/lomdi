@@ -8,6 +8,7 @@ import {
   TextField,
   type Option,
 } from '@/editor/controls/Field';
+import { AssetField } from '@/editor/Assets/AssetField';
 import { videoEmbedUrl, type VideoContent } from './content';
 
 const sourceOptions: Option<VideoContent['source']>[] = [
@@ -61,8 +62,25 @@ export function VideoSettings({
         )}
 
         {content.source === 'upload' && (
-          <FieldNote>העלאת קובצי וידאו מגיעה בשלב הבא, יחד עם ספריית הנכסים.</FieldNote>
+          <>
+            <AssetField
+              label="קובץ הסרטון"
+              kind="video"
+              assetId={content.assetId}
+              onChange={(assetId) => update({ assetId })}
+            />
+            <FieldNote>
+              הקובץ נארז לתוך התוצר, ולכן הלומדה תרוץ גם בלי אינטרנט — אבל גם תשקול בהתאם.
+            </FieldNote>
+          </>
         )}
+
+        <AssetField
+          label="תמונת פתיחה"
+          assetId={content.posterAssetId}
+          onChange={(posterAssetId) => update({ posterAssetId })}
+          hint="מוצגת לפני שהסרטון מתחיל. אופציונלית."
+        />
       </FieldGroup>
 
       <FieldGroup title="תצוגה">
