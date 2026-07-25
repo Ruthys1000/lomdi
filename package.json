@@ -4,6 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "description": "מחולל לומדות HTML מודרני מבוסס בלוקים",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "predev": "npm run build:runtime",
     "dev": "vite",
