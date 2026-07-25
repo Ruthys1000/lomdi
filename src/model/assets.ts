@@ -10,7 +10,7 @@ import type { AssetMeta, Course } from './types';
  * של כל בלוק ברגיסטרי המשותף, שיודע לקרוא את המצב שלו — ולא לסריקה
  * גנרית שהייתה גוררת לייצוא קבצים שאיש אינו רואה.
  *
- * זהו גם הבסיס לאיסוף הנכסים בייצוא בשלב 7.
+ * זהו גם הבסיס לאיסוף הנכסים בייצוא (`export/payload.ts`).
  */
 export function collectCourseAssetIds(course: Course): Set<string> {
   const ids = new Set<string>();

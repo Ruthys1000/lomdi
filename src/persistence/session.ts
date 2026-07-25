@@ -1,9 +1,10 @@
 import { downloadBlob } from '@/lib/download';
-import type { AssetMeta, Course } from '@/model/types';
+import type { Course } from '@/model/types';
 import { useAssetStore } from '@/state/assetStore';
 import { useCourseStore } from '@/state/courseStore';
 import { useEditorStore } from '@/state/editorStore';
 import { useSaveStore } from '@/state/saveStore';
+import { collectAssetBlobs } from './assetBlobs';
 import { cancelPendingSave, saveNow } from './autosave';
 import { loadProject, loadProjectAssets, putAsset, setLastProjectId } from './db';
 import {
@@ -95,29 +96,4 @@ export async function downloadProjectFile(): Promise<void> {
   const zip = await writeProjectZip(project, blobs);
 
   downloadBlob(zip, projectFileName(course.title));
-}
-
-/**
- * שליפת הבלובים חזרה מכתובות ה-blob:.
- *
- * `fetch` על `blob:` הוא קריאה מקומית לזיכרון הדפדפן ולא בקשת רשת — היא
- * עובדת גם offline. נכס שכתובתו כבר שוחררה מדולג במקום להפיל את השמירה.
- */
-async function collectAssetBlobs(
-  assets: AssetMeta[],
-  urls: Record<string, string>,
-): Promise<Map<string, Blob>> {
-  const blobs = new Map<string, Blob>();
-
-  for (const asset of assets) {
-    const url = urls[asset.id];
-    if (!url) continue;
-    try {
-      blobs.set(asset.id, await (await fetch(url)).blob());
-    } catch {
-      // הכתובת שוחררה או שהנכס אינו זמין; הוא יירשם ב-course.json בלי קובץ
-    }
-  }
-
-  return blobs;
 }
