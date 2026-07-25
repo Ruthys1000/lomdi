@@ -11,8 +11,10 @@ import {
   Tablet,
   Undo2,
 } from 'lucide-react';
-import { useCourseStore } from '@/state/courseStore';
+import { courseHistory, useCourseStore } from '@/state/courseStore';
 import { useEditorStore, type Viewport } from '@/state/editorStore';
+import { toast } from '@/state/toastStore';
+import { useHistoryState } from '../shortcuts/useHistoryState';
 import { IconButton } from '../ui/IconButton';
 
 const viewports: { id: Viewport; label: string; icon: typeof Monitor }[] = [
@@ -34,6 +36,7 @@ export function TopBar() {
   const viewport = useEditorStore((state) => state.viewport);
   const setViewport = useEditorStore((state) => state.setViewport);
   const setPreviewOpen = useEditorStore((state) => state.setPreviewOpen);
+  const { canUndo, canRedo } = useHistoryState();
 
   if (!course) return null;
 
@@ -59,8 +62,24 @@ export function TopBar() {
       </label>
 
       <div className="flex items-center gap-1">
-        <IconButton icon={Undo2} label="ביטול (בשלב 4)" disabled />
-        <IconButton icon={Redo2} label="ביצוע מחדש (בשלב 4)" disabled />
+        <IconButton
+          icon={Undo2}
+          label="ביטול (Ctrl+Z)"
+          disabled={!canUndo}
+          onClick={() => {
+            courseHistory.undo();
+            toast('הפעולה בוטלה');
+          }}
+        />
+        <IconButton
+          icon={Redo2}
+          label="ביצוע מחדש (Ctrl+Shift+Z)"
+          disabled={!canRedo}
+          onClick={() => {
+            courseHistory.redo();
+            toast('בוצע מחדש');
+          }}
+        />
       </div>
 
       <div className="mx-1 h-6 w-px bg-slate-200" />

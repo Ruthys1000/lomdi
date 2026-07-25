@@ -1,5 +1,6 @@
 import { PreviewOverlay } from './editor/Preview/PreviewOverlay';
 import { EditorLayout } from './editor/Shell/EditorLayout';
+import { ToastHost } from './editor/ui/ToastHost';
 import { WelcomeScreen } from './editor/Welcome/WelcomeScreen';
 import type { Course } from './model/types';
 import { useCourseStore } from './state/courseStore';
@@ -24,6 +25,7 @@ export function App() {
     <>
       <EditorLayout />
       <PreviewOverlay />
+      <ToastHost />
     </>
   );
 }

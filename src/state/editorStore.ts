@@ -23,6 +23,14 @@ interface EditorState {
   collapsedChapterIds: string[];
   viewport: Viewport;
   isPreviewOpen: boolean;
+  /**
+   * בלוק שממתין לאישור מחיקה.
+   *
+   * חי כאן ולא ב-state מקומי של הקנבס, כי גם סרגל הפעולות של הבלוק וגם
+   * מקש Delete מבקשים את אותה מחיקה — ושניהם צריכים להגיע לאותו חלון
+   * אישור אחד.
+   */
+  blockPendingDelete: string | null;
 
   selectChapter: (chapterId: string | null) => void;
   selectBlock: (blockId: string | null, chapterId?: string) => void;
@@ -31,6 +39,8 @@ interface EditorState {
   setChapterCollapsed: (chapterId: string, collapsed: boolean) => void;
   setViewport: (viewport: Viewport) => void;
   setPreviewOpen: (open: boolean) => void;
+  requestBlockDelete: (blockId: string) => void;
+  cancelBlockDelete: () => void;
   reset: () => void;
 }
 
@@ -40,6 +50,7 @@ const initial = {
   collapsedChapterIds: [] as string[],
   viewport: 'desktop' as Viewport,
   isPreviewOpen: false,
+  blockPendingDelete: null as string | null,
 };
 
 export const useEditorStore = create<EditorState>((set) => ({
@@ -73,5 +84,8 @@ export const useEditorStore = create<EditorState>((set) => ({
 
   setViewport: (viewport) => set({ viewport }),
   setPreviewOpen: (isPreviewOpen) => set({ isPreviewOpen }),
+
+  requestBlockDelete: (blockId) => set({ blockPendingDelete: blockId }),
+  cancelBlockDelete: () => set({ blockPendingDelete: null }),
   reset: () => set(initial),
 }));

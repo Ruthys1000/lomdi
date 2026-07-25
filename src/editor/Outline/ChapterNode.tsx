@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronLeft, Copy, Pencil, Trash2 } from 'lucide-react';
-import { blockLabel } from '@/blocks/registry.shared';
+import { ChevronDown, ChevronLeft, Copy, GripVertical, Pencil, Trash2 } from 'lucide-react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { cn } from '@/lib/cn';
 import type { Chapter } from '@/model/types';
 import { useCourseStore } from '@/state/courseStore';
 import { useEditorStore } from '@/state/editorStore';
+import { BlockRow } from './BlockRow';
 
 interface ChapterNodeProps {
   chapter: Chapter;
@@ -25,19 +27,35 @@ export function ChapterNode({ chapter, index, canDelete, onRequestDelete }: Chap
   const selectChapter = useEditorStore((state) => state.selectChapter);
   const selectBlock = useEditorStore((state) => state.selectBlock);
 
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } =
+    useSortable({ id: chapter.id });
+
   const [isRenaming, setRenaming] = useState(false);
 
   const isActiveChapter = selectedChapterId === chapter.id;
   const ChevronIcon = collapsed ? ChevronLeft : ChevronDown;
 
   return (
-    <li>
+    <li ref={setNodeRef} style={{ transform: CSS.Translate.toString(transform), transition }}>
       <div
         className={cn(
           'group flex items-center gap-1 rounded-lg px-1.5 py-1.5 transition',
+          isDragging && 'opacity-40',
+          // סימון ברור שהבלוק ייכנס לראש הפרק הזה
+          isOver && 'ring-2 ring-blue-400',
           isActiveChapter && !selectedBlockId ? 'bg-blue-50' : 'hover:bg-slate-50',
         )}
       >
+        <button
+          type="button"
+          aria-label={`גרירת הפרק ${chapter.title}`}
+          className="cursor-grab rounded p-0.5 text-slate-300 opacity-0 transition group-focus-within:opacity-100 group-hover:opacity-100 hover:text-slate-600 active:cursor-grabbing"
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical className="size-3.5" aria-hidden />
+        </button>
+
         <button
           type="button"
           onClick={() => toggleCollapsed(chapter.id)}
@@ -97,23 +115,14 @@ export function ChapterNode({ chapter, index, canDelete, onRequestDelete }: Chap
       </div>
 
       {!collapsed && (
-        <ul className="mt-0.5 mb-1 space-y-0.5 ps-8">
+        <ul className="mt-0.5 mb-1 space-y-0.5 ps-6">
           {chapter.blocks.map((block) => (
-            <li key={block.id}>
-              <button
-                type="button"
-                onClick={() => selectBlock(block.id, chapter.id)}
-                className={cn(
-                  'flex w-full items-center gap-2 rounded-md px-2 py-1 text-start text-xs transition',
-                  selectedBlockId === block.id
-                    ? 'bg-blue-100 font-semibold text-blue-900'
-                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800',
-                )}
-              >
-                <span className="size-1.5 shrink-0 rounded-full bg-current opacity-40" />
-                <span className="truncate">{blockLabel(block.type)}</span>
-              </button>
-            </li>
+            <BlockRow
+              key={block.id}
+              block={block}
+              selected={selectedBlockId === block.id}
+              onSelect={() => selectBlock(block.id, chapter.id)}
+            />
           ))}
 
           {chapter.blocks.length === 0 && (

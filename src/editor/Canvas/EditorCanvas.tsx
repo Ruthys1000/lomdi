@@ -1,49 +1,162 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { Plus } from 'lucide-react';
+import { blockLabel } from '@/blocks/labels';
 import { CourseRenderer, type BlockWrapper } from '@/renderer/CourseRenderer';
 import { useCourseStore } from '@/state/courseStore';
 import { useEditorStore, viewportWidths } from '@/state/editorStore';
-import { BlockFrame } from './BlockFrame';
+import { toast } from '@/state/toastStore';
+import { BlockLibraryModal } from '../BlockLibrary/BlockLibraryModal';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { InsertPoint } from './InsertPoint';
+import { SortableBlock } from './SortableBlock';
 
 /**
  * אזור העבודה המרכזי (סעיף 4.3).
  *
  * הקנבס אינו מרנדר בלוקים בעצמו — הוא מפעיל את אותו CourseRenderer של
- * התוצר, ומזריק דרכו את מסגרת העריכה. כך "מה שרואים בעורך" הוא פשוט
+ * התוצר ומזריק דרכו את מסגרת העריכה. כך "מה שרואים בעורך" הוא בדיוק
  * "מה שהלומד יראה", עם שכבה דקה מעליו.
  *
- * בעריכה מוצג פרק אחד בלבד — זה שנבחר במבנה — גם כשהלומדה מוגדרת לגלילה
- * רציפה. אחרת עריכת פרק אחרון בלומדה ארוכה הייתה דורשת גלילה מתמדת.
+ * הגרירה כאן מוגבלת לסידור בתוך הפרק הנוכחי, ולציר האנכי בלבד. העברה
+ * בין פרקים נעשית בסרגל המבנה, שם היא רשימה אנכית אחת — פתרון יציב
+ * בהרבה מגרירה בין שני אזורים נפרדים, ובמיוחד ב-RTL.
  */
 export function EditorCanvas() {
   const course = useCourseStore((state) => state.course);
+  const addBlock = useCourseStore((state) => state.addBlock);
+  const removeBlock = useCourseStore((state) => state.removeBlock);
+  const duplicateBlock = useCourseStore((state) => state.duplicateBlock);
+  const nudgeBlock = useCourseStore((state) => state.nudgeBlock);
+  const moveBlockWithinChapter = useCourseStore((state) => state.moveBlockWithinChapter);
+
   const selectedChapterId = useEditorStore((state) => state.selectedChapterId);
   const selectedBlockId = useEditorStore((state) => state.selectedBlockId);
   const selectBlock = useEditorStore((state) => state.selectBlock);
   const clearSelection = useEditorStore((state) => state.clearSelection);
   const viewport = useEditorStore((state) => state.viewport);
+  const blockPendingDelete = useEditorStore((state) => state.blockPendingDelete);
+  const requestBlockDelete = useEditorStore((state) => state.requestBlockDelete);
+  const cancelBlockDelete = useEditorStore((state) => state.cancelBlockDelete);
+
+  const [libraryIndex, setLibraryIndex] = useState<number | null>(null);
 
   // בשלב 6 יוחלף במיפוי אמיתי של נכסים; כרגע אין עדיין נכסים בפרויקט
   const resolveAssetUrl = useCallback(() => undefined, []);
 
+  const sensors = useSensors(
+    // סף של 6 פיקסלים: בלי זה כל לחיצה על בלוק נחשבת לתחילת גרירה
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const chapterIndex = Math.max(
+    0,
+    course?.chapters.findIndex((chapter) => chapter.id === selectedChapterId) ?? 0,
+  );
+  const chapter = course?.chapters[chapterIndex];
+
+  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!chapter || !over || active.id === over.id) return;
+
+    const from = chapter.blocks.findIndex((block) => block.id === active.id);
+    const to = chapter.blocks.findIndex((block) => block.id === over.id);
+    if (from === -1 || to === -1) return;
+
+    moveBlockWithinChapter(chapter.id, from, to);
+  };
+
+  const handleAddBlock = (type: string) => {
+    if (!chapter) return;
+    const id = addBlock(chapter.id, type, libraryIndex ?? undefined);
+    setLibraryIndex(null);
+
+    if (!id) return;
+    selectBlock(id, chapter.id);
+    toast(`נוסף בלוק ${blockLabel(type)}`, { tone: 'success' });
+
+    // גלילה לבלוק החדש אחרי שהוא נכנס ל-DOM (סעיף 8)
+    requestAnimationFrame(() => {
+      document
+        .querySelector(`[data-block-id="${id}"]`)
+        ?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    });
+  };
+
+  const pendingBlock = blockPendingDelete
+    ? (course?.chapters.flatMap((item) => item.blocks).find((b) => b.id === blockPendingDelete) ??
+      null)
+    : null;
+
+  const confirmDelete = () => {
+    if (!pendingBlock) return;
+    removeBlock(pendingBlock.id);
+    if (selectedBlockId === pendingBlock.id) clearSelection();
+    toast(`הבלוק ${blockLabel(pendingBlock.type)} נמחק`, { tone: 'info' });
+    cancelBlockDelete();
+  };
+
   const renderBlockWrapper = useCallback<BlockWrapper>(
-    (block, rendered) => (
-      <BlockFrame
-        block={block}
-        selected={selectedBlockId === block.id}
-        onSelect={() => selectBlock(block.id)}
-      >
-        {rendered}
-      </BlockFrame>
-    ),
-    [selectedBlockId, selectBlock],
+    (block, rendered) => {
+      const index = chapter?.blocks.findIndex((item) => item.id === block.id) ?? -1;
+
+      return (
+        <>
+          <InsertPoint
+            label={`הוספת בלוק לפני ${blockLabel(block.type)}`}
+            onClick={() => setLibraryIndex(index)}
+          />
+          <SortableBlock
+            block={block}
+            selected={selectedBlockId === block.id}
+            canMoveUp={index > 0 || chapterIndex > 0}
+            canMoveDown={
+              index < (chapter?.blocks.length ?? 0) - 1 ||
+              chapterIndex < (course?.chapters.length ?? 0) - 1
+            }
+            onSelect={() => selectBlock(block.id)}
+            onDuplicate={() => {
+              const id = duplicateBlock(block.id);
+              if (id) selectBlock(id);
+              toast('הבלוק שוכפל', { tone: 'success' });
+            }}
+            onMoveUp={() => nudgeBlock(block.id, -1)}
+            onMoveDown={() => nudgeBlock(block.id, 1)}
+            onDelete={() => requestBlockDelete(block.id)}
+          >
+            {rendered}
+          </SortableBlock>
+        </>
+      );
+    },
+    [
+      chapter,
+      chapterIndex,
+      course?.chapters.length,
+      selectedBlockId,
+      selectBlock,
+      duplicateBlock,
+      nudgeBlock,
+      requestBlockDelete,
+    ],
   );
 
   if (!course) return null;
 
-  const chapterIndex = Math.max(
-    0,
-    course.chapters.findIndex((chapter) => chapter.id === selectedChapterId),
-  );
   const width = viewportWidths[viewport];
 
   return (
@@ -51,7 +164,6 @@ export function EditorCanvas() {
       className="min-h-0 overflow-y-auto bg-slate-100 p-6"
       aria-label="אזור העריכה"
       onClick={(event) => {
-        // לחיצה על הרקע מבטלת בחירה, אבל לא לחיצה על בלוק
         if (event.target === event.currentTarget) clearSelection();
       }}
     >
@@ -59,14 +171,51 @@ export function EditorCanvas() {
         className="mx-auto overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200 transition-[max-width] duration-200"
         style={{ maxWidth: width ? `${width}px` : '100%' }}
       >
-        <CourseRenderer
-          course={course}
-          resolveAssetUrl={resolveAssetUrl}
-          isEditing
-          forcedChapterIndex={chapterIndex}
-          renderBlockWrapper={renderBlockWrapper}
-        />
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          modifiers={[restrictToVerticalAxis]}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={chapter?.blocks.map((block) => block.id) ?? []}
+            strategy={verticalListSortingStrategy}
+          >
+            <CourseRenderer
+              course={course}
+              resolveAssetUrl={resolveAssetUrl}
+              isEditing
+              forcedChapterIndex={chapterIndex}
+              renderBlockWrapper={renderBlockWrapper}
+            />
+          </SortableContext>
+        </DndContext>
       </div>
+
+      <div className="mx-auto mt-4 flex justify-center" style={{ maxWidth: width ? `${width}px` : '100%' }}>
+        <button
+          type="button"
+          onClick={() => setLibraryIndex(chapter?.blocks.length ?? 0)}
+          className="flex items-center gap-2 rounded-xl border border-dashed border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-blue-400 hover:text-blue-700"
+        >
+          <Plus className="size-4" aria-hidden />
+          הוספת בלוק
+        </button>
+      </div>
+
+      <BlockLibraryModal
+        open={libraryIndex !== null}
+        onClose={() => setLibraryIndex(null)}
+        onPick={handleAddBlock}
+      />
+
+      <ConfirmDialog
+        open={pendingBlock !== null}
+        title="מחיקת בלוק"
+        message={`הבלוק ${pendingBlock ? blockLabel(pendingBlock.type) : ''} יימחק מהפרק. אפשר לבטל את הפעולה עם Ctrl+Z.`}
+        onConfirm={confirmDelete}
+        onCancel={cancelBlockDelete}
+      />
     </section>
   );
 }

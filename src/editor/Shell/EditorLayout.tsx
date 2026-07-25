@@ -1,6 +1,10 @@
+import { useCallback } from 'react';
+import { useEditorStore } from '@/state/editorStore';
+import { toast } from '@/state/toastStore';
 import { EditorCanvas } from '../Canvas/EditorCanvas';
 import { InspectorPanel } from '../Inspector/InspectorPanel';
 import { OutlinePanel } from '../Outline/OutlinePanel';
+import { useKeyboardShortcuts } from '../shortcuts/useKeyboardShortcuts';
 import { TopBar } from './TopBar';
 
 /**
@@ -11,6 +15,14 @@ import { TopBar } from './TopBar';
  * לקבוע מיקום מפורש — וכשתתווסף תמיכה ב-LTR הפריסה תתהפך מעצמה.
  */
 export function EditorLayout() {
+  const requestBlockDelete = useEditorStore((state) => state.requestBlockDelete);
+
+  useKeyboardShortcuts({
+    // שמירה ידנית מגיעה בשלב 6; עד אז הקיצור לפחות לא נחטף על ידי הדפדפן
+    onSave: useCallback(() => toast('שמירת פרויקט תתווסף בשלב הבא'), []),
+    onDeleteBlock: requestBlockDelete,
+  });
+
   return (
     <div className="flex h-full flex-col overflow-hidden bg-slate-100">
       <TopBar />
