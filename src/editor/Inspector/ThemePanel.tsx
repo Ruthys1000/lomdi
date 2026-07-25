@@ -86,7 +86,12 @@ export function ThemePanel({ theme }: { theme: Theme }) {
   return (
     <>
       <FieldGroup title="ערכת עיצוב">
-        <div className="grid gap-2">
+        {/*
+          רשת דו-טורית: שש ערכות ברשימה חד-טורית הפכו את הפאנל לגלילה
+          ארוכה שבה אי אפשר להשוות בין שתי ערכות במבט אחד. התיאור המלא
+          עבר ל-title, והכרטיס מציג דגימת צבעים ושם.
+        */}
+        <div className="grid grid-cols-2 gap-2">
           {themePresets.map((preset) => {
             const isActive = theme.preset === preset.id;
             const { colors } = preset.theme;
@@ -97,26 +102,37 @@ export function ThemePanel({ theme }: { theme: Theme }) {
                 type="button"
                 onClick={() => setTheme(preset.theme)}
                 aria-pressed={isActive}
+                title={preset.description}
                 className={
                   isActive
-                    ? 'rounded-xl border-2 border-blue-500 bg-blue-50/40 p-3 text-start transition'
-                    : 'rounded-xl border border-slate-200 p-3 text-start transition hover:border-slate-300'
+                    ? 'overflow-hidden rounded-xl border-2 border-blue-500 text-start transition'
+                    : 'overflow-hidden rounded-xl border border-slate-200 text-start transition hover:border-slate-300'
                 }
               >
-                <span className="flex items-center gap-2">
-                  <span className="flex gap-1">
-                    {[colors.primary, colors.accent, colors.surface, colors.text].map((color) => (
-                      <span
-                        key={color}
-                        className="size-3.5 rounded-full ring-1 ring-black/10"
-                        style={{ background: color }}
-                      />
-                    ))}
-                  </span>
-                  <span className="text-xs font-semibold text-slate-900">{preset.name}</span>
+                {/* דגימה חיה של הערכה, ולא ארבע נקודות צבע: כך רואים גם את
+                    יחס הרקע לטקסט ולא רק את הגוונים עצמם */}
+                <span
+                  className="flex h-12 items-center gap-1 px-2"
+                  style={{ background: colors.background }}
+                >
+                  <span
+                    className="h-6 flex-1 rounded"
+                    style={{ background: colors.primary }}
+                    aria-hidden
+                  />
+                  <span
+                    className="h-6 w-3 rounded"
+                    style={{ background: colors.accent }}
+                    aria-hidden
+                  />
+                  <span
+                    className="h-6 flex-1 rounded"
+                    style={{ background: colors.surface, boxShadow: `inset 0 0 0 1px ${colors.border}` }}
+                    aria-hidden
+                  />
                 </span>
-                <span className="mt-1.5 block text-[11px] leading-relaxed text-slate-500">
-                  {preset.description}
+                <span className="block truncate px-2.5 py-2 text-xs font-semibold text-slate-900">
+                  {preset.name}
                 </span>
               </button>
             );

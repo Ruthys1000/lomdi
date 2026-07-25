@@ -71,7 +71,13 @@ export interface BlockSettings {
 
 // ─────────────────────────── עיצוב ───────────────────────────
 
-export type ThemePresetId = 'clean' | 'darkElegant' | 'vivid';
+export type ThemePresetId =
+  | 'clean'
+  | 'darkElegant'
+  | 'vivid'
+  | 'warmSand'
+  | 'forest'
+  | 'highContrast';
 export type FontFamilyId = 'system' | 'heebo' | 'assistant' | 'rubik';
 export type ShadowLevel = 'none' | 'soft' | 'medium';
 export type ButtonStyle = 'solid' | 'soft' | 'outline';

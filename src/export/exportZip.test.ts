@@ -126,6 +126,33 @@ describe('מבנה ה-ZIP המיוצא', () => {
   });
 });
 
+describe('הגופן בארכיון', () => {
+  const fonts = {
+    css: { path: 'fonts/heebo.css', content: '@font-face { src: url(heebo-hebrew.woff2); }' },
+    files: [{ path: 'fonts/heebo-hebrew.woff2', blob: new Blob([bytes]) }],
+    license: 'SIL Open Font License 1.1',
+  };
+
+  it('אורז את הגיליון, את הקבצים ואת הרישיון תחת fonts/', async () => {
+    const payload = buildExportPayload(createCourse(), []);
+    const zip = await JSZip.loadAsync(
+      await buildCourseZip({ payload, blobs: new Map(), runtime, fonts, folderName: FOLDER }),
+    );
+
+    expect(zip.file(`${FOLDER}/fonts/heebo.css`)).not.toBeNull();
+    expect(zip.file(`${FOLDER}/fonts/heebo-hebrew.woff2`)).not.toBeNull();
+    // OFL 1.1 מחייב שהרישיון ילווה את קובצי הגופן בכל הפצה
+    expect(zip.file(`${FOLDER}/fonts/OFL.txt`)).not.toBeNull();
+  });
+
+  it('בלי גופן (גופן המערכת) אין בכלל תיקיית fonts', async () => {
+    const payload = buildExportPayload(createCourse(), []);
+    const zip = await writeZip(payload, new Map());
+
+    expect(Object.keys(zip.files).some((path) => path.includes('fonts/'))).toBe(false);
+  });
+});
+
 describe('סינון הנכסים לתוצר', () => {
   it('אינו אורז נכס שאף בלוק אינו מפנה אליו', async () => {
     const payload = buildExportPayload(courseWithImage('asset-a'), [

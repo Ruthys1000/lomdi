@@ -121,6 +121,26 @@ describe('מבנה index.html', () => {
     expect(html).toContain(`background: ${data.course.theme.colors.background}`);
   });
 
+  it('מקשר לגופן שהערכה בחרה, בנתיב יחסי', () => {
+    const html = buildIndexHtml(payload());
+
+    // ברירת המחדל היא Heebo, והוא נארז לתוך ה-ZIP
+    expect(html).toContain('<link rel="stylesheet" href="fonts/heebo.css" />');
+  });
+
+  it('אינו מקשר לגופן כשהערכה משתמשת בגופן המערכת', () => {
+    const data = payload();
+    const course = {
+      ...data.course,
+      theme: {
+        ...data.course.theme,
+        typography: { ...data.course.theme.typography, fontFamily: 'system' as const },
+      },
+    };
+
+    expect(buildIndexHtml({ ...data, course })).not.toContain('fonts/');
+  });
+
   it('מציג מצב טעינה ו-noscript, כדי שהמסך לא יהיה לבן וריק', () => {
     const html = buildIndexHtml(payload());
 

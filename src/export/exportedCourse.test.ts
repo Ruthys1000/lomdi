@@ -10,6 +10,7 @@ import { defaultNavigation } from '@/model/defaults';
 import { createBlock, createChapter, createCourse } from '@/model/factory';
 import type { AssetMeta } from '@/model/types';
 import { buildCourseZip, type RuntimeBundle } from './exportZip';
+import { fontFilesIn, type FontBundle } from './fonts';
 import { buildExportPayload } from './payload';
 
 /**
@@ -25,6 +26,7 @@ import { buildExportPayload } from './payload';
  */
 
 const BUNDLE_DIR = 'public/runtime';
+const FONTS_DIR = 'public/fonts';
 
 const png = new Uint8Array([
   0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
@@ -41,6 +43,7 @@ const imageAsset: AssetMeta = {
 };
 
 let runtime: RuntimeBundle;
+let fonts: FontBundle;
 
 beforeAll(() => {
   try {
@@ -50,6 +53,23 @@ beforeAll(() => {
     };
   } catch {
     throw new Error(`לא נמצאה חבילת ה-runtime ב-${BUNDLE_DIR}. הרץ תחילה: npm run build:runtime`);
+  }
+
+  // הגופן של ברירת המחדל, מתוך תוצר build:fonts האמיתי — כדי שהבדיקה
+  // תארוז את אותם קבצים שהמשתמש מקבל
+  try {
+    const css = readFileSync(join(FONTS_DIR, 'heebo.css'), 'utf8');
+    fonts = {
+      css: { path: 'fonts/heebo.css', content: css },
+      files: fontFilesIn(css).map((name) => ({
+        path: `fonts/${name}`,
+        // Uint8Array ולא Blob, מאותה סיבה כמו התמונה למטה
+        blob: readFileSync(join(FONTS_DIR, name)) as unknown as Blob,
+      })),
+      license: readFileSync(join(FONTS_DIR, 'OFL.txt'), 'utf8'),
+    };
+  } catch {
+    throw new Error(`לא נמצאה חבילת הגופנים ב-${FONTS_DIR}. הרץ תחילה: npm run build:fonts`);
   }
 });
 
@@ -85,6 +105,7 @@ async function exportAndExtract(): Promise<string> {
     // עצמו נבדק ב-exportZip.test.ts שרץ ב-jsdom.
     blobs: new Map([[imageAsset.id, png as unknown as Blob]]),
     runtime,
+    fonts,
     folderName,
   });
 
@@ -186,6 +207,35 @@ describe('הלומדה המיוצאת נפתחת מ-file:// בלי שרת', () =
     expect(existsSync(join(opened.dir, 'runtime/app.js'))).toBe(true);
     expect(existsSync(join(opened.dir, 'runtime/styles.css'))).toBe(true);
     expect(readFileSync(join(opened.dir, 'runtime/styles.css'), 'utf8')).toContain('.lc-course');
+  });
+
+  /**
+   * גופן שאינו מותקן אצל הלומד פשוט אינו קיים, ו-CDN אינו זמין מ-file://.
+   * לכן קובצי ה-woff2 חייבים להיות בארכיון, וכל קובץ שה-CSS מפנה אליו
+   * חייב להימצא בפועל — קישור לקובץ חסר נראה בדיוק כמו גופן שעובד, עד
+   * שפותחים את הלומדה במחשב אחר.
+   */
+  it('אורזת את הגופן שהערכה בחרה, כולל כל קובץ שהגיליון מפנה אליו', () => {
+    const cssPath = join(opened.dir, 'fonts/heebo.css');
+    expect(existsSync(cssPath)).toBe(true);
+
+    const css = readFileSync(cssPath, 'utf8');
+    expect(css).toContain('Heebo Variable');
+    expect(fontFilesIn(css).length).toBeGreaterThan(0);
+
+    for (const file of fontFilesIn(css)) {
+      expect(existsSync(join(opened.dir, 'fonts', file))).toBe(true);
+    }
+
+    // OFL 1.1 מחייב שהרישיון ילווה את קובצי הגופן בכל הפצה
+    expect(existsSync(join(opened.dir, 'fonts/OFL.txt'))).toBe(true);
+  });
+
+  it('ה-HTML מקשר לגופן בנתיב יחסי, לפני גיליון הלומדה', () => {
+    const html = readFileSync(join(opened.dir, 'index.html'), 'utf8');
+
+    expect(html).toContain('<link rel="stylesheet" href="fonts/heebo.css" />');
+    expect(html.indexOf('fonts/heebo.css')).toBeLessThan(html.indexOf('runtime/styles.css'));
   });
 
   it('אינה מפנה לשום כתובת מוחלטת בקובץ ה-HTML', () => {

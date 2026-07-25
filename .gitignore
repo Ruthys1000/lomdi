@@ -8,5 +8,6 @@ coverage
 !.vscode/extensions.json
 *.tsbuildinfo
 
-# תוצר build:runtime — נבנה מהמקור, לא נשמר בגיט
+# תוצרי build — נבנים מהמקור, לא נשמרים בגיט
 public/runtime/
+public/fonts/

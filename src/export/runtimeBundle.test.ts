@@ -68,7 +68,7 @@ describe('טעינת חבילת הלומדה לייצוא', () => {
     const spa = fetchOf({ ...bundle, 'runtime/app.js': respond('<!doctype html><html></html>') });
 
     await expect(loadRuntimeBundle({ fetchImpl: spa, baseUrl: BASE })).rejects.toThrow(
-      /חבילת הלומדה/,
+      /runtime\/app\.js חסר/,
     );
   });
 

@@ -1,10 +1,11 @@
 import type { Theme, ThemePresetId } from './types';
 
 /**
- * שלוש ערכות העיצוב המוכנות (סעיף 10 באפיון).
+ * ערכות העיצוב המוכנות (סעיף 10 באפיון).
  *
  * כל הצמדים של טקסט על רקע נבדקו לניגודיות של 4.5:1 לפחות (WCAG AA),
- * כדי שערכה שנבחרה בלחיצה אחת לא תייצר לומדה לא קריאה.
+ * כדי שערכה שנבחרה בלחיצה אחת לא תייצר לומדה לא קריאה. `themes.test.ts`
+ * אוכף את זה על כל ערכה — הבטחה בהערה אינה נשמרת לבד.
  */
 
 export interface ThemePreset {
@@ -15,7 +16,7 @@ export interface ThemePreset {
 }
 
 const baseTypography = {
-  fontFamily: 'assistant',
+  fontFamily: 'heebo',
   baseSize: 17,
   headingWeight: 700,
   headingStyle: 'plain',
@@ -83,6 +84,73 @@ export const themePresets: ThemePreset[] = [
       typography: { ...baseTypography, headingWeight: 800, headingStyle: 'accentBar' },
       shape: { radius: 20, shadow: 'medium', buttonStyle: 'soft', cardStyle: 'elevated' },
       layout: { contentMaxWidth: 820, density: 'spacious' },
+    },
+  },
+  {
+    id: 'warmSand',
+    name: 'חול חם',
+    description: 'גווני חול, חימר וטרקוטה. רקע חמים שנעים לקריאה ארוכה.',
+    theme: {
+      preset: 'warmSand',
+      colors: {
+        primary: '#a2543a',
+        secondary: '#7c5c3b',
+        accent: '#0f766e',
+        // שבור-לבן חם ולא לבן: הרקע הוא חצי מהאופי של הערכה הזו
+        background: '#fdfaf5',
+        surface: '#f5ece0',
+        text: '#33261c',
+        textMuted: '#6d5949',
+        border: '#e6d6c4',
+      },
+      typography: { ...baseTypography, fontFamily: 'assistant' },
+      shape: { radius: 12, shadow: 'soft', buttonStyle: 'solid', cardStyle: 'bordered' },
+      layout: { contentMaxWidth: 760, density: 'comfortable' },
+    },
+  },
+  {
+    id: 'forest',
+    name: 'ירוק יער',
+    description: 'ירוק עמוק על רקע קרם, עם הדגשת ענבר. רגוע ורציני.',
+    theme: {
+      preset: 'forest',
+      colors: {
+        primary: '#166534',
+        secondary: '#14532d',
+        accent: '#b45309',
+        background: '#fbfdfa',
+        surface: '#eef5ee',
+        text: '#12241a',
+        textMuted: '#4f6355',
+        border: '#d3e3d6',
+      },
+      typography: { ...baseTypography, headingWeight: 700, headingStyle: 'underline' },
+      shape: { radius: 10, shadow: 'soft', buttonStyle: 'solid', cardStyle: 'bordered' },
+      layout: { contentMaxWidth: 780, density: 'comfortable' },
+    },
+  },
+  {
+    id: 'highContrast',
+    name: 'ניגודיות גבוהה',
+    description: 'שחור-לבן עם הדגשה צהובה, מעל 7:1. לנגישות ולמסכים חלשים.',
+    theme: {
+      preset: 'highContrast',
+      colors: {
+        primary: '#000000',
+        secondary: '#1a1a1a',
+        // צהוב עז מיועד לרקע של הדגשה עם טקסט שחור מעליו — readableTextOn
+        // בוחר את הכהה לבד
+        accent: '#ffd400',
+        background: '#ffffff',
+        surface: '#f2f2f2',
+        text: '#000000',
+        textMuted: '#3d3d3d',
+        border: '#000000',
+      },
+      typography: { ...baseTypography, baseSize: 18, headingWeight: 800 },
+      // בלי צללים: קווי מתאר מלאים נראים גם במסך זול ובהדפסה, צל לא
+      shape: { radius: 6, shadow: 'none', buttonStyle: 'solid', cardStyle: 'bordered' },
+      layout: { contentMaxWidth: 760, density: 'comfortable' },
     },
   },
 ];

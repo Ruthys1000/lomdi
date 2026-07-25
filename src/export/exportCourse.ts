@@ -3,6 +3,7 @@ import { collectAssetBlobs } from '@/persistence/assetBlobs';
 import { useAssetStore } from '@/state/assetStore';
 import { useCourseStore } from '@/state/courseStore';
 import { buildCourseZip, exportFileName, exportFolderName } from './exportZip';
+import { loadFontBundle } from './fonts';
 import { buildExportPayload } from './payload';
 import { ExportError, loadRuntimeBundle } from './runtimeBundle';
 
@@ -35,9 +36,13 @@ export async function exportCourseZip(date = new Date()): Promise<ExportResult> 
     wanted.filter((asset) => blobs.has(asset.id)),
   );
 
-  const runtime = await loadRuntimeBundle();
+  const [runtime, fonts] = await Promise.all([
+    loadRuntimeBundle(),
+    loadFontBundle(course.theme),
+  ]);
+
   const folderName = exportFolderName(course.title, date);
-  const zip = await buildCourseZip({ payload, blobs, runtime, folderName, date });
+  const zip = await buildCourseZip({ payload, blobs, runtime, fonts, folderName, date });
 
   const fileName = exportFileName(course.title, date);
   downloadBlob(zip, fileName);
