@@ -23,6 +23,9 @@ export default defineConfig({
     // מבטיח build של React במצב production גם כשנבנה כספרייה
     'process.env.NODE_ENV': JSON.stringify('production'),
   },
+  // ל-build הזה אין נכסים סטטיים משלו. בלי זה Vite מזהיר שה-outDir
+  // יושב בתוך publicDir של העורך — אזהרה מיותרת שמלכלכת את הפלט.
+  publicDir: false,
   build: {
     outDir: 'public/runtime',
     emptyOutDir: true,
