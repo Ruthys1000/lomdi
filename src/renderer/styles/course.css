@@ -1,0 +1,95 @@
+/*
+ * מערכת העיצוב של הלומדה.
+ *
+ * נכתבת ביד ולא ב-Tailwind, בכוונה: ה-CSS הזה נארז לתוך התוצר המיוצא
+ * וחייב להיות דטרמיניסטי, קטן ועצמאי. שימוש ב-Tailwind בחבילה השנייה היה
+ * מוסיף נקודת כשל שקטה (קלאס שנוצר דינמית נעלם מהייצוא ומופיע בעורך).
+ *
+ * כל המרווחים והיישורים משתמשים ב-CSS logical properties
+ * (inline-start/inline-end ולא left/right), כדי ש-RTL ו-LTR יעבדו
+ * מאותו קוד בלי כפילות.
+ *
+ * המשתנים כאן הם ברירות המחדל. ה-Theme Builder (שלב 3) דורס אותם דרך
+ * themeToCssVars, שמזריקה :root { --lc-* } גם בעורך וגם ב-index.html המיוצא.
+ */
+
+.lc-course {
+  /* צבעים */
+  --lc-color-primary: #2563eb;
+  --lc-color-secondary: #0f172a;
+  --lc-color-accent: #f59e0b;
+  --lc-color-background: #ffffff;
+  --lc-color-surface: #f8fafc;
+  --lc-color-text: #0f172a;
+  --lc-color-text-muted: #64748b;
+  --lc-color-border: #e2e8f0;
+
+  /* טיפוגרפיה */
+  --lc-font-family: system-ui, -apple-system, 'Segoe UI', 'Noto Sans Hebrew', Arial, sans-serif;
+  --lc-font-size-base: 17px;
+  --lc-line-height: 1.75;
+  --lc-heading-weight: 700;
+
+  /* צורה */
+  --lc-radius: 14px;
+  --lc-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px rgb(15 23 42 / 0.06);
+
+  /* פריסה */
+  --lc-content-max-width: 780px;
+  --lc-space-unit: 8px;
+
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  background: var(--lc-color-background);
+  color: var(--lc-color-text);
+  font-family: var(--lc-font-family);
+  font-size: var(--lc-font-size-base);
+  line-height: var(--lc-line-height);
+  -webkit-font-smoothing: antialiased;
+}
+
+.lc-course *,
+.lc-course *::before,
+.lc-course *::after {
+  box-sizing: border-box;
+}
+
+.lc-chapter {
+  display: block;
+}
+
+/* מיכל התוכן הסטנדרטי של בלוק */
+.lc-container {
+  max-inline-size: var(--lc-content-max-width);
+  margin-inline: auto;
+  padding-inline: calc(var(--lc-space-unit) * 3);
+}
+
+/* מצב focus אחיד ונראה לעין — דרישת נגישות (סעיף 18) */
+.lc-course :focus-visible {
+  outline: 3px solid var(--lc-color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.lc-unknown-block {
+  margin: calc(var(--lc-space-unit) * 2) auto;
+  max-inline-size: var(--lc-content-max-width);
+  padding: calc(var(--lc-space-unit) * 2);
+  border: 1px dashed var(--lc-color-border);
+  border-radius: var(--lc-radius);
+  color: var(--lc-color-text-muted);
+  font-size: 0.9em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lc-course *,
+  .lc-course *::before,
+  .lc-course *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
