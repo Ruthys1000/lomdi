@@ -2,6 +2,8 @@
 import { readFileSync } from 'node:fs';
 import { JSDOM, VirtualConsole } from 'jsdom';
 import { beforeAll, describe, expect, it } from 'vitest';
+import { defaultNavigation } from '@/model/defaults';
+import { defaultTheme } from '@/model/themes';
 
 /**
  * בדיקת האינטגרציה החשובה ביותר בפרויקט.
@@ -24,6 +26,9 @@ const course = {
   description: '',
   direction: 'rtl',
   language: 'he',
+  theme: defaultTheme,
+  // גלילה רציפה, כדי שהבדיקה תראה את שני הפרקים בלי לנווט ביניהם
+  navigation: { ...defaultNavigation, mode: 'scroll' },
   chapters: [
     { id: 'chapter-1', title: 'פתיחה', description: '', blocks: [] },
     { id: 'chapter-2', title: 'עקרונות מנחים', description: '', blocks: [] },

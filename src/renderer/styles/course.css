@@ -3,50 +3,50 @@
  *
  * נכתבת ביד ולא ב-Tailwind, בכוונה: ה-CSS הזה נארז לתוך התוצר המיוצא
  * וחייב להיות דטרמיניסטי, קטן ועצמאי. שימוש ב-Tailwind בחבילה השנייה היה
- * מוסיף נקודת כשל שקטה (קלאס שנוצר דינמית נעלם מהייצוא ומופיע בעורך).
+ * מוסיף נקודת כשל שקטה — קלאס שנוצר דינמית נעלם מהייצוא אך מופיע בעורך.
  *
  * כל המרווחים והיישורים משתמשים ב-CSS logical properties
- * (inline-start/inline-end ולא left/right), כדי ש-RTL ו-LTR יעבדו
- * מאותו קוד בלי כפילות.
+ * (inline-start/inline-end ולא left/right), כדי ש-RTL ו-LTR יעבדו מאותו
+ * קוד בלי כפילות.
  *
- * המשתנים כאן הם ברירות המחדל. ה-Theme Builder (שלב 3) דורס אותם דרך
- * themeToCssVars, שמזריקה :root { --lc-* } גם בעורך וגם ב-index.html המיוצא.
+ * המשתנים כאן הם ברירות המחדל בלבד. themeToCssVars דורסת אותם בערכים
+ * מה-Theme — גם בעורך וגם ב-index.html המיוצא.
  */
 
 .lc-course {
-  /* צבעים */
   --lc-color-primary: #2563eb;
   --lc-color-secondary: #0f172a;
   --lc-color-accent: #f59e0b;
   --lc-color-background: #ffffff;
   --lc-color-surface: #f8fafc;
   --lc-color-text: #0f172a;
-  --lc-color-text-muted: #64748b;
+  --lc-color-text-muted: #5b6b7f;
   --lc-color-border: #e2e8f0;
+  --lc-color-on-primary: #ffffff;
+  --lc-color-on-accent: #111827;
 
-  /* טיפוגרפיה */
   --lc-font-family: system-ui, -apple-system, 'Segoe UI', 'Noto Sans Hebrew', Arial, sans-serif;
   --lc-font-size-base: 17px;
   --lc-line-height: 1.75;
   --lc-heading-weight: 700;
 
-  /* צורה */
   --lc-radius: 14px;
+  --lc-radius-small: 7px;
   --lc-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px rgb(15 23 42 / 0.06);
 
-  /* פריסה */
   --lc-content-max-width: 780px;
   --lc-space-unit: 8px;
 
-  box-sizing: border-box;
   margin: 0;
   padding: 0;
+  min-block-size: 100%;
   background: var(--lc-color-background);
   color: var(--lc-color-text);
   font-family: var(--lc-font-family);
   font-size: var(--lc-font-size-base);
   line-height: var(--lc-line-height);
   -webkit-font-smoothing: antialiased;
+  text-size-adjust: 100%;
 }
 
 .lc-course *,
@@ -55,15 +55,321 @@
   box-sizing: border-box;
 }
 
+.lc-course p,
+.lc-course h1,
+.lc-course h2,
+.lc-course h3,
+.lc-course h4,
+.lc-course ul,
+.lc-course ol,
+.lc-course figure,
+.lc-course blockquote {
+  margin: 0;
+}
+
+.lc-course h1,
+.lc-course h2,
+.lc-course h3,
+.lc-course h4 {
+  font-weight: var(--lc-heading-weight);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.lc-course a {
+  color: var(--lc-color-primary);
+  text-underline-offset: 3px;
+}
+
+.lc-course img {
+  max-inline-size: 100%;
+  block-size: auto;
+}
+
+/* ─────────────────────── מיכל ופריסת בלוק ─────────────────────── */
+
+.lc-container {
+  inline-size: 100%;
+  max-inline-size: var(--lc-content-max-width);
+  margin-inline: auto;
+  padding-inline: calc(var(--lc-space-unit) * 3);
+}
+
+.lc-block {
+  inline-size: 100%;
+  margin-inline: auto;
+}
+
+.lc-block--w-narrow {
+  max-inline-size: calc(var(--lc-content-max-width) * 0.75);
+}
+.lc-block--w-normal {
+  max-inline-size: var(--lc-content-max-width);
+}
+.lc-block--w-wide {
+  max-inline-size: calc(var(--lc-content-max-width) * 1.3);
+}
+.lc-block--w-full {
+  max-inline-size: none;
+}
+
+.lc-block--align-start {
+  text-align: start;
+}
+.lc-block--align-center {
+  text-align: center;
+}
+.lc-block--align-end {
+  text-align: end;
+}
+
+.lc-block--bg-transparent {
+  background: transparent;
+}
+.lc-block--bg-surface {
+  background: var(--lc-color-surface);
+}
+.lc-block--bg-muted {
+  background: color-mix(in srgb, var(--lc-color-text) 4%, var(--lc-color-background));
+}
+.lc-block--bg-primary {
+  background: var(--lc-color-primary);
+  color: var(--lc-color-on-primary);
+}
+.lc-block--bg-accent {
+  background: var(--lc-color-accent);
+  color: var(--lc-color-on-accent);
+}
+
+/* בלוק עם רקע צבעוני חייב מרווח פנימי, אחרת הצבע נצמד לטקסט */
+.lc-block--bg-surface,
+.lc-block--bg-muted,
+.lc-block--bg-primary,
+.lc-block--bg-accent {
+  padding-inline: calc(var(--lc-space-unit) * 3);
+  border-radius: var(--lc-radius);
+}
+
+.lc-block--pt-none {
+  padding-block-start: 0;
+}
+.lc-block--pt-small {
+  padding-block-start: calc(var(--lc-space-unit) * 2);
+}
+.lc-block--pt-medium {
+  padding-block-start: calc(var(--lc-space-unit) * 5);
+}
+.lc-block--pt-large {
+  padding-block-start: calc(var(--lc-space-unit) * 9);
+}
+
+.lc-block--pb-none {
+  padding-block-end: 0;
+}
+.lc-block--pb-small {
+  padding-block-end: calc(var(--lc-space-unit) * 2);
+}
+.lc-block--pb-medium {
+  padding-block-end: calc(var(--lc-space-unit) * 5);
+}
+.lc-block--pb-large {
+  padding-block-end: calc(var(--lc-space-unit) * 9);
+}
+
+/* ─────────────────────── כפתורים ─────────────────────── */
+
+.lc-button {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--lc-space-unit) * 1);
+  padding: calc(var(--lc-space-unit) * 1.25) calc(var(--lc-space-unit) * 2.5);
+  border: 1px solid transparent;
+  border-radius: var(--lc-radius-small);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.95em;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.lc-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.lc-button--primary {
+  background: var(--lc-color-primary);
+  color: var(--lc-color-on-primary);
+}
+.lc-button--primary:not(:disabled):hover {
+  background: color-mix(in srgb, var(--lc-color-primary) 88%, black);
+}
+
+.lc-button--ghost {
+  border-color: var(--lc-color-border);
+  color: var(--lc-color-text);
+}
+.lc-button--ghost:not(:disabled):hover {
+  background: var(--lc-color-surface);
+}
+
+.lc-icon {
+  inline-size: 1.15em;
+  block-size: 1.15em;
+  flex: none;
+}
+
+/* ─────────────────────── מצב פרקים ─────────────────────── */
+
+.lc-chapters-mode {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100%;
+}
+
+.lc-chapter-bar {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 5;
+  background: color-mix(in srgb, var(--lc-color-background) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-block-end: 1px solid var(--lc-color-border);
+}
+
+.lc-chapter-bar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--lc-space-unit) * 2);
+  min-block-size: calc(var(--lc-space-unit) * 6.5);
+}
+
+.lc-chapter-bar__counter {
+  color: var(--lc-color-text-muted);
+  font-size: 0.85em;
+  font-weight: 600;
+}
+
+.lc-chapter-menu {
+  position: relative;
+}
+
+.lc-chapter-menu__list {
+  position: absolute;
+  inset-block-start: calc(100% + var(--lc-space-unit));
+  inset-inline-end: 0;
+  z-index: 10;
+  min-inline-size: 260px;
+  max-block-size: 60vh;
+  overflow-y: auto;
+  margin: 0;
+  padding: calc(var(--lc-space-unit) * 0.75);
+  list-style: none;
+  background: var(--lc-color-background);
+  border: 1px solid var(--lc-color-border);
+  border-radius: var(--lc-radius);
+  box-shadow: var(--lc-shadow);
+}
+
+.lc-chapter-menu__item {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--lc-space-unit) * 1.5);
+  inline-size: 100%;
+  padding: calc(var(--lc-space-unit) * 1.25) calc(var(--lc-space-unit) * 1.5);
+  border: 0;
+  border-radius: var(--lc-radius-small);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.95em;
+  text-align: start;
+  cursor: pointer;
+}
+
+.lc-chapter-menu__item:hover {
+  background: var(--lc-color-surface);
+}
+
+/* הפרק הנוכחי מסומן גם בצבע וגם במשקל — לא רק בצבע (סעיף 18) */
+.lc-chapter-menu__item[aria-current='step'] {
+  color: var(--lc-color-primary);
+  font-weight: 700;
+}
+
+.lc-chapter-menu__number {
+  display: grid;
+  place-items: center;
+  inline-size: 1.75em;
+  block-size: 1.75em;
+  flex: none;
+  border-radius: 50%;
+  background: var(--lc-color-surface);
+  font-size: 0.8em;
+  font-variant-numeric: tabular-nums;
+}
+
+.lc-progress {
+  block-size: 3px;
+  background: var(--lc-color-border);
+}
+
+.lc-progress__bar {
+  block-size: 100%;
+  background: var(--lc-color-primary);
+  transition: inline-size 0.3s ease;
+}
+
+.lc-chapter-body {
+  flex: 1;
+}
+
+.lc-chapter-nav {
+  position: sticky;
+  inset-block-end: 0;
+  background: color-mix(in srgb, var(--lc-color-background) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-block-start: 1px solid var(--lc-color-border);
+}
+
+.lc-chapter-nav__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--lc-space-unit) * 2);
+  padding-block: calc(var(--lc-space-unit) * 1.5);
+}
+
+/* ─────────────────────── מצב גלילה ─────────────────────── */
+
+.lc-scroll-mode {
+  display: block;
+}
+
 .lc-chapter {
   display: block;
 }
 
-/* מיכל התוכן הסטנדרטי של בלוק */
-.lc-container {
+.lc-block-slot {
+  display: block;
+}
+
+/* ─────────────────────── מצבים ─────────────────────── */
+
+.lc-empty-chapter,
+.lc-unknown-block {
   max-inline-size: var(--lc-content-max-width);
-  margin-inline: auto;
-  padding-inline: calc(var(--lc-space-unit) * 3);
+  margin: calc(var(--lc-space-unit) * 3) auto;
+  padding: calc(var(--lc-space-unit) * 3);
+  border: 1px dashed var(--lc-color-border);
+  border-radius: var(--lc-radius);
+  color: var(--lc-color-text-muted);
+  font-size: 0.92em;
+  text-align: center;
 }
 
 /* מצב focus אחיד ונראה לעין — דרישת נגישות (סעיף 18) */
@@ -71,16 +377,6 @@
   outline: 3px solid var(--lc-color-accent);
   outline-offset: 2px;
   border-radius: 4px;
-}
-
-.lc-unknown-block {
-  margin: calc(var(--lc-space-unit) * 2) auto;
-  max-inline-size: var(--lc-content-max-width);
-  padding: calc(var(--lc-space-unit) * 2);
-  border: 1px dashed var(--lc-color-border);
-  border-radius: var(--lc-radius);
-  color: var(--lc-color-text-muted);
-  font-size: 0.9em;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -91,5 +387,22 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ─────────────────────── מובייל ─────────────────────── */
+
+@media (max-width: 640px) {
+  .lc-course {
+    --lc-font-size-base: 16px;
+  }
+
+  .lc-container {
+    padding-inline: calc(var(--lc-space-unit) * 2);
+  }
+
+  .lc-chapter-menu__list {
+    inline-size: calc(100vw - var(--lc-space-unit) * 4);
+    min-inline-size: 0;
   }
 }

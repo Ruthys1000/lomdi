@@ -1,0 +1,158 @@
+import { useState } from 'react';
+import { ChevronDown, ChevronLeft, Copy, Pencil, Trash2 } from 'lucide-react';
+import { blockLabel } from '@/blocks/registry.shared';
+import { cn } from '@/lib/cn';
+import type { Chapter } from '@/model/types';
+import { useCourseStore } from '@/state/courseStore';
+import { useEditorStore } from '@/state/editorStore';
+
+interface ChapterNodeProps {
+  chapter: Chapter;
+  index: number;
+  canDelete: boolean;
+  onRequestDelete: () => void;
+}
+
+/** פרק בסרגל המבנה, עם הבלוקים שבתוכו ופעולות הפרק */
+export function ChapterNode({ chapter, index, canDelete, onRequestDelete }: ChapterNodeProps) {
+  const updateChapter = useCourseStore((state) => state.updateChapter);
+  const duplicateChapter = useCourseStore((state) => state.duplicateChapter);
+
+  const selectedChapterId = useEditorStore((state) => state.selectedChapterId);
+  const selectedBlockId = useEditorStore((state) => state.selectedBlockId);
+  const collapsed = useEditorStore((state) => state.collapsedChapterIds.includes(chapter.id));
+  const toggleCollapsed = useEditorStore((state) => state.toggleChapterCollapsed);
+  const selectChapter = useEditorStore((state) => state.selectChapter);
+  const selectBlock = useEditorStore((state) => state.selectBlock);
+
+  const [isRenaming, setRenaming] = useState(false);
+
+  const isActiveChapter = selectedChapterId === chapter.id;
+  const ChevronIcon = collapsed ? ChevronLeft : ChevronDown;
+
+  return (
+    <li>
+      <div
+        className={cn(
+          'group flex items-center gap-1 rounded-lg px-1.5 py-1.5 transition',
+          isActiveChapter && !selectedBlockId ? 'bg-blue-50' : 'hover:bg-slate-50',
+        )}
+      >
+        <button
+          type="button"
+          onClick={() => toggleCollapsed(chapter.id)}
+          aria-expanded={!collapsed}
+          aria-label={collapsed ? `פתיחת הפרק ${chapter.title}` : `סגירת הפרק ${chapter.title}`}
+          className="rounded p-0.5 text-slate-400 hover:text-slate-700"
+        >
+          <ChevronIcon className="size-4" aria-hidden />
+        </button>
+
+        <span className="w-5 shrink-0 text-center text-xs font-semibold text-slate-400 tabular-nums">
+          {index + 1}
+        </span>
+
+        {isRenaming ? (
+          <input
+            autoFocus
+            defaultValue={chapter.title}
+            aria-label="שם הפרק"
+            onBlur={(event) => {
+              const value = event.target.value.trim();
+              if (value) updateChapter(chapter.id, { title: value });
+              setRenaming(false);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') event.currentTarget.blur();
+              if (event.key === 'Escape') setRenaming(false);
+            }}
+            className="min-w-0 flex-1 rounded border border-blue-500 px-1.5 py-0.5 text-sm focus:outline-none"
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() => selectChapter(chapter.id)}
+            onDoubleClick={() => setRenaming(true)}
+            className={cn(
+              'min-w-0 flex-1 truncate text-start text-sm',
+              isActiveChapter ? 'font-semibold text-blue-900' : 'text-slate-700',
+            )}
+          >
+            {chapter.title || 'פרק ללא שם'}
+          </button>
+        )}
+
+        {/* הפעולות מופיעות בריחוף, אבל נשארות נגישות במקלדת דרך focus-within */}
+        <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition group-focus-within:opacity-100 group-hover:opacity-100">
+          <OutlineAction icon={Pencil} label="שינוי שם" onClick={() => setRenaming(true)} />
+          <OutlineAction icon={Copy} label="שכפול פרק" onClick={() => duplicateChapter(chapter.id)} />
+          <OutlineAction
+            icon={Trash2}
+            label={canDelete ? 'מחיקת פרק' : 'לא ניתן למחוק את הפרק האחרון'}
+            onClick={onRequestDelete}
+            disabled={!canDelete}
+            destructive
+          />
+        </div>
+      </div>
+
+      {!collapsed && (
+        <ul className="mt-0.5 mb-1 space-y-0.5 ps-8">
+          {chapter.blocks.map((block) => (
+            <li key={block.id}>
+              <button
+                type="button"
+                onClick={() => selectBlock(block.id, chapter.id)}
+                className={cn(
+                  'flex w-full items-center gap-2 rounded-md px-2 py-1 text-start text-xs transition',
+                  selectedBlockId === block.id
+                    ? 'bg-blue-100 font-semibold text-blue-900'
+                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800',
+                )}
+              >
+                <span className="size-1.5 shrink-0 rounded-full bg-current opacity-40" />
+                <span className="truncate">{blockLabel(block.type)}</span>
+              </button>
+            </li>
+          ))}
+
+          {chapter.blocks.length === 0 && (
+            <li className="px-2 py-1 text-xs text-slate-400">פרק ריק</li>
+          )}
+        </ul>
+      )}
+    </li>
+  );
+}
+
+function OutlineAction({
+  icon: Icon,
+  label,
+  onClick,
+  disabled,
+  destructive,
+}: {
+  icon: typeof Pencil;
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+  destructive?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      title={label}
+      aria-label={label}
+      className={cn(
+        'rounded p-1 transition disabled:cursor-not-allowed disabled:opacity-30',
+        destructive
+          ? 'text-slate-400 hover:bg-red-50 hover:text-red-600'
+          : 'text-slate-400 hover:bg-slate-200 hover:text-slate-700',
+      )}
+    >
+      <Icon className="size-3.5" aria-hidden />
+    </button>
+  );
+}

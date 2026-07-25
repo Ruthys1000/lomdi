@@ -1,5 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
+import { defaultNavigation } from '@/model/defaults';
+import { defaultTheme } from '@/model/themes';
 import type { Course } from '@/model/types';
 import { CourseRenderer } from './CourseRenderer';
 
@@ -10,6 +12,8 @@ const course: Course = {
   description: '',
   direction: 'rtl',
   language: 'he',
+  theme: defaultTheme,
+  navigation: { ...defaultNavigation, mode: 'scroll' },
   chapters: [
     { id: 'chapter-1', title: 'פתיחה', description: '', blocks: [] },
     { id: 'chapter-2', title: 'עקרונות', description: '', blocks: [] },

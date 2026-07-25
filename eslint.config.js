@@ -22,6 +22,9 @@ const FORBIDDEN_IN_RENDERER = [
   { group: ['@dnd-kit/*', '@dnd-kit/**'], message: 'dnd-kit הוא כלי עריכה — אסור בחבילת ה-runtime.' },
   { group: ['zustand', 'zustand/*', 'zundo'], message: 'ה-Renderer מקבל נתונים ב-props בלבד, לא מ-store.' },
   { group: ['jszip', 'idb'], message: 'שמירה וייצוא הם באחריות העורך בלבד.' },
+  // התוכן כבר אומת בעת השמירה והייצוא. אימות חוזר בזמן ריצה היה מוסיף
+  // את zod לחבילת הלומדה בלי להגן על שום דבר.
+  { group: ['zod'], message: 'אין אימות סכמה בזמן ריצה — הרנדרר מקבל נתונים שכבר אומתו.' },
   { group: ['@/editor/**', '**/editor/**'], message: 'ה-Renderer לא מייבא קוד עורך.' },
   { group: ['@/state/**', '**/state/**'], message: 'ה-Renderer לא ניגש ל-state של העורך.' },
   { group: ['@/persistence/**', '**/persistence/**'], message: 'ה-Renderer לא ניגש לשכבת השמירה.' },
