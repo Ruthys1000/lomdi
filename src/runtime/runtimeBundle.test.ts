@@ -18,6 +18,7 @@ import { defaultTheme } from '@/model/themes';
  */
 
 const BUNDLE = 'public/runtime/app.js';
+const STYLES = 'public/runtime/styles.css';
 
 const course = {
   id: 'course-test',
@@ -103,6 +104,23 @@ describe('גבול חבילת ה-runtime', () => {
 
   it.each(FORBIDDEN)('אינה מכילה את $name', ({ fingerprint }) => {
     expect(bundle.toLowerCase()).not.toContain(fingerprint.toLowerCase());
+  });
+
+  /**
+   * גיליון הסגנון הוא חצי מהתוצר: בלעדיו הלומדה עולה אבל נראית כמו מסמך
+   * טקסט. הוא נבנה בנפרד מה-JS (cssCodeSplit: false), ולכן הוא יכול
+   * להיעלם בלי שאף בדיקה על ה-JS תרגיש.
+   */
+  it('נבנית לצד גיליון סגנון שמכיל את מערכת העיצוב של הלומדה', () => {
+    let styles: string;
+    try {
+      styles = readFileSync(STYLES, 'utf8');
+    } catch {
+      throw new Error(`לא נמצא ${STYLES}. הרץ תחילה: npm run build:runtime`);
+    }
+
+    expect(styles).toContain('.lc-course');
+    expect(styles).toContain('--lc-color-primary');
   });
 
   it('מכילה Renderer לכל תשעת סוגי הבלוקים', () => {

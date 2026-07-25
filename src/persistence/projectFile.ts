@@ -1,4 +1,5 @@
 import JSZip from 'jszip';
+import { datedFileName } from '@/lib/fileName';
 import type { AssetMeta, Course, ProjectFile } from '@/model/types';
 import { SCHEMA_VERSION } from '@/model/types';
 import { validateProjectFile } from '@/model/validate';
@@ -13,9 +14,9 @@ import { APP_NAME, APP_VERSION } from '@/version';
  *   assets/images/asset-a1b2c3d4e5.jpg ← בדיוק לפי AssetMeta.exportPath
  *   assets/videos/asset-f6g7h8i9j0.mp4
  *
- * הנתיבים בתוך הארכיון הם אותם `exportPath` שיהיו בתוצר המיוצא בשלב 7,
- * ולא סכמה מקבילה. כך אין שתי נוסחאות נתיב שיכולות להתפצל, וייצוא לומדה
- * הוא בעיקר החלפת `course.json` ב-`index.html`.
+ * הנתיבים בתוך הארכיון הם אותם `exportPath` שנמצאים בתוצר המיוצא, ולא
+ * סכמה מקבילה. כך אין שתי נוסחאות נתיב שיכולות להתפצל, וייצוא לומדה
+ * (`src/export/`) הוא בעיקר החלפת `course.json` ב-`index.html`.
  *
  * ZIP ולא JSON יחיד עם base64: תמונה ב-base64 מתנפחת בשליש, וקובץ פרויקט
  * של 200MB היה הופך למחרוזת שהדפדפן נחנק בפריסתה.
@@ -117,28 +118,9 @@ export async function readProjectZip(file: Blob): Promise<ReadProjectResult> {
 }
 
 /**
- * שם קובץ ההורדה — ASCII בלבד.
- *
- * זה נראה כמו ויתור מיותר בממשק עברי, והוא לא: Chromium משמיט שם קובץ
- * שאינו ASCII במלואו ומוריד במקומו קובץ בשם `download` — **בלי סיומת**.
- * קובץ כזה גם אינו מוצע במסנן `.zip` של חלון פתיחת הקובץ, כלומר המשתמש
- * מקבל קובץ שהוא לא יכול לפתוח בחזרה. נבדק בדפדפן אמיתי.
- *
- * הכותרת בעברית לא הולכת לאיבוד — היא נשמרת בתוך `course.json` ומוצגת
- * שוב ברגע שהפרויקט נפתח. התאריך בשם מבדיל בין הורדות חוזרות.
+ * שם קובץ ההורדה — ASCII בלבד, לפי `lib/fileName`. הנימוק המלא נמצא שם,
+ * ואותה נוסחה משמשת גם את שם התוצר המיוצא.
  */
 export function projectFileName(title: string, date = new Date()): string {
-  const slug = title
-    // כל מה שאינו ASCII נדיר יורד; אותיות לטיניות ומספרים שהמשתמש כתב נשמרים
-    .replace(/[^ -~]/g, ' ')
-    // התווים ש-Windows, macOS ו-Linux אוסרים בשם קובץ
-    .replace(/[/\\:*?"<>|.]/g, ' ')
-    .trim()
-    .replace(/\s+/g, '-')
-    .slice(0, 60)
-    .replace(/^-+|-+$/g, '');
-
-  const day = date.toISOString().slice(0, 10);
-
-  return `learnit-${slug ? `${slug}-` : ''}${day}${PROJECT_EXTENSION}`;
+  return datedFileName(title, PROJECT_EXTENSION, date);
 }

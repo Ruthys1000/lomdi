@@ -17,6 +17,7 @@ import { courseHistory, useCourseStore } from '@/state/courseStore';
 import { useEditorStore, type Viewport } from '@/state/editorStore';
 import { toast } from '@/state/toastStore';
 import { AssetLibraryModal } from '../Assets/AssetLibraryModal';
+import { ExportDialog } from '../Export/ExportDialog';
 import { useHistoryState } from '../shortcuts/useHistoryState';
 import { IconButton } from '../ui/IconButton';
 import { SaveIndicator } from './SaveIndicator';
@@ -45,6 +46,7 @@ export function TopBar() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [assetsOpen, setAssetsOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
   if (!course) return null;
@@ -151,7 +153,11 @@ export function TopBar() {
           label="פתיחת קובץ פרויקט"
           onClick={() => fileInputRef.current?.click()}
         />
-        <IconButton icon={Download} label="ייצוא HTML (בשלב 7)" disabled />
+        <IconButton
+          icon={Download}
+          label="ייצוא לומדה עצמאית (ZIP)"
+          onClick={() => setExportOpen(true)}
+        />
       </div>
 
       <input
@@ -167,6 +173,7 @@ export function TopBar() {
       />
 
       <AssetLibraryModal open={assetsOpen} onClose={() => setAssetsOpen(false)} />
+      <ExportDialog open={exportOpen} onClose={() => setExportOpen(false)} />
     </header>
   );
 }
