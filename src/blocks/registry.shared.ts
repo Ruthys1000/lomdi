@@ -1,4 +1,5 @@
 import type { ZodType } from 'zod';
+import type { BlockSettings } from '@/model/types';
 import { blockLabels } from './labels';
 import { heroContentSchema, createHeroContent, heroAssetIds } from './hero/content';
 import { richTextContentSchema, createRichTextContent, richTextAssetIds } from './richText/content';
@@ -33,6 +34,12 @@ export interface SharedBlockDefinition<C = unknown> {
   schema: ZodType<C>;
   createContent: () => C;
   usedAssetIds: (content: C) => string[];
+  /**
+   * חריגות מהגדרות הפריסה הרגילות.
+   * הירו נולד ברוחב מלא וללא מרווחים, אחרת רקע מלא-מסך נראה כקופסה
+   * צפה באמצע העמוד; מפריד נולד בלי מרווחים כי הוא עצמו המרווח.
+   */
+  defaultSettings?: Partial<BlockSettings>;
 }
 
 function define<C>(definition: SharedBlockDefinition<C>): SharedBlockDefinition<unknown> {
@@ -48,6 +55,7 @@ export const sharedBlockRegistry: Record<string, SharedBlockDefinition<unknown>>
     schema: heroContentSchema,
     createContent: createHeroContent,
     usedAssetIds: heroAssetIds,
+    defaultSettings: { width: 'full', spacingTop: 'none', spacingBottom: 'none' },
   }),
   richText: define({
     type: 'richText',
@@ -120,6 +128,7 @@ export const sharedBlockRegistry: Record<string, SharedBlockDefinition<unknown>>
     schema: dividerContentSchema,
     createContent: createDividerContent,
     usedAssetIds: dividerAssetIds,
+    defaultSettings: { spacingTop: 'none', spacingBottom: 'none' },
   }),
 };
 

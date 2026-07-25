@@ -406,3 +406,518 @@
     min-inline-size: 0;
   }
 }
+
+/* ═══════════════════════ בלוקים ═══════════════════════ */
+
+/* ─────────────────────── טקסט עשיר ─────────────────────── */
+
+.lc-prose > * + * {
+  margin-block-start: calc(var(--lc-space-unit) * 2);
+}
+
+.lc-prose h2 {
+  margin-block-start: calc(var(--lc-space-unit) * 4);
+  font-size: 1.55em;
+}
+
+.lc-prose h3 {
+  margin-block-start: calc(var(--lc-space-unit) * 3.5);
+  font-size: 1.25em;
+}
+
+.lc-prose h4 {
+  margin-block-start: calc(var(--lc-space-unit) * 3);
+  font-size: 1.08em;
+}
+
+.lc-prose > :first-child {
+  margin-block-start: 0;
+}
+
+/*
+ * list-style מוצהר במפורש ולא נסמך על ברירת המחדל של הדפדפן.
+ *
+ * הסיבה מעשית: בעורך, ה-CSS הזה חי בתוך מסמך שה-preflight של Tailwind
+ * כבר איפס בו ul ל-list-style: none, בעוד שבתוצר המיוצא אין Tailwind
+ * בכלל. הסתמכות על ברירת המחדל הייתה מייצרת רשימה בלי תבליטים בעורך
+ * ועם תבליטים בייצוא — בדיוק סוג הפער שהארכיטקטורה נועדה למנוע.
+ *
+ * הכלל: course.css לא נשען על סגנונות שהסביבה שמסביבו מספקת.
+ */
+.lc-prose ul,
+.lc-prose ol {
+  padding-inline-start: calc(var(--lc-space-unit) * 3);
+  margin-inline-start: 0;
+}
+
+.lc-prose ul {
+  list-style: disc outside;
+}
+
+.lc-prose ol {
+  list-style: decimal outside;
+}
+
+.lc-prose li {
+  display: list-item;
+}
+
+.lc-prose li + li {
+  margin-block-start: calc(var(--lc-space-unit) * 0.75);
+}
+
+.lc-prose li::marker {
+  color: var(--lc-color-primary);
+}
+
+/* קו הציטוט בצד ההתחלה — מתהפך לבד בין עברית לאנגלית */
+.lc-prose blockquote {
+  padding-inline-start: calc(var(--lc-space-unit) * 2.5);
+  border-inline-start: 3px solid var(--lc-color-accent);
+  color: var(--lc-color-text-muted);
+  font-size: 1.05em;
+  font-style: italic;
+}
+
+.lc-text--narrow .lc-prose {
+  max-inline-size: 58ch;
+}
+.lc-text--normal .lc-prose {
+  max-inline-size: 68ch;
+}
+.lc-text--wide .lc-prose {
+  max-inline-size: none;
+}
+
+/* היישור נקבע ברמת הבלוק; המיכל הפנימי מתיישר בהתאם */
+.lc-block--align-center .lc-prose {
+  margin-inline: auto;
+}
+.lc-block--align-end .lc-prose {
+  margin-inline-start: auto;
+}
+
+/* ─────────────────────── כותרת ראשית ─────────────────────── */
+
+.lc-hero {
+  position: relative;
+  display: grid;
+  align-items: center;
+  overflow: hidden;
+  color: #ffffff;
+  isolation: isolate;
+}
+
+.lc-hero--contained {
+  border-radius: var(--lc-radius);
+}
+
+.lc-hero--h-compact {
+  min-block-size: 220px;
+}
+.lc-hero--h-medium {
+  min-block-size: 340px;
+}
+.lc-hero--h-tall {
+  min-block-size: 460px;
+}
+.lc-hero--h-screen {
+  min-block-size: 82vh;
+}
+
+.lc-hero__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: #0b1220;
+}
+
+.lc-hero__inner {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--lc-space-unit) * 1.5);
+  padding-block: calc(var(--lc-space-unit) * 6);
+}
+
+.lc-hero--align-start .lc-hero__inner {
+  align-items: flex-start;
+  text-align: start;
+}
+.lc-hero--align-center .lc-hero__inner {
+  align-items: center;
+  text-align: center;
+}
+.lc-hero--align-end .lc-hero__inner {
+  align-items: flex-end;
+  text-align: end;
+}
+
+.lc-hero__intro {
+  font-size: 0.85em;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  opacity: 0.85;
+}
+
+.lc-hero__title {
+  font-size: clamp(1.9em, 4.5vw, 3em);
+  color: inherit;
+}
+
+.lc-hero__subtitle {
+  max-inline-size: 56ch;
+  font-size: 1.12em;
+  line-height: 1.55;
+  opacity: 0.92;
+}
+
+.lc-hero__actions {
+  margin-block-start: calc(var(--lc-space-unit) * 1.5);
+}
+
+/* הכפתור מנוגד לרקע ההירו ולא לרקע הלומדה */
+.lc-hero__button {
+  background: #ffffff;
+  color: #0f172a;
+  padding-inline: calc(var(--lc-space-unit) * 3);
+  text-decoration: none;
+}
+.lc-hero__button:hover {
+  background: rgb(255 255 255 / 0.9);
+}
+
+/* ─────────────────────── תמונה ─────────────────────── */
+
+.lc-image {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+}
+
+.lc-round--none {
+  border-radius: 0;
+}
+.lc-round--small {
+  border-radius: var(--lc-radius-small);
+}
+.lc-round--medium {
+  border-radius: var(--lc-radius);
+}
+.lc-round--large {
+  border-radius: calc(var(--lc-radius) * 1.6);
+}
+.lc-round--full {
+  border-radius: 999px;
+}
+
+.lc-figure {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--lc-space-unit) * 1);
+}
+
+.lc-figure__caption {
+  color: var(--lc-color-text-muted);
+  font-size: 0.88em;
+  line-height: 1.5;
+}
+
+.lc-image-button {
+  display: block;
+  inline-size: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+}
+
+.lc-lightbox {
+  inline-size: min(94vw, 1100px);
+  max-block-size: 92vh;
+  margin: auto;
+  padding: calc(var(--lc-space-unit) * 2);
+  border: 0;
+  border-radius: var(--lc-radius);
+  background: var(--lc-color-background);
+  color: var(--lc-color-text);
+}
+
+.lc-lightbox::backdrop {
+  background: rgb(8 12 22 / 0.82);
+}
+
+.lc-lightbox__image {
+  display: block;
+  inline-size: 100%;
+  max-block-size: 78vh;
+  object-fit: contain;
+}
+
+.lc-lightbox__caption {
+  margin-block-start: calc(var(--lc-space-unit) * 1.5);
+  color: var(--lc-color-text-muted);
+  font-size: 0.9em;
+  text-align: center;
+}
+
+.lc-lightbox__close {
+  position: absolute;
+  inset-block-start: calc(var(--lc-space-unit) * 1.5);
+  inset-inline-end: calc(var(--lc-space-unit) * 1.5);
+  inline-size: 2.2em;
+  block-size: 2.2em;
+  border: 0;
+  border-radius: 50%;
+  background: var(--lc-color-surface);
+  color: var(--lc-color-text);
+  font-size: 1em;
+  cursor: pointer;
+}
+
+/* ─────────────────────── טקסט ותמונה ─────────────────────── */
+
+.lc-text-image {
+  display: grid;
+  gap: calc(var(--lc-space-unit) * 4);
+}
+
+.lc-text-image--v-center {
+  align-items: center;
+}
+.lc-text-image--v-start {
+  align-items: start;
+}
+
+/*
+ * הטקסט תמיד קודם ב-DOM, כדי שקורא מסך וניווט מקלדת יקבלו את התוכן
+ * לפני התמונה. הסידור החזותי נעשה ב-grid-column בלבד.
+ */
+.lc-text-image__text {
+  grid-row: 1;
+}
+.lc-text-image__media {
+  grid-row: 1;
+}
+
+.lc-text-image--imageStart .lc-text-image__media {
+  grid-column: 1;
+}
+.lc-text-image--imageStart .lc-text-image__text {
+  grid-column: 2;
+}
+.lc-text-image--imageEnd .lc-text-image__media {
+  grid-column: 2;
+}
+.lc-text-image--imageEnd .lc-text-image__text {
+  grid-column: 1;
+}
+
+.lc-text-image--ratio-50-50 {
+  grid-template-columns: 1fr 1fr;
+}
+.lc-text-image--imageStart.lc-text-image--ratio-40-60 {
+  grid-template-columns: 4fr 6fr;
+}
+.lc-text-image--imageEnd.lc-text-image--ratio-40-60 {
+  grid-template-columns: 6fr 4fr;
+}
+.lc-text-image--imageStart.lc-text-image--ratio-60-40 {
+  grid-template-columns: 6fr 4fr;
+}
+.lc-text-image--imageEnd.lc-text-image--ratio-60-40 {
+  grid-template-columns: 4fr 6fr;
+}
+
+.lc-text-image--imageTop {
+  grid-template-columns: 1fr;
+}
+.lc-text-image--imageTop .lc-text-image__media,
+.lc-text-image--imageTop .lc-text-image__text {
+  grid-column: 1;
+}
+.lc-text-image--imageTop .lc-text-image__media {
+  grid-row: 1;
+}
+.lc-text-image--imageTop .lc-text-image__text {
+  grid-row: 2;
+}
+
+.lc-text-image__actions {
+  margin-block-start: calc(var(--lc-space-unit) * 2.5);
+}
+
+/* ─────────────────────── מפריד ─────────────────────── */
+
+.lc-divider {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--lc-space-unit) * 2);
+}
+
+.lc-divider--h-small {
+  padding-block: calc(var(--lc-space-unit) * 1);
+}
+.lc-divider--h-medium {
+  padding-block: calc(var(--lc-space-unit) * 3);
+}
+.lc-divider--h-large {
+  padding-block: calc(var(--lc-space-unit) * 6);
+}
+
+.lc-divider__rule {
+  block-size: 1px;
+  flex: 1;
+  background: var(--lc-color-border);
+}
+
+.lc-divider--gradient .lc-divider__rule {
+  block-size: 2px;
+  background: linear-gradient(
+    to inline-end,
+    transparent,
+    var(--lc-color-primary),
+    var(--lc-color-accent),
+    transparent
+  );
+}
+
+.lc-divider--w-short .lc-divider__rule {
+  max-inline-size: 64px;
+  margin-inline: auto;
+}
+.lc-divider--w-half .lc-divider__rule {
+  max-inline-size: 50%;
+  margin-inline: auto;
+}
+
+.lc-divider__icon {
+  inline-size: 1.4em;
+  block-size: 1.4em;
+  flex: none;
+  color: var(--lc-color-accent);
+}
+
+/* ─────────────────────── מצבי ריק ועזר ─────────────────────── */
+
+.lc-media-placeholder {
+  display: grid;
+  place-items: center;
+  min-block-size: 160px;
+  padding: calc(var(--lc-space-unit) * 3);
+  border: 1px dashed var(--lc-color-border);
+  border-radius: var(--lc-radius);
+  background: var(--lc-color-surface);
+  color: var(--lc-color-text-muted);
+  font-size: 0.88em;
+  text-align: center;
+}
+
+.lc-sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ─────────────────────── מובייל: פריסות מתקפלות ─────────────────────── */
+
+@media (max-width: 720px) {
+  .lc-text-image,
+  .lc-text-image--ratio-50-50,
+  .lc-text-image--ratio-40-60,
+  .lc-text-image--ratio-60-40 {
+    grid-template-columns: 1fr;
+    gap: calc(var(--lc-space-unit) * 2.5);
+  }
+
+  /* התמונה עולה למעלה בכל הפריסות — מסך צר לא סובל שתי עמודות */
+  .lc-text-image .lc-text-image__media {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .lc-text-image .lc-text-image__text {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .lc-hero--h-tall,
+  .lc-hero--h-screen {
+    min-block-size: 320px;
+  }
+}
+
+/* ═══════════════════ בחירות עיצוב מה-Theme Builder ═══════════════════ */
+
+/*
+ * שלוש בחירות שאינן ניתנות לביטוי כערך יחיד של משתנה CSS. הן מגיעות
+ * כמאפיינים על שורש הלומדה, ונתפסות כאן בבורר אחד לכל אחת — במקום
+ * לשכפל קלאסים בכל בלוק בנפרד.
+ */
+
+/* ─── סגנון כותרות ─── */
+
+.lc-course[data-heading-style='underline'] .lc-prose h2 {
+  padding-block-end: calc(var(--lc-space-unit) * 1);
+  border-block-end: 2px solid var(--lc-color-border);
+}
+
+.lc-course[data-heading-style='accentBar'] .lc-prose h2 {
+  padding-inline-start: calc(var(--lc-space-unit) * 1.5);
+  border-inline-start: 4px solid var(--lc-color-accent);
+}
+
+/* ─── סגנון כפתורים ─── */
+
+.lc-course[data-button-style='soft'] .lc-button--primary {
+  background: color-mix(in srgb, var(--lc-color-primary) 15%, var(--lc-color-background));
+  color: var(--lc-color-primary);
+}
+.lc-course[data-button-style='soft'] .lc-button--primary:not(:disabled):hover {
+  background: color-mix(in srgb, var(--lc-color-primary) 24%, var(--lc-color-background));
+}
+
+.lc-course[data-button-style='outline'] .lc-button--primary {
+  background: transparent;
+  border-color: var(--lc-color-primary);
+  color: var(--lc-color-primary);
+}
+.lc-course[data-button-style='outline'] .lc-button--primary:not(:disabled):hover {
+  background: color-mix(in srgb, var(--lc-color-primary) 10%, transparent);
+}
+
+/* כפתור ההירו יושב על רקע משלו ולכן אינו מושפע מסגנון הכפתורים */
+.lc-course[data-button-style='soft'] .lc-hero__button,
+.lc-course[data-button-style='outline'] .lc-hero__button {
+  background: #ffffff;
+  border-color: transparent;
+  color: #0f172a;
+}
+
+/* ─── סגנון כרטיסים ─── */
+
+.lc-card {
+  padding: calc(var(--lc-space-unit) * 3);
+  border-radius: var(--lc-radius);
+  background: var(--lc-color-surface);
+}
+
+.lc-course[data-card-style='flat'] .lc-card {
+  border: 0;
+  box-shadow: none;
+}
+
+.lc-course[data-card-style='bordered'] .lc-card {
+  border: 1px solid var(--lc-color-border);
+  background: transparent;
+  box-shadow: none;
+}
+
+.lc-course[data-card-style='elevated'] .lc-card {
+  border: 0;
+  background: var(--lc-color-background);
+  box-shadow: var(--lc-shadow);
+}

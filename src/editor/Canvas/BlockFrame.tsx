@@ -1,27 +1,39 @@
 import type { ReactNode } from 'react';
-import { blockLabel } from '@/blocks/registry.shared';
+import { blockLabel } from '@/blocks/labels';
+import { getEditorBlockDefinition } from '@/blocks/registry.editor';
 import { cn } from '@/lib/cn';
-import type { Block } from '@/model/types';
+import type { Block, BlockContent } from '@/model/types';
+import { useCourseStore } from '@/state/courseStore';
 
 interface BlockFrameProps {
   block: Block;
   selected: boolean;
   onSelect: () => void;
+  /** תוצר ה-Renderer — מה שהלומד יראה */
   children: ReactNode;
 }
 
 /**
  * המסגרת שהעורך עוטף בה כל בלוק בקנבס.
  *
- * היא מוזרקת לרנדרר מבחוץ (renderBlockWrapper) ולא חיה בתוכו, כדי שקוד
- * העריכה יישאר מחוץ לחבילת הלומדה המיוצאת.
+ * היא מוזרקת לרנדרר מבחוץ ולא חיה בתוכו, כדי שקוד העריכה יישאר מחוץ
+ * לחבילת הלומדה המיוצאת.
  *
- * המסגרת עדינה בכוונה (סעיף 4.3): קו דק וסימון פינה, בלי רקע שמשנה את
- * מראה הבלוק — אחרת העורך מפסיק להראות את מה שהלומד יראה.
- *
- * סרגל הפעולות המלא (גרירה, שכפול, הזזה, מחיקה) מתווסף בשלב 4.
+ * שני מצבים:
+ * - בלוק שאינו נבחר מוצג דרך ה-Renderer, עם שכבה שקופה שתופסת את הלחיצה
+ *   ובוחרת אותו. השכבה נחוצה כדי שלחיצה על קישור בתוך הבלוק תבחר אותו
+ *   במקום לנווט החוצה.
+ * - בלוק נבחר שיש לו EditorComponent מציג אותו במקום ה-Renderer, בלי
+ *   השכבה — כדי שאפשר יהיה להקליד ישירות בתוכו. המבנה והקלאסים זהים,
+ *   ולכן המראה לא קופץ במעבר בין המצבים.
  */
 export function BlockFrame({ block, selected, onSelect, children }: BlockFrameProps) {
+  const updateBlockContent = useCourseStore((state) => state.updateBlockContent);
+  const definition = getEditorBlockDefinition(block.type);
+  const EditorComponent = definition?.EditorComponent;
+
+  const isDirectEditing = selected && Boolean(EditorComponent);
+
   return (
     <div
       className={cn(
@@ -31,22 +43,20 @@ export function BlockFrame({ block, selected, onSelect, children }: BlockFramePr
           ? 'before:ring-2 before:ring-blue-500'
           : 'before:ring-1 before:ring-transparent hover:before:ring-slate-300',
       )}
+      data-selected={selected || undefined}
     >
-      {/*
-        כפתור שקוף מעל הבלוק לצורך בחירה. בשלב 4, כשתתווסף עריכה ישירה
-        בתוך הבלוק, הוא יוחלף בשכבה שמפנה אירועים לתוכן.
-      */}
-      <button
-        type="button"
-        onClick={onSelect}
-        aria-label={`בחירת בלוק ${blockLabel(block.type)}`}
-        className="absolute inset-0 z-10 cursor-pointer"
-      />
+      {!isDirectEditing && (
+        <button
+          type="button"
+          onClick={onSelect}
+          aria-label={`עריכת בלוק ${blockLabel(block.type)}`}
+          className="absolute inset-0 z-10 cursor-pointer"
+        />
+      )}
 
       <span
         className={cn(
-          'absolute -top-2.5 z-20 rounded-md px-1.5 py-0.5 text-[11px] font-semibold transition',
-          'end-2',
+          'absolute -top-2.5 end-2 z-20 rounded-md px-1.5 py-0.5 text-[11px] font-semibold transition',
           selected
             ? 'bg-blue-600 text-white opacity-100'
             : 'bg-slate-700 text-white opacity-0 group-hover:opacity-100',
@@ -55,7 +65,14 @@ export function BlockFrame({ block, selected, onSelect, children }: BlockFramePr
         {blockLabel(block.type)}
       </span>
 
-      {children}
+      {isDirectEditing && EditorComponent ? (
+        <EditorComponent
+          block={block as never}
+          onChange={((content: BlockContent) => updateBlockContent(block.id, content)) as never}
+        />
+      ) : (
+        children
+      )}
     </div>
   );
 }

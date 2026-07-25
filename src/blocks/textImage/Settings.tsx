@@ -1,0 +1,142 @@
+import { ArrowLeftRight } from 'lucide-react';
+import type { BlockOf } from '@/model/types';
+import {
+  FieldGroup,
+  FieldNote,
+  SegmentedField,
+  SelectField,
+  SwitchField,
+  TextField,
+  type Option,
+} from '@/editor/controls/Field';
+import type { TextImageContent } from './content';
+
+const layoutOptions: Option<TextImageContent['layout']>[] = [
+  { value: 'imageStart', label: 'תמונה בהתחלה' },
+  { value: 'imageEnd', label: 'תמונה בסוף' },
+  { value: 'imageTop', label: 'תמונה למעלה' },
+];
+
+const ratioOptions: Option<TextImageContent['ratio']>[] = [
+  { value: '50-50', label: '50 / 50' },
+  { value: '40-60', label: '40 / 60' },
+  { value: '60-40', label: '60 / 40' },
+];
+
+export function TextImageSettings({
+  block,
+  onChange,
+}: {
+  block: BlockOf<TextImageContent>;
+  onChange: (content: TextImageContent) => void;
+}) {
+  const { content } = block;
+  const update = (patch: Partial<TextImageContent>) => onChange({ ...content, ...patch });
+
+  const swapSides = () =>
+    update({ layout: content.layout === 'imageStart' ? 'imageEnd' : 'imageStart' });
+
+  return (
+    <>
+      <FieldGroup title="פריסה">
+        <SelectField
+          label="מיקום התמונה"
+          value={content.layout}
+          options={layoutOptions}
+          onChange={(layout) => update({ layout })}
+        />
+
+        {content.layout !== 'imageTop' && (
+          <>
+            <button
+              type="button"
+              onClick={swapSides}
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              <ArrowLeftRight className="size-3.5" aria-hidden />
+              החלפת צדדים
+            </button>
+            <SegmentedField
+              label="יחס העמודות"
+              value={content.ratio}
+              options={ratioOptions}
+              onChange={(ratio) => update({ ratio })}
+            />
+            <SegmentedField
+              label="יישור אנכי"
+              value={content.verticalAlign}
+              options={[
+                { value: 'center', label: 'מרכז' },
+                { value: 'start', label: 'למעלה' },
+              ]}
+              onChange={(verticalAlign) => update({ verticalAlign })}
+            />
+          </>
+        )}
+
+        <FieldNote>במסך צר הפריסה עוברת אוטומטית לאנכית, והתמונה עולה מעל הטקסט.</FieldNote>
+      </FieldGroup>
+
+      <FieldGroup title="תמונה">
+        <FieldNote>העלאת תמונות וספריית הנכסים מגיעות בשלב הבא.</FieldNote>
+        <TextField
+          label="טקסט חלופי"
+          placeholder="מה רואים בתמונה"
+          value={content.alt}
+          onChange={(alt) => update({ alt })}
+        />
+        <TextField
+          label="כיתוב"
+          value={content.caption}
+          onChange={(caption) => update({ caption })}
+        />
+        <SelectField
+          label="יחס גובה-רוחב"
+          value={content.aspectRatio}
+          options={[
+            { value: 'auto', label: 'לפי התמונה' },
+            { value: '16:9', label: '16:9' },
+            { value: '4:3', label: '4:3' },
+            { value: '3:2', label: '3:2' },
+            { value: '1:1', label: '1:1' },
+          ]}
+          onChange={(aspectRatio) => update({ aspectRatio })}
+        />
+        <SelectField
+          label="פינות"
+          value={content.roundness}
+          options={[
+            { value: 'none', label: 'חדות' },
+            { value: 'small', label: 'קלות' },
+            { value: 'medium', label: 'בינוניות' },
+            { value: 'large', label: 'עגולות' },
+          ]}
+          onChange={(roundness) => update({ roundness })}
+        />
+      </FieldGroup>
+
+      <FieldGroup title="כפתור">
+        <SwitchField
+          label="הצגת כפתור"
+          checked={content.button.enabled}
+          onChange={(enabled) => update({ button: { ...content.button, enabled } })}
+        />
+        {content.button.enabled && (
+          <>
+            <TextField
+              label="טקסט"
+              value={content.button.label}
+              onChange={(label) => update({ button: { ...content.button, label } })}
+            />
+            <TextField
+              label="קישור"
+              placeholder="https://"
+              value={content.button.href}
+              onChange={(href) => update({ button: { ...content.button, href } })}
+            />
+          </>
+        )}
+      </FieldGroup>
+    </>
+  );
+}

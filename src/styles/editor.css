@@ -31,3 +31,49 @@
     outline-offset: 2px;
   }
 }
+
+/*
+ * סגנונות העריכה שחלים בתוך אזור הלומדה.
+ *
+ * הם חיים כאן ולא ב-course.css בכוונה: course.css נארז לתוך התוצר, ואין
+ * שום סיבה שהלומד יקבל סגנונות של placeholder ושל מסגרות עריכה.
+ */
+
+/* ─── עריכת טקסט פשוט במקום (InlineText) ─── */
+
+.lc-inline-text {
+  display: block;
+  min-inline-size: 1ch;
+  border-radius: 4px;
+  outline: none;
+  cursor: text;
+}
+
+.lc-inline-text:empty::before {
+  content: attr(data-placeholder);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.lc-inline-text:hover {
+  box-shadow: 0 0 0 1px rgb(148 163 184 / 0.5);
+}
+
+.lc-inline-text:focus {
+  box-shadow: 0 0 0 2px var(--color-blue-500);
+}
+
+/* ─── עורך הטקסט העשיר (TipTap) ─── */
+
+.lc-rich-text-editor .ProseMirror {
+  outline: none;
+  min-block-size: 1.5em;
+}
+
+.lc-rich-text-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: inline-start;
+  block-size: 0;
+  opacity: 0.45;
+  pointer-events: none;
+}

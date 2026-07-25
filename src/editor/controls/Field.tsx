@@ -165,3 +165,98 @@ export function SwitchField({
     </div>
   );
 }
+
+export function ColorField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const id = useId();
+
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <label htmlFor={id} className="text-xs font-medium text-slate-600">
+        {label}
+      </label>
+      <span className="flex items-center gap-1.5">
+        {/*
+          dir="ltr" הכרחי: בתוך ממשק RTL הדפדפן מסדר מחדש מחרוזת שמתחילה
+          בסימן ניטרלי, ו-#f59e0b היה מוצג כ-f59e0b#. אותו כלל חל על כל
+          ערך לטיני שמוצג בממשק העברי.
+        */}
+        <output dir="ltr" className="font-mono text-[11px] text-slate-400 tabular-nums">
+          {value}
+        </output>
+        <input
+          id={id}
+          type="color"
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className="size-7 cursor-pointer rounded border border-slate-200 bg-white p-0.5"
+        />
+      </span>
+    </div>
+  );
+}
+
+export function SliderField({
+  label,
+  value,
+  min,
+  max,
+  step = 1,
+  unit,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step?: number;
+  unit?: string;
+  onChange: (value: number) => void;
+}) {
+  const id = useId();
+
+  return (
+    <div>
+      <div className="mb-1 flex items-baseline justify-between">
+        <label htmlFor={id} className="text-xs font-medium text-slate-600">
+          {label}
+        </label>
+        <output className="text-[11px] text-slate-400 tabular-nums">
+          {value}
+          {unit}
+        </output>
+      </div>
+      <input
+        id={id}
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value))}
+        className="w-full accent-blue-600"
+      />
+    </div>
+  );
+}
+
+/** הודעת עזר או אזהרה בתוך פאנל ההגדרות */
+export function FieldNote({ children, tone = 'info' }: { children: ReactNode; tone?: 'info' | 'warning' }) {
+  return (
+    <p
+      className={cn(
+        'rounded-lg px-3 py-2 text-[11px] leading-relaxed',
+        tone === 'warning' ? 'bg-amber-50 text-amber-800' : 'bg-slate-50 text-slate-500',
+      )}
+    >
+      {children}
+    </p>
+  );
+}

@@ -78,3 +78,11 @@ export function richTextToPlainText(doc: RichTextNode | undefined): string {
   const inner = (doc.content ?? []).map(richTextToPlainText).join(' ');
   return inner.replace(/\s+/g, ' ').trim();
 }
+
+/** true כשהמסמך ריק לגמרי — לצורך מצבי ריק ואימות תוכן */
+export function isRichTextEmpty(doc: RichTextNode | undefined): boolean {
+  if (!doc?.content?.length) return true;
+  return doc.content.every(
+    (node) => !node.content?.length && !node.text?.trim() && node.type !== 'hardBreak',
+  );
+}

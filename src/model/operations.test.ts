@@ -209,3 +209,35 @@ describe('אינווריאנטות', () => {
     expect(ops.moveChapter(course, 0, 0)).toBe(course);
   });
 });
+
+describe('ברירות מחדל לפי סוג בלוק', () => {
+  it('בלוק כותרת ראשית נולד ברוחב מלא וללא מרווחים', () => {
+    const hero = createBlock('hero');
+
+    // רקע מלא-מסך בתוך קונטיינר צר נראה כקופסה צפה, לא ככותרת פתיחה
+    expect(hero.settings.width).toBe('full');
+    expect(hero.settings.spacingTop).toBe('none');
+    expect(hero.settings.spacingBottom).toBe('none');
+  });
+
+  it('מפריד נולד ללא מרווחים — הוא עצמו המרווח', () => {
+    const divider = createBlock('divider');
+
+    expect(divider.settings.spacingTop).toBe('none');
+    expect(divider.settings.spacingBottom).toBe('none');
+  });
+
+  it('בלוק רגיל מקבל את הגדרות ברירת המחדל הכלליות', () => {
+    const text = createBlock('richText');
+
+    expect(text.settings.width).toBe('normal');
+    expect(text.settings.spacingTop).toBe('medium');
+  });
+
+  it('הגדרות שנמסרו במפורש גוברות על ברירות המחדל של הסוג', () => {
+    const hero = createBlock('hero', { settings: { width: 'narrow' } });
+
+    expect(hero.settings.width).toBe('narrow');
+    expect(hero.settings.spacingTop).toBe('none');
+  });
+});

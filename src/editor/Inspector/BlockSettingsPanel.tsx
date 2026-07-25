@@ -1,4 +1,12 @@
-import type { Block, BlockAlignment, BlockBackground, BlockWidth, Spacing } from '@/model/types';
+import { getEditorBlockDefinition } from '@/blocks/registry.editor';
+import type {
+  Block,
+  BlockAlignment,
+  BlockBackground,
+  BlockContent,
+  BlockWidth,
+  Spacing,
+} from '@/model/types';
 import { useCourseStore } from '@/state/courseStore';
 import { FieldGroup, SegmentedField, SelectField, type Option } from '../controls/Field';
 
@@ -32,16 +40,28 @@ const spacingOptions: Option<Spacing>[] = [
 ];
 
 /**
- * הגדרות הפריסה המשותפות לכל הבלוקים.
- * ההגדרות הייחודיות לכל סוג בלוק יתווספו מתחת לאלה בשלבים 3 ו-5.
+ * הגדרות הבלוק: קודם ההגדרות הייחודיות לסוג שלו, ואז הפריסה המשותפת.
+ * הסדר מכוון — מה שמייחד את הבלוק נמצא למעלה, שם מסתכלים קודם.
  */
 export function BlockSettingsPanel({ block }: { block: Block }) {
   const updateBlockSettings = useCourseStore((state) => state.updateBlockSettings);
+  const updateBlockContent = useCourseStore((state) => state.updateBlockContent);
+
+  const definition = getEditorBlockDefinition(block.type);
+  const SettingsComponent = definition?.SettingsComponent;
+
   const update = (patch: Parameters<typeof updateBlockSettings>[1]) =>
     updateBlockSettings(block.id, patch);
 
   return (
     <>
+      {SettingsComponent && (
+        <SettingsComponent
+          block={block as never}
+          onChange={((content: BlockContent) => updateBlockContent(block.id, content)) as never}
+        />
+      )}
+
       <FieldGroup title="פריסה">
         <SegmentedField
           label="רוחב"
@@ -77,12 +97,6 @@ export function BlockSettingsPanel({ block }: { block: Block }) {
           onChange={(spacingBottom) => update({ spacingBottom })}
         />
       </FieldGroup>
-
-      <div className="px-4 pb-6">
-        <p className="rounded-lg bg-slate-50 px-3 py-2.5 text-[11px] leading-relaxed text-slate-500">
-          ההגדרות הייחודיות לבלוק זה, ועריכת התוכן שלו, יתווספו בשלב הבא.
-        </p>
-      </div>
     </>
   );
 }

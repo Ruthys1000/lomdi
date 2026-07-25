@@ -17,7 +17,7 @@ export function createBlock(
     id: createId('block'),
     type,
     content: overrides.content ?? (definition.createContent() as BlockContent),
-    settings: createBlockSettings(overrides.settings),
+    settings: createBlockSettings({ ...definition.defaultSettings, ...overrides.settings }),
   };
 }
 

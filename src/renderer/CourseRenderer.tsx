@@ -86,12 +86,20 @@ export function CourseRenderer({
 
   return (
     <RenderContext value={ctx}>
+      {/*
+        בחירות עיצוב שאינן ניתנות לביטוי כערך יחיד של משתנה CSS — סגנון
+        כותרות, כפתורים וכרטיסים — עוברות כמאפייני data ונתפסות ב-course.css
+        בבורר אחד לכל אחת, במקום לשכפל קלאסים בכל בלוק בנפרד.
+      */}
       <div
         className="lc-course"
         dir={course.direction}
         lang={course.language}
         style={themeStyle}
         data-navigation={course.navigation.mode}
+        data-heading-style={course.theme.typography.headingStyle}
+        data-button-style={course.theme.shape.buttonStyle}
+        data-card-style={course.theme.shape.cardStyle}
       >
         {useChapterMode ? (
           <ChapterNavigation
