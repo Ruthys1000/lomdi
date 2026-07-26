@@ -86,8 +86,13 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
     >
       <Header />
 
-      {featured ? (
-        <ReturningLauncher
+      {/*
+        דף אחד לכולם. הנחיתה (Hero, איך עובדים, הבלוקים) מוצגת תמיד — כך
+        אפשר לחזור אליה מהעורך גם אחרי שכבר נבנו לומדות. למבקר חוזר נוספת
+        למעלה רצועת "ממשיכים" + הלומדות שלו, לפני הסיפור.
+      */}
+      {featured && (
+        <ReturningTop
           featured={featured}
           rest={rest}
           error={error}
@@ -96,19 +101,19 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
           onBuild={() => startTemplate('blank')}
           onShort={() => startTemplate('shortTraining')}
           onSample={() => startTemplate('sample')}
-          loading={loading}
-          fileErrors={fileErrors}
-          onPickFile={pickFile}
-        />
-      ) : (
-        <NewVisitorLanding
-          onBuild={() => startTemplate('blank')}
-          onSample={() => startTemplate('sample')}
-          loading={loading}
-          fileErrors={fileErrors}
-          onPickFile={pickFile}
         />
       )}
+
+      <Hero onBuild={() => startTemplate('blank')} onSample={() => startTemplate('sample')} />
+      <HowItWorks />
+      <BuildingBlocks />
+      <Closer
+        isReturning={featured != null}
+        onBuild={() => startTemplate('blank')}
+        loading={loading}
+        fileErrors={fileErrors}
+        onPickFile={pickFile}
+      />
 
       <input
         ref={fileInputRef}
@@ -162,59 +167,22 @@ function Header() {
   );
 }
 
-interface EntryProps {
-  onBuild: () => void;
-  onSample: () => void;
-  loading: boolean;
-  fileErrors: string[];
-  onPickFile: () => void;
-}
-
-/** מצב "מבקר חדש": הנחיתה המספרת-סיפור */
-function NewVisitorLanding({ onBuild, onSample, loading, fileErrors, onPickFile }: EntryProps) {
-  return (
-    <>
-      <Hero onBuild={onBuild} onSample={onSample} />
-      <HowItWorks />
-      <BuildingBlocks />
-
-      <section className="mx-auto max-w-5xl px-6 pt-10 pb-11">
-        {/* CTA שקט אחד — לא רצועה גדולה; ה-CTA הראשי כבר ב-Hero */}
-        <div className="flex flex-wrap items-center justify-center gap-4 text-center">
-          <p className="text-lg font-extrabold text-balance text-fg md:text-xl">
-            מוכנים? הלומדה הראשונה שלכם במרחק בלוק אחד.
-          </p>
-          <button
-            type="button"
-            onClick={onBuild}
-            className="inline-flex items-center gap-2 rounded-xl bg-volt px-6 py-3 font-extrabold text-on-volt transition hover:bg-volt-bright"
-          >
-            <Plus className="size-4.5" aria-hidden />
-            מתחילים לבנות
-          </button>
-        </div>
-
-        <div className="mt-7">
-          <ImportRow loading={loading} fileErrors={fileErrors} onPickFile={onPickFile} />
-        </div>
-
-        <Footer />
-      </section>
-    </>
-  );
-}
-
-interface LauncherProps extends EntryProps {
+interface ReturningTopProps {
   featured: ProjectSummary;
   rest: ProjectSummary[];
   error: string | null;
   onOpen: (id: string) => void;
   onRemove: (project: ProjectSummary) => void;
+  onBuild: () => void;
   onShort: () => void;
+  onSample: () => void;
 }
 
-/** מצב "מבקר חוזר": המשגר הקומפקטי */
-function ReturningLauncher({
+/**
+ * רצועת המבקר החוזר, מעל הסיפור: "ממשיכים" + "לומדה חדשה" + "הלומדות שלי".
+ * מה שחוזרים בשבילו יושב מעל הקיפול; הנחיתה המלאה נמשכת מתחת.
+ */
+function ReturningTop({
   featured,
   rest,
   error,
@@ -223,13 +191,9 @@ function ReturningLauncher({
   onBuild,
   onShort,
   onSample,
-  loading,
-  fileErrors,
-  onPickFile,
-}: LauncherProps) {
+}: ReturningTopProps) {
   return (
     <div className="mx-auto max-w-5xl px-6 py-8">
-      {/* שתי הפעולות שבשבילן חוזרים לכאן, מעל הקיפול */}
       <div className="grid gap-4 sm:grid-cols-2">
         <FeaturedProject project={featured} onOpen={() => onOpen(featured.id)} />
 
@@ -282,34 +246,56 @@ function ReturningLauncher({
       )}
 
       <ProjectList projects={rest} onOpen={onOpen} onRemove={onRemove} />
-
-      {/* הסיפור מתקפל לרצועת תזכורת אחת */}
-      <div className="mt-8 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-xl border border-edge bg-panel px-4 py-3 text-sm text-fg-muted">
-        <b className="font-bold text-fg-soft">איך זה עובד:</b>
-        <span>מרכיבים בלוקים</span>
-        <span className="text-edge-strong">·</span>
-        <span>בוחרים ערכה</span>
-        <span className="text-edge-strong">·</span>
-        <span>
-          מייצאים <bdi>ZIP</bdi> שרץ בכל דפדפן
-        </span>
-      </div>
-
-      <div className="mt-5">
-        <ImportRow loading={loading} fileErrors={fileErrors} onPickFile={onPickFile} />
-      </div>
-
-      <Footer />
     </div>
   );
 }
 
-/** רצועת ייבוא קובץ קיים — משותפת לשני המצבים */
+interface CloserProps {
+  isReturning: boolean;
+  onBuild: () => void;
+  loading: boolean;
+  fileErrors: string[];
+  onPickFile: () => void;
+}
+
+/** סוגר הדף: CTA שקט + ייבוא קובץ קיים + שורת אמון. מוצג תמיד. */
+function Closer({ isReturning, onBuild, loading, fileErrors, onPickFile }: CloserProps) {
+  return (
+    <section className="mx-auto max-w-5xl px-6 pt-10 pb-11">
+      {/* CTA שקט אחד — לא רצועה גדולה; הנוסח משתנה בין ראשונה להבאה */}
+      <div className="flex flex-wrap items-center justify-center gap-4 text-center">
+        <p className="text-lg font-extrabold text-balance text-fg md:text-xl">
+          {isReturning ? 'מוכנים ללומדה הבאה?' : 'מוכנים? הלומדה הראשונה שלכם במרחק בלוק אחד.'}
+        </p>
+        <button
+          type="button"
+          onClick={onBuild}
+          className="inline-flex items-center gap-2 rounded-xl bg-volt px-6 py-3 font-extrabold text-on-volt transition hover:bg-volt-bright"
+        >
+          <Plus className="size-4.5" aria-hidden />
+          מתחילים לבנות
+        </button>
+      </div>
+
+      <div className="mt-7">
+        <ImportRow loading={loading} fileErrors={fileErrors} onPickFile={onPickFile} />
+      </div>
+
+      <Footer />
+    </section>
+  );
+}
+
+/** רצועת ייבוא קובץ קיים */
 function ImportRow({
   loading,
   fileErrors,
   onPickFile,
-}: Pick<EntryProps, 'loading' | 'fileErrors' | 'onPickFile'>) {
+}: {
+  loading: boolean;
+  fileErrors: string[];
+  onPickFile: () => void;
+}) {
   return (
     <section aria-labelledby="open-heading">
       <h2 id="open-heading" className="sr-only">
