@@ -71,12 +71,8 @@ export function ProjectList({
   const hidden = projects.length - visible.length;
 
   return (
-    <section className="mt-10" aria-labelledby="all-projects-heading">
-      <h2 id="all-projects-heading" className="text-base font-bold text-fg">
-        הלומדות שלי
-      </h2>
-
-      <ul className="mt-3 overflow-hidden rounded-2xl border border-edge bg-panel">
+    <section aria-label="הלומדות שלי">
+      <ul className="overflow-hidden rounded-2xl border border-edge bg-panel">
         {visible.map((project) => (
           <li
             key={project.id}

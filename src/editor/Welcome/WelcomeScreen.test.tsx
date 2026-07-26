@@ -5,8 +5,8 @@ import { WelcomeScreen } from './WelcomeScreen';
 
 /**
  * מסך הפתיחה נשען על IndexedDB (הלומדות השמורות) ועל טעינת קובץ פרויקט.
- * שניהם ממוקים כאן, כי מה שנבדק הוא המסך: הפעולות שמוצגות, הסדר שלהן
- * ביחס לרשימה, וגרירת קובץ לכל שטח המסך.
+ * שניהם ממוקים כאן, כי מה שנבדק הוא המסך: שהנחיתה מוצגת תמיד, שהלומדות
+ * השמורות חיות בחוצץ נפרד (מגירה), וגרירת קובץ לכל שטח המסך.
  */
 const project = (id: string, title: string, savedAt: string): ProjectSummary => ({
   id,
@@ -48,7 +48,7 @@ async function setup() {
 }
 
 describe('מסך הפתיחה', () => {
-  it('מבקר חדש רואה פעולה ראשית "מתחילים לבנות" וקישור ללומדת דוגמה', async () => {
+  it('מציג פעולה ראשית "מתחילים לבנות" וקישור ללומדת דוגמה', async () => {
     await setup();
 
     // ה-CTA הראשי מופיע גם ב-Hero וגם בסוגר — לכן getAllByRole
@@ -65,10 +65,7 @@ describe('מסך הפתיחה', () => {
     expect(onStart.mock.calls[0][0].course.chapters.length).toBeGreaterThan(0);
   });
 
-  it('"מבנה מוכן" מגיע עם תוכן ועם האיור שלו, ולא עם בלוקים ריקים', async () => {
-    // "מבנה מוכן" ו"לומדת הדוגמה" הן נקודות כניסה של המבקר החוזר (המשגר)
-    projects = [project('a', 'לומדה', '2026-03-01T10:00:00.000Z')];
-    lastProjectId = 'a';
+  it('"מבנה מוכן" (מה-Hero) מגיע עם תוכן ועם האיור שלו, ולא עם בלוקים ריקים', async () => {
     const { onStart } = await setup();
 
     fireEvent.click(screen.getByRole('button', { name: /מבנה מוכן/ }));
@@ -95,7 +92,38 @@ describe('מסך הפתיחה', () => {
     expect(screen.queryByRole('button', { name: /נוהל או מדיניות/ })).not.toBeInTheDocument();
   });
 
-  it('הלומדה המובילה נבחרת לפי הלומדה שנפתחה לאחרונה, לא לפי זמן השמירה', async () => {
+  it('הנחיתה ("איך עובדים עם לומדי") מוצגת תמיד — גם למבקר חדש וגם עם לומדות שמורות', async () => {
+    await setup();
+    expect(screen.getByRole('heading', { name: 'איך עובדים עם לומדי' })).toBeInTheDocument();
+    // בלי לומדות שמורות אין כפתור "הלומדות שלי"
+    expect(screen.queryByRole('button', { name: 'הלומדות שלי' })).not.toBeInTheDocument();
+
+    cleanup();
+    projects = [project('a', 'לומדה', '2026-03-01T10:00:00.000Z')];
+    lastProjectId = 'a';
+    await setup();
+
+    // הנחיתה נשארת זהה, ונוסף כפתור הגישה ללומדות השמורות
+    expect(screen.getByRole('heading', { name: 'איך עובדים עם לומדי' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'הלומדות שלי' })).toBeInTheDocument();
+  });
+
+  it('כפתור "הלומדות שלי" פותח מגירה עם הלומדות השמורות', async () => {
+    projects = [project('a', 'קליטת חייל חדש', '2026-03-01T10:00:00.000Z')];
+    lastProjectId = 'a';
+    await setup();
+
+    // לא על הנחיתה עצמה — נפתח מהפס העליון
+    fireEvent.click(screen.getByRole('button', { name: 'הלומדות שלי' }));
+
+    const drawer = screen.getByRole('dialog', { name: 'הלומדות שלי' });
+    expect(drawer).toBeInTheDocument();
+    // getByText ולא getByRole: לכל שורה יש גם כפתור פתיחה וגם כפתור מחיקה
+    // ששניהם נושאים את שם הלומדה
+    expect(screen.getByText(/קליטת חייל חדש/)).toBeInTheDocument();
+  });
+
+  it('במגירה, הלומדה שנפתחה לאחרונה מופיעה ראשונה (לא לפי זמן השמירה)', async () => {
     projects = [
       project('b', 'נשמרה אחרונה', '2026-03-02T10:00:00.000Z'),
       project('a', 'נפתחה אחרונה', '2026-03-01T10:00:00.000Z'),
@@ -103,58 +131,28 @@ describe('מסך הפתיחה', () => {
     lastProjectId = 'a';
 
     await setup();
+    fireEvent.click(screen.getByRole('button', { name: 'הלומדות שלי' }));
 
-    const featured = screen.getByRole('region', { name: 'ממשיכים מאיפה שעצרתם' });
-    expect(featured).toHaveTextContent('נפתחה אחרונה');
+    // שורות הרשימה נושאות את מטא-הנתונים ("פרקים"); הראשונה היא האחרונה שנפתחה
+    const rows = screen.getAllByRole('button', { name: /פרקים/ });
+    expect(rows[0]).toHaveTextContent('נפתחה אחרונה');
   });
 
-  it('גם עם עשר לומדות שמורות, "מתחילים לבנות" מופיע לפני הרשימה', async () => {
-    projects = Array.from({ length: 10 }, (_, index) =>
-      project(`p${index}`, `לומדה ${index}`, `2026-03-0${(index % 9) + 1}T10:00:00.000Z`),
-    );
-    lastProjectId = 'p0';
-
-    await setup();
-
-    // "מתחילים לבנות" מופיע כמה פעמים (רצועת המבקר החוזר, ה-Hero, הסוגר);
-    // הראשון הוא זה שברצועה העליונה, והוא זה שצריך להיות מעל הרשימה
-    const newButton = screen.getAllByRole('button', { name: 'מתחילים לבנות' })[0];
-    const listHeading = screen.getByRole('heading', { name: 'הלומדות שלי' });
-
-    // DOCUMENT_POSITION_FOLLOWING — הכותרת של הרשימה באה *אחרי* הכפתור
-    expect(newButton.compareDocumentPosition(listHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-  });
-
-  it('רשימה ארוכה מקופלת, ונפתחת בלחיצה אחת', async () => {
+  it('במגירה, רשימה ארוכה מקופלת ונפתחת בלחיצה אחת', async () => {
     projects = Array.from({ length: 10 }, (_, index) =>
       project(`p${index}`, `לומדה ${index}`, '2026-03-01T10:00:00.000Z'),
     );
     lastProjectId = 'p0';
 
     await setup();
+    fireEvent.click(screen.getByRole('button', { name: 'הלומדות שלי' }));
 
-    // אחת מובילה, ארבע ברשימה, וחמש מוסתרות מאחורי "עוד"
-    const more = screen.getByRole('button', { name: /עוד 5 לומדות/ });
+    // המגירה מציגה את *כל* הלומדות: ארבע גלויות, ושש מאחורי "עוד"
+    const more = screen.getByRole('button', { name: /עוד 6 לומדות/ });
     fireEvent.click(more);
 
-    expect(screen.queryByRole('button', { name: /עוד 5 לומדות/ })).not.toBeInTheDocument();
-    expect(screen.getByText('לומדה 9')).toBeInTheDocument();
-  });
-
-  it('הנחיתה ("איך עובדים עם לומדי") מוצגת תמיד — גם למבקר חדש וגם כשיש לומדות שמורות', async () => {
-    // מבקר חדש
-    await setup();
-    expect(screen.getByRole('heading', { name: 'איך עובדים עם לומדי' })).toBeInTheDocument();
-
-    // מבקר חוזר — הנחיתה נשארת נגישה מתחת לרצועת "ממשיכים", ולא נעלמת
-    cleanup();
-    projects = [project('a', 'לומדה', '2026-03-01T10:00:00.000Z')];
-    lastProjectId = 'a';
-    await setup();
-
-    expect(screen.getByRole('heading', { name: 'איך עובדים עם לומדי' })).toBeInTheDocument();
-    // ועדיין רואים את רצועת ההמשך של המבקר החוזר
-    expect(screen.getByRole('region', { name: 'ממשיכים מאיפה שעצרתם' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /עוד 6 לומדות/ })).not.toBeInTheDocument();
+    expect(screen.getByText(/לומדה 9/)).toBeInTheDocument();
   });
 
   it('קובץ שנגרר לכל מקום במסך נטען כפרויקט', async () => {
