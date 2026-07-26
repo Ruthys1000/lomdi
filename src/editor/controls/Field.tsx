@@ -5,8 +5,8 @@ import { cn } from '@/lib/cn';
 
 export function FieldGroup({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="border-b border-sand-100 px-4 py-4 last:border-0">
-      <h3 className="mb-3 text-xs font-bold text-sand-900">{title}</h3>
+    <section className="border-b border-edge px-4 py-4 last:border-0">
+      <h3 className="mb-3 text-xs font-bold text-fg">{title}</h3>
       <div className="space-y-3">{children}</div>
     </section>
   );
@@ -27,11 +27,11 @@ export function TextField({
 }) {
   const id = useId();
   const className =
-    'w-full rounded-lg border border-sand-200 px-2.5 py-1.5 text-sm text-sand-900 focus:border-clay-500 focus:ring-1 focus:ring-clay-500 focus:outline-none';
+    'w-full rounded-lg border border-edge px-2.5 py-1.5 text-sm text-fg focus:border-volt-dim focus:ring-1 focus:ring-volt focus:outline-none';
 
   return (
     <div>
-      <label htmlFor={id} className="mb-1 block text-xs font-medium text-sand-600">
+      <label htmlFor={id} className="mb-1 block text-xs font-medium text-fg-soft">
         {label}
       </label>
       {multiline ? (
@@ -76,14 +76,14 @@ export function SelectField<T extends string>({
 
   return (
     <div>
-      <label htmlFor={id} className="mb-1 block text-xs font-medium text-sand-600">
+      <label htmlFor={id} className="mb-1 block text-xs font-medium text-fg-soft">
         {label}
       </label>
       <select
         id={id}
         value={value}
         onChange={(event) => onChange(event.target.value as T)}
-        className="w-full rounded-lg border border-sand-200 bg-white px-2.5 py-1.5 text-sm text-sand-900 focus:border-clay-500 focus:ring-1 focus:ring-clay-500 focus:outline-none"
+        className="w-full rounded-lg border border-edge bg-panel px-2.5 py-1.5 text-sm text-fg focus:border-volt-dim focus:ring-1 focus:ring-volt focus:outline-none"
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>
@@ -112,8 +112,8 @@ export function SegmentedField<T extends string>({
 }) {
   return (
     <div>
-      <span className="mb-1 block text-xs font-medium text-sand-600">{label}</span>
-      <div role="radiogroup" aria-label={label} className="flex gap-0.5 rounded-lg bg-sand-100 p-0.5">
+      <span className="mb-1 block text-xs font-medium text-fg-soft">{label}</span>
+      <div role="radiogroup" aria-label={label} className="flex gap-0.5 rounded-lg bg-panel-2 p-0.5">
         {options.map((option) => (
           <button
             key={option.value}
@@ -124,8 +124,8 @@ export function SegmentedField<T extends string>({
             className={cn(
               'flex-1 rounded-md px-2 py-1 text-xs font-medium transition',
               value === option.value
-                ? 'bg-white text-sand-900 shadow-sm'
-                : 'text-sand-500 hover:text-sand-800',
+                ? 'bg-panel text-fg shadow-sm'
+                : 'text-fg-muted hover:text-fg',
             )}
           >
             {option.label}
@@ -151,16 +151,16 @@ export function SwitchField({
 
   return (
     <div className="flex items-start justify-between gap-3">
-      <label htmlFor={id} className="text-xs font-medium text-sand-600">
+      <label htmlFor={id} className="text-xs font-medium text-fg-soft">
         {label}
-        {hint && <span className="mt-0.5 block text-[11px] font-normal text-sand-400">{hint}</span>}
+        {hint && <span className="mt-0.5 block text-[11px] font-normal text-fg-muted">{hint}</span>}
       </label>
       <input
         id={id}
         type="checkbox"
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
-        className="mt-0.5 size-4 shrink-0 rounded border-sand-300 text-clay-600 focus:ring-clay-500"
+        className="mt-0.5 size-4 shrink-0 rounded border-edge-strong text-volt focus:ring-volt"
       />
     </div>
   );
@@ -179,7 +179,7 @@ export function ColorField({
 
   return (
     <div className="flex items-center justify-between gap-3">
-      <label htmlFor={id} className="text-xs font-medium text-sand-600">
+      <label htmlFor={id} className="text-xs font-medium text-fg-soft">
         {label}
       </label>
       <span className="flex items-center gap-1.5">
@@ -188,7 +188,7 @@ export function ColorField({
           בסימן ניטרלי, ו-#f59e0b היה מוצג כ-f59e0b#. אותו כלל חל על כל
           ערך לטיני שמוצג בממשק העברי.
         */}
-        <output dir="ltr" className="font-mono text-[11px] text-sand-400 tabular-nums">
+        <output dir="ltr" className="font-mono text-[11px] text-fg-muted tabular-nums">
           {value}
         </output>
         <input
@@ -196,7 +196,7 @@ export function ColorField({
           type="color"
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="size-7 cursor-pointer rounded border border-sand-200 bg-white p-0.5"
+          className="size-7 cursor-pointer rounded border border-edge bg-panel p-0.5"
         />
       </span>
     </div>
@@ -225,10 +225,10 @@ export function SliderField({
   return (
     <div>
       <div className="mb-1 flex items-baseline justify-between">
-        <label htmlFor={id} className="text-xs font-medium text-sand-600">
+        <label htmlFor={id} className="text-xs font-medium text-fg-soft">
           {label}
         </label>
-        <output className="text-[11px] text-sand-400 tabular-nums">
+        <output className="text-[11px] text-fg-muted tabular-nums">
           {value}
           {unit}
         </output>
@@ -241,7 +241,7 @@ export function SliderField({
         step={step}
         value={value}
         onChange={(event) => onChange(Number(event.target.value))}
-        className="w-full accent-clay-600"
+        className="w-full accent-volt"
       />
     </div>
   );
@@ -253,7 +253,7 @@ export function FieldNote({ children, tone = 'info' }: { children: ReactNode; to
     <p
       className={cn(
         'rounded-lg px-3 py-2 text-[11px] leading-relaxed',
-        tone === 'warning' ? 'bg-ochre-50 text-ochre-800' : 'bg-sand-50 text-sand-500',
+        tone === 'warning' ? 'bg-warn-soft text-warn' : 'bg-app text-fg-muted',
       )}
     >
       {children}

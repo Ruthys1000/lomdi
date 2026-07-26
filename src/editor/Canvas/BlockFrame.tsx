@@ -40,8 +40,8 @@ export function BlockFrame({ block, selected, onSelect, children }: BlockFramePr
         'group relative transition',
         'before:pointer-events-none before:absolute before:inset-0 before:rounded-lg before:transition',
         selected
-          ? 'before:ring-2 before:ring-clay-500'
-          : 'before:ring-1 before:ring-transparent hover:before:ring-sand-300',
+          ? 'before:ring-2 before:ring-volt'
+          : 'before:ring-1 before:ring-transparent hover:before:ring-edge',
       )}
       data-selected={selected || undefined}
     >
@@ -60,8 +60,8 @@ export function BlockFrame({ block, selected, onSelect, children }: BlockFramePr
           // בקצה הנגדי לסרגל הפעולות
           'absolute -top-6 end-2 z-20 rounded-md px-1.5 py-0.5 text-[11px] font-semibold transition',
           selected
-            ? 'bg-clay-600 text-white opacity-100'
-            : 'bg-sand-700 text-white opacity-0 group-hover:opacity-100',
+            ? 'bg-volt text-app opacity-100'
+            : 'bg-panel text-fg opacity-0 group-hover:opacity-100',
         )}
       >
         {blockLabel(block.type)}

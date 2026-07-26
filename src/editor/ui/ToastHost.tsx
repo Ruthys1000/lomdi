@@ -9,9 +9,9 @@ const icons: Record<ToastTone, typeof Info> = {
 };
 
 const tones: Record<ToastTone, string> = {
-  info: 'text-sand-300',
-  success: 'text-sage-400',
-  error: 'text-plum-400',
+  info: 'text-fg-muted',
+  success: 'text-ok',
+  error: 'text-danger',
 };
 
 /**
@@ -36,7 +36,7 @@ export function ToastHost() {
         return (
           <div
             key={toastItem.id}
-            className="pointer-events-auto flex items-center gap-3 rounded-xl bg-sand-900 py-2.5 ps-4 pe-2.5 text-sm text-white shadow-lg"
+            className="pointer-events-auto flex items-center gap-3 rounded-xl border border-edge bg-panel py-2.5 ps-4 pe-2.5 text-sm text-fg shadow-lg"
           >
             <Icon className={cn('size-4 shrink-0', tones[toastItem.tone])} aria-hidden />
             <span>{toastItem.message}</span>
@@ -48,7 +48,7 @@ export function ToastHost() {
                   toastItem.action?.run();
                   dismiss(toastItem.id);
                 }}
-                className="rounded-lg px-2 py-1 text-xs font-semibold text-clay-300 transition hover:bg-white/10"
+                className="rounded-lg px-2 py-1 text-xs font-semibold text-volt transition hover:bg-panel/10"
               >
                 {toastItem.action.label}
               </button>
@@ -58,7 +58,7 @@ export function ToastHost() {
               type="button"
               onClick={() => dismiss(toastItem.id)}
               aria-label="סגירת ההודעה"
-              className="rounded-lg p-1 text-sand-400 transition hover:bg-white/10 hover:text-white"
+              className="rounded-lg p-1 text-fg-muted transition hover:bg-panel-2 hover:text-fg"
             >
               <X className="size-3.5" aria-hidden />
             </button>

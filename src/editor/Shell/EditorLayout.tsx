@@ -38,7 +38,7 @@ export function EditorLayout() {
   });
 
   return (
-    <div className="flex h-full flex-col overflow-hidden bg-sand-100">
+    <div className="flex h-full flex-col overflow-hidden bg-panel-2">
       <TopBar />
 
       {/*
@@ -47,7 +47,7 @@ export function EditorLayout() {
         הרבה אנשים עובדים. מתחת ל-lg הפאנלים יוצאים מהזרימה והופכים למגירות
         מעל הקנבס, ונפתחים מהכפתורים בסרגל העליון.
       */}
-      <div className="relative grid min-h-0 flex-1 grid-cols-1 gap-px bg-sand-200 lg:grid-cols-[240px_minmax(0,1fr)_280px] xl:grid-cols-[280px_minmax(0,1fr)_320px]">
+      <div className="relative grid min-h-0 flex-1 grid-cols-1 gap-px bg-edge lg:grid-cols-[240px_minmax(0,1fr)_280px] xl:grid-cols-[280px_minmax(0,1fr)_320px]">
         <Drawer side="start" open={isOutlineOpen} onClose={() => setOutlineOpen(false)}>
           <OutlinePanel />
         </Drawer>
@@ -87,13 +87,13 @@ function Drawer({
           type="button"
           aria-label="סגירת הפאנל"
           onClick={onClose}
-          className="fixed inset-0 z-30 bg-sand-900/40 lg:hidden"
+          className="fixed inset-0 z-30 bg-app/40 lg:hidden"
         />
       )}
 
       <div
         className={cn(
-          'z-40 flex min-h-0 flex-col bg-white lg:z-auto lg:translate-x-0 lg:shadow-none',
+          'z-40 flex min-h-0 flex-col bg-panel lg:z-auto lg:translate-x-0 lg:shadow-none',
           'max-lg:fixed max-lg:inset-y-0 max-lg:w-72 max-lg:shadow-xl max-lg:transition-transform',
           side === 'start' ? 'max-lg:start-0' : 'max-lg:end-0',
           !open && 'max-lg:hidden',

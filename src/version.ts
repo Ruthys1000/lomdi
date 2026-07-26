@@ -5,5 +5,5 @@
  * ייבוא של package.json היה גורר את כל הקובץ — כולל רשימת התלויות — לתוך
  * מה שהלומד מוריד.
  */
-export const APP_NAME = 'LearnIt';
+export const APP_NAME = 'לומדי';
 export const APP_VERSION = '0.1.0';

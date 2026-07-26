@@ -45,11 +45,11 @@ export function ConfirmDialog({
         onCancel();
       }}
       onClose={onCancel}
-      className="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-2xl border border-sand-200 p-0 shadow-xl backdrop:bg-sand-900/40"
+      className="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-2xl border border-edge p-0 shadow-xl backdrop:bg-app/40"
     >
       <div className="p-6 text-right">
-        <h2 className="text-base font-bold text-sand-900">{title}</h2>
-        <p className="mt-2 text-sm leading-relaxed text-sand-600">{message}</p>
+        <h2 className="text-base font-bold text-fg">{title}</h2>
+        <p className="mt-2 text-sm leading-relaxed text-fg-soft">{message}</p>
 
         <div className="mt-6 flex gap-2">
           <button
@@ -57,8 +57,8 @@ export function ConfirmDialog({
             onClick={onConfirm}
             className={
               destructive
-                ? 'rounded-lg bg-plum-600 px-4 py-2 text-sm font-semibold text-white hover:bg-plum-700'
-                : 'rounded-lg bg-clay-600 px-4 py-2 text-sm font-semibold text-white hover:bg-clay-700'
+                ? 'rounded-lg bg-danger px-4 py-2 text-sm font-semibold text-app hover:opacity-90'
+                : 'rounded-lg bg-volt px-4 py-2 text-sm font-semibold text-app hover:bg-volt-bright'
             }
           >
             {confirmLabel}
@@ -66,7 +66,7 @@ export function ConfirmDialog({
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-lg border border-sand-200 px-4 py-2 text-sm font-semibold text-sand-700 hover:bg-sand-50"
+            className="rounded-lg border border-edge px-4 py-2 text-sm font-semibold text-fg-soft hover:bg-app"
           >
             {cancelLabel}
           </button>

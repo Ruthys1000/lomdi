@@ -70,7 +70,7 @@ export function CoursePanel({ course }: { course: Course }) {
             updateCourse({ navigation: { ...course.navigation, showChapterNumber } })
           }
         />
-        <p className="text-[11px] leading-relaxed text-sand-400">
+        <p className="text-[11px] leading-relaxed text-fg-muted">
           מצב הניווט משפיע על התוצר ועל התצוגה המקדימה. בקנבס תמיד מוצג פרק אחד, לנוחות העריכה.
         </p>
       </FieldGroup>

@@ -27,26 +27,26 @@ export function FeaturedProject({
 }) {
   return (
     <section
-      className="flex flex-col rounded-2xl border border-sand-200 bg-white p-5"
+      className="flex flex-col rounded-2xl border border-edge bg-panel p-5"
       aria-labelledby="featured-heading"
     >
-      <h2 id="featured-heading" className="text-xs font-bold tracking-wide text-sand-500 uppercase">
-        המשך מהמקום שבו הפסקת
+      <h2 id="featured-heading" className="text-xs font-bold tracking-wide text-fg-muted uppercase">
+        ממשיכים מאיפה שעצרתם
       </h2>
 
-      <p className="mt-3 truncate text-lg font-bold text-sand-900">
+      <p className="mt-3 truncate text-lg font-bold text-fg">
         {project.title || 'לומדה ללא שם'}
       </p>
-      <p className="mt-1 text-sm text-sand-500">
+      <p className="mt-1 text-sm text-fg-muted">
         {project.chapterCount} פרקים · {project.blockCount} בלוקים · {formatSavedAt(project.savedAt)}
       </p>
 
       <button
         type="button"
         onClick={onOpen}
-        className="mt-4 self-start rounded-xl bg-sand-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-sand-800"
+        className="mt-4 self-start rounded-xl bg-volt px-5 py-2.5 text-sm font-semibold text-app transition hover:bg-volt-bright"
       >
-        המשך לערוך
+        ממשיכים
       </button>
     </section>
   );
@@ -72,25 +72,25 @@ export function ProjectList({
 
   return (
     <section className="mt-10" aria-labelledby="all-projects-heading">
-      <h2 id="all-projects-heading" className="text-base font-bold text-sand-900">
+      <h2 id="all-projects-heading" className="text-base font-bold text-fg">
         הלומדות שלי
       </h2>
 
-      <ul className="mt-3 overflow-hidden rounded-2xl border border-sand-200 bg-white">
+      <ul className="mt-3 overflow-hidden rounded-2xl border border-edge bg-panel">
         {visible.map((project) => (
           <li
             key={project.id}
-            className="flex items-center gap-2 border-b border-sand-200 ps-4 pe-2 last:border-b-0"
+            className="flex items-center gap-2 border-b border-edge ps-4 pe-2 last:border-b-0"
           >
             <button
               type="button"
               onClick={() => onOpen(project.id)}
               className="min-w-0 flex-1 py-3 text-start"
             >
-              <span className="block truncate text-sm font-semibold text-sand-900">
+              <span className="block truncate text-sm font-semibold text-fg">
                 {project.title || 'לומדה ללא שם'}
               </span>
-              <span className="mt-0.5 block text-xs text-sand-500">
+              <span className="mt-0.5 block text-xs text-fg-muted">
                 {project.chapterCount} פרקים · {project.blockCount} בלוקים ·{' '}
                 {formatSavedAt(project.savedAt)}
               </span>
@@ -106,7 +106,7 @@ export function ProjectList({
               onClick={() => setPendingDelete(project)}
               aria-label={`מחיקת ${project.title || 'הלומדה'}`}
               title="מחיקה"
-              className="rounded-lg p-2 text-sand-400 transition hover:bg-plum-50 hover:text-plum-600"
+              className="rounded-lg p-2 text-fg-muted transition hover:bg-danger-soft hover:text-danger"
             >
               <Trash2 className="size-4" aria-hidden />
             </button>
@@ -118,7 +118,7 @@ export function ProjectList({
         <button
           type="button"
           onClick={() => setExpanded(true)}
-          className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-clay-700 transition hover:text-clay-800"
+          className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-volt transition hover:text-volt"
         >
           <ChevronDown className="size-4" aria-hidden />
           עוד {hidden} לומדות
@@ -127,8 +127,8 @@ export function ProjectList({
 
       <ConfirmDialog
         open={pendingDelete !== null}
-        title="מחיקת הפרויקט מהמחשב"
-        message={`"${pendingDelete?.title || 'לומדה ללא שם'}" יימחק מהאחסון של הדפדפן יחד עם הנכסים שלו. אם יש לכם קובץ ‎.course.zip‎ שמור, אפשר יהיה לפתוח אותו שוב.`}
+        title="למחוק את הלומדה?"
+        message={`"${pendingDelete?.title || 'לומדה ללא שם'}" יימחק מהדפדפן יחד עם התמונות שלו. אם שמרתם קובץ ‎.course.zip‎, אפשר לפתוח אותו שוב.`}
         onConfirm={() => {
           if (pendingDelete) onRemove(pendingDelete);
           setPendingDelete(null);

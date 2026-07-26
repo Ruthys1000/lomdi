@@ -52,7 +52,7 @@ export function TextImageSettings({
             <button
               type="button"
               onClick={swapSides}
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-sand-200 px-3 py-2 text-xs font-semibold text-sand-700 transition hover:bg-sand-50"
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-edge px-3 py-2 text-xs font-semibold text-fg-soft transition hover:bg-app"
             >
               <ArrowLeftRight className="size-3.5" aria-hidden />
               החלפת צדדים

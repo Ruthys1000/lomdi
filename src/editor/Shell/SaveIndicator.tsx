@@ -42,7 +42,7 @@ export function SaveIndicator() {
         type="button"
         onClick={() => void saveNow()}
         title={error ?? undefined}
-        className="inline-flex items-center gap-1.5 rounded-lg bg-plum-50 px-2 py-1 text-xs font-semibold text-plum-700 transition hover:bg-plum-100"
+        className="inline-flex items-center gap-1.5 rounded-lg bg-danger-soft px-2 py-1 text-xs font-semibold text-danger transition hover:bg-danger-soft"
       >
         <AlertTriangle className="size-3.5" aria-hidden />
         השמירה נכשלה — נסו שוב
@@ -61,7 +61,7 @@ export function SaveIndicator() {
 
   return (
     <span
-      className="inline-flex items-center gap-1.5 whitespace-nowrap px-2 text-xs text-sand-400"
+      className="inline-flex items-center gap-1.5 whitespace-nowrap px-2 text-xs text-fg-muted"
       role="status"
       aria-live="polite"
     >

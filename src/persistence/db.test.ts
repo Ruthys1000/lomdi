@@ -39,7 +39,7 @@ const testBlob = (data: Uint8Array | string, type = 'image/png'): Blob =>
 
 const projectFile = (title: string, savedAt: string, assets: AssetMeta[] = []): ProjectFile => ({
   version: SCHEMA_VERSION,
-  generator: { name: 'LearnIt', version: '0.1.0' },
+  generator: { name: 'לומדי', version: '0.1.0' },
   savedAt,
   course: createCourse({ title }),
   assets,

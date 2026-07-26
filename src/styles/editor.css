@@ -16,61 +16,58 @@
     Arial, sans-serif;
 
   /*
-   * פלטת צ'רום העורך.
+   * פלטת צ'רום העורך — "לילה + לאים".
    *
-   * ארבע משפחות שמחליפות את slate/blue/red/amber של ברירת המחדל. הן חיות
-   * כאן ולא ב-course.css: אלה צבעי הכלי, לא צבעי הלומדה. ללומדה יש ערכות
-   * עיצוב משלה (model/themes.ts), והתוצר המיוצא לא רואה את הקובץ הזה.
+   * חיה כאן ולא ב-course.css: אלה צבעי הכלי, לא צבעי הלומדה. ללומדה יש
+   * ערכות עיצוב משלה (model/themes.ts), והתוצר המיוצא לא רואה את הקובץ
+   * הזה בכלל.
    *
-   * שתי מוסכמות שמסבירות את הבחירות:
+   * שלוש מוסכמות שמסבירות את הבחירות:
    *
-   * 1. **הנייטרל חם בקצה הבהיר וקריר בקצה הכהה.** sand-50 הוא שמנת,
-   *    sand-900 הוא ירוק-טורקיז עמוק. טקסט על נייר חם צריך גוון שאינו
-   *    שחור טהור, אחרת הניגוד צורם.
-   * 2. **הטרהקוטה היא צבע המצב היחיד.** בחירה, פוקוס ופריט פעיל — כולם
-   *    clay. צבע אחד ולא שלושה הוא מה שמאפשר לזהות "מה נבחר עכשיו" במבט,
+   * 1. **טוקנים לפי תפקיד ולא סולם מספרי.** בפלטה כהה `50` ו-`900`
+   *    מאבדים משמעות — `text-…-900` שפירושו "טקסט בהיר" הוא בדיוק סוג
+   *    הבלבול שמייצר תיקון שגוי בעוד חצי שנה. `text-fg` חד־משמעי.
+   * 2. **הלאים הוא צבע המצב היחיד.** בחירה, פוקוס ופעולה ראשית — כולם
+   *    volt. צבע אחד ולא שלושה הוא מה שמאפשר לראות "מה פעיל עכשיו" במבט,
    *    וגם מה שמבטיח שטבעת הבחירה תיראה מעל לומדה בכל ערכת עיצוב.
+   * 3. **הצ'רום כהה, גיליון הלומדה לבן.** הדפוס של Figma: הכלי נסוג
+   *    לרקע, והמסמך הוא הדבר הבהיר היחיד על המסך.
    */
 
-  /* נייטרל חם */
-  --color-sand-50: #faf9f6;
-  --color-sand-100: #f2f0ea;
-  --color-sand-200: #e5e2da;
-  --color-sand-300: #d2cec4;
-  --color-sand-400: #a9a79c;
-  --color-sand-500: #7c857f;
-  --color-sand-600: #5f6b66;
-  --color-sand-700: #4e5c59;
-  --color-sand-800: #3a4846;
-  --color-sand-900: #2b3a38;
+  --color-app: #0f1115;
+  --color-panel: #171a21;
+  --color-panel-2: #1f232c;
+  --color-edge: #272b34;
+  --color-edge-strong: #363b47;
 
-  /* טרהקוטה — בחירה, פוקוס, פעולה */
-  --color-clay-50: #fbede4;
-  --color-clay-100: #f7ddcd;
-  --color-clay-200: #f3c9a8;
-  --color-clay-300: #eaa77c;
-  --color-clay-400: #e28e66;
-  --color-clay-500: #dc7e5b;
-  --color-clay-600: #c4643f;
-  --color-clay-700: #a34e2e;
-  --color-clay-800: #864026;
-  --color-clay-900: #6f3520;
+  --color-fg: #f2f4f7;
+  --color-fg-soft: #c3c9d2;
+  --color-fg-muted: #99a1ae;
 
-  /* שזיף — פעולות הרסניות */
-  --color-plum-50: #f7e9ec;
-  --color-plum-100: #efd6dc;
-  --color-plum-400: #c07286;
-  --color-plum-600: #9c3d4f;
-  --color-plum-700: #82303f;
+  /*
+   * volt ולא lime — הסולם `lime-*` כבר קיים ב-Tailwind, ושם זהה היה
+   * מייצר `bg-lime` לצד `bg-lime-500` שאינם קרובים בכלל.
+   *
+   * טקסט על volt הוא תמיד `text-app`. לבן על #c9f24d נכשל בניגודיות;
+   * כמעט-שחור עליו הוא כ-14:1.
+   */
+  --color-volt: #c9f24d;
+  --color-volt-bright: #d7f76f;
+  --color-volt-dim: #a9cc3e;
+  --color-volt-soft: #1e2a12;
 
-  /* חמרה — התראות ואזהרות */
-  --color-ochre-50: #fbf2e3;
-  --color-ochre-100: #f4e5c9;
-  --color-ochre-800: #7a5a22;
+  --color-danger: #ff5c5c;
+  --color-danger-soft: #2a1416;
+  --color-warn: #f0c14b;
+  --color-warn-soft: #2b2312;
+  --color-ok: #6ee7a8;
 
-  /* מרווה — הצלחה */
-  --color-sage-400: #7e948a;
-  --color-sage-600: #4a6151;
+  /*
+   * גוון מסגרת לצ'רום שיושב *בתוך* הגיליון הלבן — סימון בחירה בטקסט
+   * שנערך במקום. שאר הצ'רום הצף מעל הגיליון (סרגלים, תוויות) כהה כמו
+   * הכלי, ולכן אינו זקוק לזה.
+   */
+  --color-sheet-edge: #d8dbe0;
 }
 
 @layer base {
@@ -82,14 +79,14 @@
 
   body {
     margin: 0;
-    background: var(--color-sand-50);
-    color: var(--color-sand-900);
+    background: var(--color-app);
+    color: var(--color-fg);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-clay-500);
+    outline: 2px solid var(--color-volt);
     outline-offset: 2px;
   }
 }
@@ -117,12 +114,16 @@
   pointer-events: none;
 }
 
+/*
+ * הסימון כאן משתמש ב-sheet-edge ולא בטוקני הצ'רום: הוא חל *בתוך* הגיליון
+ * הלבן, ומסגרת בגוון של פאנל כהה הייתה נראית כמו כתם על הדף.
+ */
 .lc-inline-text:hover {
-  box-shadow: 0 0 0 1px var(--color-sand-300);
+  box-shadow: 0 0 0 1px var(--color-sheet-edge);
 }
 
 .lc-inline-text:focus {
-  box-shadow: 0 0 0 2px var(--color-clay-500);
+  box-shadow: 0 0 0 2px var(--color-volt-dim);
 }
 
 /* ─── עורך הטקסט העשיר (TipTap) ─── */

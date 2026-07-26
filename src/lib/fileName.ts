@@ -13,7 +13,7 @@
  * שלא יהיו שתי נוסחאות שם שיכולות להתפצל.
  */
 
-const PREFIX = 'learnit';
+const PREFIX = 'lomdi';
 
 export function asciiSlug(title: string): string {
   return (
@@ -29,7 +29,7 @@ export function asciiSlug(title: string): string {
   );
 }
 
-/** `learnit-Safety-101-2026-07-25.zip` — הסיומת נמסרת שלמה, כולל הנקודה */
+/** `lomdi-Safety-101-2026-07-25.zip` — הסיומת נמסרת שלמה, כולל הנקודה */
 export function datedFileName(title: string, extension: string, date = new Date()): string {
   const slug = asciiSlug(title);
   const day = date.toISOString().slice(0, 10);

@@ -21,9 +21,9 @@ export function InspectorPanel() {
   const location = selectedBlockId ? findBlock(course, selectedBlockId) : undefined;
 
   return (
-    <aside className="flex min-h-0 flex-col bg-white" aria-label="הגדרות">
-      <div className="border-b border-sand-200 px-4 py-3">
-        <h2 className="text-xs font-bold tracking-wide text-sand-500 uppercase">
+    <aside className="flex min-h-0 flex-col bg-panel" aria-label="הגדרות">
+      <div className="border-b border-edge px-4 py-3">
+        <h2 className="text-xs font-bold tracking-wide text-fg-muted uppercase">
           {location ? blockLabel(location.block.type) : 'הגדרות הלומדה'}
         </h2>
       </div>
