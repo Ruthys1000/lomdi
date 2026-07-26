@@ -20,15 +20,16 @@ import type { TemplateResult } from '@/templates/types';
  * אמורה לעשות.
  */
 export function createSampleCourse(): TemplateResult {
-  const outline = courseOutlineIllustration();
-  const practice = practiceStopIllustration();
+  const theme = getThemePreset('vivid')!.theme;
+  const outline = courseOutlineIllustration(theme.colors);
+  const practice = practiceStopIllustration(theme.colors);
 
   const course = createCourse({
     title: 'איך בונים הדרכה דיגיטלית אפקטיבית',
     subtitle: 'מדריך קצר למי שבונה לומדות בארגון',
     description:
       'לומדת דוגמה שמדגימה את סוגי הבלוקים במחולל: כותרת, טקסט, כרטיסים, תמונה, אקורדיון ושאלת תרגול.',
-    theme: getThemePreset('warmSand')!.theme,
+    theme,
     chapters: [
       openingChapter(),
       principlesChapter(outline.meta.id),
@@ -55,9 +56,9 @@ function openingChapter() {
           // צבע אחיד ולא גרדיאנט: הכותרת אמורה להראות איך נראית לומדה
           // בערכת העיצוב שנבחרה, ולא להציג אפקט שאינו חלק מאף ערכה
           backgroundType: 'color',
-          backgroundColor: '#33261c',
-          gradientFrom: '#33261c',
-          gradientTo: '#a2543a',
+          backgroundColor: '#1e1b32',
+          gradientFrom: '#1e1b32',
+          gradientTo: '#7c3aed',
           imageAssetId: '',
           overlayOpacity: 0.45,
           height: 'tall',

@@ -37,7 +37,7 @@ function courseWithImage(assetId: string) {
   });
 }
 
-const FOLDER = 'learnit-2026-07-25';
+const FOLDER = 'lomdi-2026-07-25';
 
 async function writeZip(payload: EmbeddedCourseData, blobs: Map<string, Blob>) {
   return JSZip.loadAsync(
@@ -186,9 +186,9 @@ describe('שם הקובץ ושם התיקייה', () => {
   const day = new Date('2026-07-25T09:00:00.000Z');
 
   it('הם ASCII ונגזרים מאותה נוסחה של קובץ הפרויקט', () => {
-    expect(exportFileName('לומדת בטיחות', day)).toBe('learnit-2026-07-25.zip');
-    expect(exportFolderName('לומדת בטיחות', day)).toBe('learnit-2026-07-25');
-    expect(exportFileName('Safety 101 — מבוא', day)).toBe('learnit-Safety-101-2026-07-25.zip');
+    expect(exportFileName('לומדת בטיחות', day)).toBe('lomdi-2026-07-25.zip');
+    expect(exportFolderName('לומדת בטיחות', day)).toBe('lomdi-2026-07-25');
+    expect(exportFileName('Safety 101 — מבוא', day)).toBe('lomdi-Safety-101-2026-07-25.zip');
   });
 
   it('שם התיקייה הוא שם הקובץ בלי הסיומת', () => {

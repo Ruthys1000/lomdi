@@ -42,14 +42,14 @@ export function PreviewOverlay() {
   const width = viewportWidths[viewport];
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-sand-900" role="dialog" aria-modal="true" aria-label="תצוגה מקדימה">
-      <div className="flex h-14 shrink-0 items-center justify-between gap-4 px-4 text-white">
+    <div className="fixed inset-0 z-50 flex flex-col bg-app" role="dialog" aria-modal="true" aria-label="תצוגה מקדימה">
+      <div className="flex h-14 shrink-0 items-center justify-between gap-4 px-4 text-fg">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold">תצוגה מקדימה</span>
-          <span className="text-xs text-sand-400">{course.title}</span>
+          <span className="text-xs text-fg-muted">{course.title}</span>
         </div>
 
-        <div className="flex items-center gap-0.5 rounded-lg bg-white/10 p-0.5">
+        <div className="flex items-center gap-0.5 rounded-lg bg-panel/10 p-0.5">
           {devices.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
@@ -60,8 +60,8 @@ export function PreviewOverlay() {
               aria-label={label}
               className={
                 viewport === id
-                  ? 'rounded-md bg-white px-2 py-1.5 text-sand-900'
-                  : 'rounded-md px-2 py-1.5 text-sand-300 hover:text-white'
+                  ? 'rounded-md bg-panel px-2 py-1.5 text-fg'
+                  : 'rounded-md px-2 py-1.5 text-fg-muted hover:text-fg'
               }
             >
               <Icon className="size-4" aria-hidden />
@@ -74,7 +74,7 @@ export function PreviewOverlay() {
         </IconButton>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto bg-sand-800 p-4">
+      <div className="min-h-0 flex-1 overflow-y-auto bg-panel-2 p-4">
         <div
           className="mx-auto min-h-full overflow-hidden rounded-xl bg-white shadow-2xl transition-[max-width] duration-200"
           style={{ maxWidth: width ? `${width}px` : '1100px' }}

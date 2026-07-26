@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ProjectSummary } from '@/persistence/db';
 import { WelcomeScreen } from './WelcomeScreen';
@@ -51,15 +51,15 @@ describe('מסך הפתיחה', () => {
   it('מציג פעולה ראשית אחת ליצירת לומדה, ושתי נקודות כניסה נוספות', async () => {
     await setup();
 
-    expect(screen.getByRole('button', { name: 'לומדה חדשה' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'בונים לומדה' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /מבנה מוכן/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /לומדת הדוגמה/ })).toBeInTheDocument();
   });
 
-  it('לחיצה על "לומדה חדשה" מחזירה לומדה עם פרק, ולא רק שם תבנית', async () => {
+  it('לחיצה על "בונים לומדה" מחזירה לומדה עם פרק, ולא רק שם תבנית', async () => {
     const { onStart } = await setup();
 
-    fireEvent.click(screen.getByRole('button', { name: 'לומדה חדשה' }));
+    fireEvent.click(screen.getByRole('button', { name: 'בונים לומדה' }));
 
     expect(onStart).toHaveBeenCalledTimes(1);
     expect(onStart.mock.calls[0][0].course.chapters.length).toBeGreaterThan(0);
@@ -101,11 +101,11 @@ describe('מסך הפתיחה', () => {
 
     await setup();
 
-    const featured = screen.getByRole('region', { name: 'המשך מהמקום שבו הפסקת' });
+    const featured = screen.getByRole('region', { name: 'ממשיכים מאיפה שעצרתם' });
     expect(featured).toHaveTextContent('נפתחה אחרונה');
   });
 
-  it('גם עם עשר לומדות שמורות, "לומדה חדשה" מופיע לפני הרשימה', async () => {
+  it('גם עם עשר לומדות שמורות, "בונים לומדה" מופיע לפני הרשימה', async () => {
     projects = Array.from({ length: 10 }, (_, index) =>
       project(`p${index}`, `לומדה ${index}`, `2026-03-0${(index % 9) + 1}T10:00:00.000Z`),
     );
@@ -113,7 +113,7 @@ describe('מסך הפתיחה', () => {
 
     await setup();
 
-    const newButton = screen.getByRole('button', { name: 'לומדה חדשה' });
+    const newButton = screen.getByRole('button', { name: 'בונים לומדה' });
     const listHeading = screen.getByRole('heading', { name: 'הלומדות שלי' });
 
     // DOCUMENT_POSITION_FOLLOWING — הכותרת של הרשימה באה *אחרי* הכפתור
@@ -136,6 +136,18 @@ describe('מסך הפתיחה', () => {
     expect(screen.getByText('לומדה 9')).toBeInTheDocument();
   });
 
+  it('פס "איך זה עובד" מוצג בלי לומדות שמורות, ונעלם ברגע שיש אחת', async () => {
+    await setup();
+    expect(screen.getByRole('heading', { name: 'איך זה עובד' })).toBeInTheDocument();
+
+    cleanup();
+    projects = [project('a', 'לומדה', '2026-03-01T10:00:00.000Z')];
+    lastProjectId = 'a';
+    await setup();
+
+    expect(screen.queryByRole('heading', { name: 'איך זה עובד' })).not.toBeInTheDocument();
+  });
+
   it('קובץ שנגרר לכל מקום במסך נטען כפרויקט', async () => {
     const { onOpened } = await setup();
     const file = new File(['zip'], 'course.zip', { type: 'application/zip' });
@@ -151,6 +163,6 @@ describe('מסך הפתיחה', () => {
 
     fireEvent.dragOver(screen.getByRole('main'), { dataTransfer: { files: [] } });
 
-    expect(screen.getByText('שחררו כאן את קובץ הפרויקט')).toBeInTheDocument();
+    expect(screen.getByText('שחררו. זה נטען לבד.')).toBeInTheDocument();
   });
 });

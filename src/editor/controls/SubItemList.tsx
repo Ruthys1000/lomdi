@@ -86,8 +86,8 @@ export function SubItemList<T extends Identified>({
   return (
     <div>
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-xs font-medium text-sand-600">{label}</span>
-        <span className="text-[11px] text-sand-400 tabular-nums">{items.length}</span>
+        <span className="text-xs font-medium text-fg-soft">{label}</span>
+        <span className="text-[11px] text-fg-muted tabular-nums">{items.length}</span>
       </div>
 
       <DndContext
@@ -121,7 +121,7 @@ export function SubItemList<T extends Identified>({
         type="button"
         disabled={items.length >= maxItems}
         onClick={() => onChange([...items, createItem()])}
-        className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-sand-300 px-3 py-2 text-xs font-semibold text-sand-600 transition hover:border-clay-400 hover:text-clay-700 disabled:cursor-not-allowed disabled:opacity-40"
+        className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-edge-strong px-3 py-2 text-xs font-semibold text-fg-soft transition hover:border-volt-dim hover:text-volt disabled:cursor-not-allowed disabled:opacity-40"
       >
         <Plus className="size-3.5" aria-hidden />
         {addLabel}
@@ -154,7 +154,7 @@ function SubItemRow({
       ref={setNodeRef}
       style={{ transform: CSS.Translate.toString(transform), transition }}
       className={cn(
-        'rounded-xl border border-sand-200 bg-white p-2.5',
+        'rounded-xl border border-edge bg-panel p-2.5',
         isDragging && 'opacity-40 shadow-md',
       )}
     >
@@ -163,7 +163,7 @@ function SubItemRow({
           type="button"
           aria-label="גרירה לשינוי סדר"
           title="גרירה לשינוי סדר"
-          className="cursor-grab rounded p-1 text-sand-300 transition hover:text-sand-600 active:cursor-grabbing"
+          className="cursor-grab rounded p-1 text-fg-muted transition hover:text-fg-soft active:cursor-grabbing"
           {...attributes}
           {...listeners}
         >
@@ -178,7 +178,7 @@ function SubItemRow({
           disabled={!canDuplicate}
           aria-label="שכפול"
           title="שכפול"
-          className="rounded p-1 text-sand-400 transition hover:bg-sand-100 hover:text-sand-700 disabled:opacity-30"
+          className="rounded p-1 text-fg-muted transition hover:bg-panel-2 hover:text-fg-soft disabled:opacity-30"
         >
           <Copy className="size-3.5" aria-hidden />
         </button>
@@ -188,7 +188,7 @@ function SubItemRow({
           disabled={!canDelete}
           aria-label="מחיקה"
           title={canDelete ? 'מחיקה' : 'לא ניתן למחוק את הפריט האחרון'}
-          className="rounded p-1 text-sand-400 transition hover:bg-plum-50 hover:text-plum-600 disabled:opacity-30"
+          className="rounded p-1 text-fg-muted transition hover:bg-danger-soft hover:text-danger disabled:opacity-30"
         >
           <Trash2 className="size-3.5" aria-hidden />
         </button>

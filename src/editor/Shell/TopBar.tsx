@@ -18,6 +18,7 @@ import { downloadProjectFile, openProjectFile } from '@/persistence/session';
 import { courseHistory, useCourseStore } from '@/state/courseStore';
 import { useEditorStore, type Viewport } from '@/state/editorStore';
 import { toast } from '@/state/toastStore';
+import { APP_NAME } from '@/version';
 import { AssetLibraryModal } from '../Assets/AssetLibraryModal';
 import { ExportDialog } from '../Export/ExportDialog';
 import { useHistoryState } from '../shortcuts/useHistoryState';
@@ -82,12 +83,12 @@ export function TopBar() {
   };
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-sand-200 bg-white px-4">
+    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-edge bg-panel px-4">
       <div className="flex items-center gap-2">
-        <span className="flex size-8 items-center justify-center rounded-lg bg-sand-900 text-white">
+        <span className="flex size-8 items-center justify-center rounded-lg bg-volt text-app">
           <BookOpen className="size-4" aria-hidden />
         </span>
-        <span className="hidden text-sm font-bold tracking-tight sm:inline">LearnIt</span>
+        <span className="hidden text-sm font-bold tracking-tight sm:inline">{APP_NAME}</span>
       </div>
 
       {/* פותחי המגירות. מוסתרים מ-lg ומעלה, שם שני הפאנלים בגריד ממילא */}
@@ -106,7 +107,7 @@ export function TopBar() {
         />
       </div>
 
-      <div className="mx-1 hidden h-6 w-px bg-sand-200 sm:block" />
+      <div className="mx-1 hidden h-6 w-px bg-edge sm:block" />
 
       <label className="min-w-0 flex-1">
         <span className="sr-only">שם הפרויקט</span>
@@ -114,7 +115,7 @@ export function TopBar() {
           value={course.title}
           onChange={(event) => updateCourse({ title: event.target.value })}
           placeholder="שם הלומדה"
-          className="w-full min-w-24 max-w-xs truncate rounded-lg border border-transparent px-2 py-1.5 text-sm font-semibold hover:border-sand-200 focus:border-clay-500 focus:bg-white focus:outline-none"
+          className="w-full min-w-24 max-w-xs truncate rounded-lg border border-transparent px-2 py-1.5 text-sm font-semibold hover:border-edge focus:border-volt-dim focus:bg-panel focus:outline-none"
         />
       </label>
 
@@ -141,10 +142,10 @@ export function TopBar() {
         />
       </div>
 
-      <div className="mx-1 h-6 w-px bg-sand-200" />
+      <div className="mx-1 h-6 w-px bg-edge" />
 
       <div
-        className="hidden items-center gap-0.5 rounded-lg bg-sand-100 p-0.5 lg:flex"
+        className="hidden items-center gap-0.5 rounded-lg bg-panel-2 p-0.5 lg:flex"
         role="group"
         aria-label="תצוגה לפי מכשיר"
       >
@@ -159,7 +160,7 @@ export function TopBar() {
         ))}
       </div>
 
-      <div className="mx-1 h-6 w-px bg-sand-200" />
+      <div className="mx-1 h-6 w-px bg-edge" />
 
       <div className="flex items-center gap-1">
         <IconButton icon={Images} label="ספריית הנכסים" onClick={() => setAssetsOpen(true)} />

@@ -161,14 +161,14 @@ export function EditorCanvas() {
 
   return (
     <section
-      className="min-h-0 overflow-y-auto bg-sand-100 p-6"
+      className="min-h-0 overflow-y-auto bg-panel-2 p-6"
       aria-label="אזור העריכה"
       onClick={(event) => {
         if (event.target === event.currentTarget) clearSelection();
       }}
     >
       <div
-        className="mx-auto overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-sand-200 transition-[max-width] duration-200"
+        className="mx-auto overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-edge transition-[max-width] duration-200"
         style={{ maxWidth: width ? `${width}px` : '100%' }}
       >
         <DndContext
@@ -196,7 +196,7 @@ export function EditorCanvas() {
         <button
           type="button"
           onClick={() => setLibraryIndex(chapter?.blocks.length ?? 0)}
-          className="flex items-center gap-2 rounded-xl border border-dashed border-sand-300 bg-white px-4 py-2.5 text-sm font-semibold text-sand-600 transition hover:border-clay-400 hover:text-clay-700"
+          className="flex items-center gap-2 rounded-xl border border-dashed border-edge-strong bg-panel px-4 py-2.5 text-sm font-semibold text-fg-soft transition hover:border-volt-dim hover:text-volt"
         >
           <Plus className="size-4" aria-hidden />
           הוספת בלוק

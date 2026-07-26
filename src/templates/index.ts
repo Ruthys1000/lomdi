@@ -34,13 +34,14 @@ export interface CourseTemplate {
  * הדרכה אמיתית על בניית הדרכה: מי שמוחק אותם יודע מה אמור לבוא במקומם.
  */
 function shortTrainingTemplate(): TemplateResult {
-  const path = learnerPathIllustration();
+  const theme = getThemePreset('vivid')!.theme;
+  const path = learnerPathIllustration(theme.colors);
 
   const course = createCourse({
     title: 'הדרכה קצרה',
     subtitle: 'שלושה פרקים, כרבע שעה',
     description: 'שלד להדרכה ארגונית קצרה: פתיחה, תוכן מרכזי ותרגול מסכם.',
-    theme: getThemePreset('warmSand')!.theme,
+    theme,
     chapters: [
       createChapter({
         title: 'פתיחה',
@@ -52,9 +53,9 @@ function shortTrainingTemplate(): TemplateResult {
               subtitle: 'משפט אחד שמסביר למי ההדרכה מיועדת',
               intro: 'כרבע שעה',
               backgroundType: 'color',
-              backgroundColor: '#33261c',
-              gradientFrom: '#33261c',
-              gradientTo: '#a2543a',
+              backgroundColor: '#1e1b32',
+              gradientFrom: '#1e1b32',
+              gradientTo: '#7c3aed',
               imageAssetId: '',
               overlayOpacity: 0.45,
               height: 'medium',

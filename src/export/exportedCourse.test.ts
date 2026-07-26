@@ -96,7 +96,7 @@ function course() {
 /** פורק את ה-ZIP לתיקייה זמנית ומחזיר את הנתיב לתיקיית השורש שבתוכו */
 async function exportAndExtract(): Promise<string> {
   const payload = buildExportPayload(course(), [imageAsset]);
-  const folderName = 'learnit-test-course';
+  const folderName = 'lomdi-test-course';
 
   const zip = await buildCourseZip({
     payload,
@@ -110,7 +110,7 @@ async function exportAndExtract(): Promise<string> {
   });
 
   const archive = await JSZip.loadAsync(Buffer.from(await zip.arrayBuffer()));
-  const target = mkdtempSync(join(tmpdir(), 'learnit-export-'));
+  const target = mkdtempSync(join(tmpdir(), 'lomdi-export-'));
 
   for (const [path, entry] of Object.entries(archive.files)) {
     const full = join(target, path);

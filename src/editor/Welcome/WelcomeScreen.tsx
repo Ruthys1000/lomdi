@@ -5,6 +5,7 @@ import { openProjectFile } from '@/persistence/session';
 import { getTemplate } from '@/templates';
 import type { TemplateResult } from '@/templates';
 import { APP_NAME, APP_VERSION } from '@/version';
+import { HowItWorks } from './HowItWorks';
 import { FeaturedProject, ProjectList } from './RecentProjects';
 import { useRecentProjects } from './useRecentProjects';
 
@@ -15,9 +16,9 @@ interface WelcomeScreenProps {
 }
 
 const SELLING_POINTS = [
-  { icon: WifiOff, text: 'רץ בלי שרת ובלי אינטרנט' },
+  { icon: WifiOff, text: 'בלי שרת, בלי אינטרנט' },
   { icon: Languages, text: 'עברית ו-RTL מהיסוד' },
-  { icon: Globe, text: 'ZIP להעלאה ל-Moodle' },
+  { icon: Globe, text: 'מוכן ל-Moodle' },
 ];
 
 /**
@@ -60,7 +61,7 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
 
   return (
     <main
-      className="relative min-h-full overflow-y-auto bg-sand-50"
+      className="relative min-h-full overflow-y-auto bg-app"
       onDragOver={(event) => {
         event.preventDefault();
         setDragging(true);
@@ -78,20 +79,20 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
         if (file) void handleFile(file);
       }}
     >
-      <header className="border-b border-sand-200 bg-white">
+      <header className="border-b border-edge bg-panel">
         <div className="mx-auto flex max-w-5xl items-center gap-3 px-6 py-4">
-          <span className="flex size-9 items-center justify-center rounded-xl bg-sand-900 text-white">
+          <span className="flex size-9 items-center justify-center rounded-xl bg-volt text-app">
             <BookOpen className="size-5" aria-hidden />
           </span>
           <div className="min-w-0">
-            <h1 className="text-base font-bold tracking-tight text-sand-900">{APP_NAME}</h1>
-            <p className="text-xs text-sand-500">מחולל לומדות HTML מבוסס בלוקים</p>
+            <h1 className="text-base font-bold tracking-tight text-fg">{APP_NAME}</h1>
+            <p className="text-xs text-fg-muted">בונים לומדה, מקבלים אתר</p>
           </div>
 
-          <ul className="ms-auto hidden gap-5 text-xs text-sand-500 lg:flex">
+          <ul className="ms-auto hidden gap-5 text-xs text-fg-muted lg:flex">
             {SELLING_POINTS.map(({ icon: Icon, text }) => (
               <li key={text} className="flex items-center gap-1.5">
-                <Icon className="size-3.5 text-sand-400" aria-hidden />
+                <Icon className="size-3.5 text-fg-muted" aria-hidden />
                 {text}
               </li>
             ))}
@@ -113,52 +114,71 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
           */}
           <section
             className={cn(
-              'flex flex-col rounded-2xl border border-sand-200 bg-white p-5',
+              'flex flex-col rounded-2xl border border-edge bg-panel p-5',
               !featured && 'items-center px-6 py-12 text-center',
             )}
             aria-labelledby="new-heading"
           >
-            <h2 id="new-heading" className="text-xs font-bold tracking-wide text-sand-500 uppercase">
-              לומדה חדשה
+            <h2 id="new-heading" className="text-xs font-bold tracking-wide text-fg-muted uppercase">
+              {featured ? 'לומדה חדשה' : 'עוד אין כאן כלום'}
             </h2>
 
             <p
               className={cn(
-                'mt-3 font-bold text-balance text-sand-900',
-                featured ? 'text-lg' : 'max-w-lg text-2xl leading-snug',
+                'mt-3 font-bold text-balance text-fg',
+                featured ? 'text-lg' : 'max-w-xl text-3xl leading-tight',
               )}
             >
-              בונים מבלוקים, ומקבלים תיקייה שרצה לבד בכל דפדפן.
+              לומדה שמסיימים עד הסוף.
+            </p>
+
+            <p
+              className={cn(
+                'mt-3 leading-relaxed text-fg-muted',
+                featured ? 'text-sm' : 'max-w-md text-base',
+              )}
+            >
+              בונים מבלוקים, מקבלים תיקייה שרצה לבד. בלי שרת, בלי אינטרנט, בלי לחכות לאף אחד.
             </p>
 
             <button
               type="button"
               onClick={() => startTemplate('blank')}
+              /*
+               * מלא רק כשאין לומדה מובילה.
+               *
+               * כששתי הפעולות על המסך, "ממשיכים" הוא הסביר מביניהן, ושני
+               * כפתורי לאים זהים זה לצד זה מבטלים זה את זה — אין שום דבר
+               * שאומר במה להתחיל. הכפתור נשאר גלוי ומעל הקיפול, רק מתוחם
+               * במקום מלא.
+               */
               className={cn(
-                'mt-4 inline-flex items-center gap-2 rounded-xl bg-clay-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-clay-700',
-                featured ? 'self-start' : 'px-6 py-3 text-base',
+                'mt-5 inline-flex items-center gap-2 rounded-xl font-semibold transition',
+                featured
+                  ? 'self-start border border-edge-strong px-5 py-2.5 text-sm text-fg hover:border-volt hover:text-volt'
+                  : 'bg-volt px-7 py-3.5 text-base text-app hover:bg-volt-bright',
               )}
             >
               <Plus className="size-4" aria-hidden />
-              לומדה חדשה
+              בונים לומדה
             </button>
 
             {/* שתי נקודות כניסה נוספות כטקסט ולא ככרטיסים: הן נחוצות פעם
                 אחת בחיים של משתמש, ולא מגיע להן שליש מהמסך */}
-            <p className="mt-3 text-sm text-sand-500">
+            <p className="mt-3 text-sm text-fg-muted">
               או{' '}
               <button
                 type="button"
                 onClick={() => startTemplate('shortTraining')}
-                className="font-semibold text-clay-700 underline underline-offset-2 transition hover:text-clay-800"
+                className="font-semibold text-volt underline underline-offset-2 transition hover:text-volt-bright"
               >
-                מבנה מוכן של שלושה פרקים
+                מבנה מוכן
               </button>{' '}
               ·{' '}
               <button
                 type="button"
                 onClick={() => startTemplate('sample')}
-                className="font-semibold text-clay-700 underline underline-offset-2 transition hover:text-clay-800"
+                className="font-semibold text-volt underline underline-offset-2 transition hover:text-volt-bright"
               >
                 לומדת הדוגמה
               </button>
@@ -166,8 +186,11 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
           </section>
         </div>
 
+        {/* נעלם מעצמו ברגע שיש לומדה ראשונה — ראו HowItWorks */}
+        {!featured && <HowItWorks />}
+
         {error && (
-          <p className="mt-6 rounded-xl bg-ochre-50 px-4 py-3 text-sm leading-relaxed text-ochre-800">
+          <p className="mt-6 rounded-xl bg-warn-soft px-4 py-3 text-sm leading-relaxed text-warn">
             {error}
           </p>
         )}
@@ -179,29 +202,29 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
         />
 
         <section className="mt-10" aria-labelledby="open-heading">
-          <h2 id="open-heading" className="text-base font-bold text-sand-900">
-            פתיחה מקובץ פרויקט
+          <h2 id="open-heading" className="text-base font-bold text-fg">
+            יש קובץ לומדה?
           </h2>
 
-          <div className="mt-3 flex flex-wrap items-center gap-4 rounded-2xl border border-dashed border-sand-300 bg-white px-5 py-4">
-            <Upload className="size-5 shrink-0 text-sand-400" aria-hidden />
+          <div className="mt-3 flex flex-wrap items-center gap-4 rounded-2xl border border-dashed border-edge-strong bg-panel px-5 py-4">
+            <Upload className="size-5 shrink-0 text-fg-muted" aria-hidden />
 
-            <p className="min-w-0 flex-1 text-sm leading-relaxed text-sand-500">
-              גררו לכאן קובץ ‎.course.zip‎ — לכל מקום במסך. הוא כולל את התוכן, העיצוב והתמונות.
+            <p className="min-w-0 flex-1 text-sm leading-relaxed text-fg-muted">
+              גררו אותו לכאן — לכל מקום במסך. הקובץ כולל את התוכן, העיצוב והתמונות.
             </p>
 
             <button
               type="button"
               disabled={loading}
               onClick={() => fileInputRef.current?.click()}
-              className="rounded-xl border border-sand-300 px-4 py-2 text-sm font-semibold text-sand-700 transition hover:border-clay-300 hover:text-clay-700 disabled:opacity-50"
+              className="rounded-xl border border-edge-strong px-4 py-2 text-sm font-semibold text-fg-soft transition hover:border-volt-dim hover:text-volt disabled:opacity-50"
             >
               {loading ? 'טוען…' : 'בחירת קובץ'}
             </button>
           </div>
 
           {fileErrors.length > 0 && (
-            <ul className="mt-3 space-y-1 rounded-xl bg-ochre-50 px-4 py-3 text-sm leading-relaxed text-ochre-800">
+            <ul className="mt-3 space-y-1 rounded-xl bg-warn-soft px-4 py-3 text-sm leading-relaxed text-warn">
               {fileErrors.map((message) => (
                 <li key={message}>{message}</li>
               ))}
@@ -222,28 +245,28 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
         </section>
 
         {/* אותן שלוש נקודות שבכותרת, למסכים צרים שבהם הן אינן נכנסות לשם */}
-        <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-xs text-sand-500 lg:hidden">
+        <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-xs text-fg-muted lg:hidden">
           {SELLING_POINTS.map(({ icon: Icon, text }) => (
             <li key={text} className="flex items-center gap-1.5">
-              <Icon className="size-3.5 text-sand-400" aria-hidden />
+              <Icon className="size-3.5 text-fg-muted" aria-hidden />
               {text}
             </li>
           ))}
         </ul>
 
-        <p className="mt-8 text-center text-xs text-sand-400">
-          {APP_NAME} {APP_VERSION} · הלומדות נשמרות בדפדפן שלכם בלבד ואינן נשלחות לשום שרת
+        <p className="mt-8 text-center text-xs text-fg-muted">
+          {APP_NAME} {APP_VERSION} · נשמר אצלכם בדפדפן. לא עולה לשום שרת.
         </p>
       </div>
 
       {/* שכבת היעד. על כל המסך ולא על קופסה אחת — הגרירה תמיד תפסה את כל
           המסך, אבל שום דבר לא הראה את זה */}
       {dragging && (
-        <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-sand-50/85 p-8">
-          <div className="flex w-full max-w-xl flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-clay-400 bg-white/90 px-8 py-12">
-            <FileUp className="size-8 text-clay-600" aria-hidden />
-            <p className="text-lg font-bold text-sand-900">שחררו כאן את קובץ הפרויקט</p>
-            <p className="text-sm text-sand-500">‎.course.zip‎</p>
+        <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-app/85 p-8">
+          <div className="flex w-full max-w-xl flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-volt-dim bg-panel/90 px-8 py-12">
+            <FileUp className="size-8 text-volt" aria-hidden />
+            <p className="text-lg font-bold text-fg">שחררו. זה נטען לבד.</p>
+            <p className="text-sm text-fg-muted">‎.course.zip‎</p>
           </div>
         </div>
       )}

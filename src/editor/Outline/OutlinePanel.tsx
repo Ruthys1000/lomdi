@@ -87,14 +87,14 @@ export function OutlinePanel() {
   };
 
   return (
-    <aside className="flex min-h-0 flex-col bg-white" aria-label="מבנה הלומדה">
-      <div className="flex items-center justify-between border-b border-sand-200 px-4 py-3">
-        <h2 className="text-xs font-bold tracking-wide text-sand-500 uppercase">מבנה הלומדה</h2>
+    <aside className="flex min-h-0 flex-col bg-panel" aria-label="מבנה הלומדה">
+      <div className="flex items-center justify-between border-b border-edge px-4 py-3">
+        <h2 className="text-xs font-bold tracking-wide text-fg-muted uppercase">מבנה הלומדה</h2>
         <button
           type="button"
           onClick={handleAddChapter}
           title="הוספת פרק"
-          className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-clay-700 transition hover:bg-clay-50"
+          className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-volt transition hover:bg-volt-soft"
         >
           <Plus className="size-3.5" aria-hidden />
           פרק
@@ -127,7 +127,7 @@ export function OutlinePanel() {
         </DndContext>
 
         {course.chapters.length === 0 && (
-          <p className="px-3 py-8 text-center text-sm text-sand-400">אין עדיין פרקים בלומדה.</p>
+          <p className="px-3 py-8 text-center text-sm text-fg-muted">אין עדיין פרקים בלומדה.</p>
         )}
       </div>
 

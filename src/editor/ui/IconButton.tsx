@@ -33,10 +33,10 @@ export function IconButton({
         'inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium transition',
         'disabled:cursor-not-allowed disabled:opacity-40',
         variant === 'solid'
-          ? 'bg-clay-600 text-white hover:bg-clay-700'
+          ? 'bg-volt text-app hover:bg-volt-bright'
           : active
-            ? 'bg-clay-50 text-clay-700'
-            : 'text-sand-600 hover:bg-sand-100 hover:text-sand-900',
+            ? 'bg-volt-soft text-volt'
+            : 'text-fg-soft hover:bg-panel-2 hover:text-fg',
       )}
     >
       <Icon className="size-4 shrink-0" />

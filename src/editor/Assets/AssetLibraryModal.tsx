@@ -143,16 +143,16 @@ export function AssetLibraryModal({ open, onClose, onPick, kind }: AssetLibraryM
         void handleFiles(event.dataTransfer.files);
       }}
       aria-label="ספריית הנכסים"
-      className="m-auto w-[min(52rem,calc(100vw-2rem))] rounded-2xl border border-sand-200 p-0 shadow-2xl backdrop:bg-sand-900/40"
+      className="m-auto w-[min(52rem,calc(100vw-2rem))] rounded-2xl border border-edge p-0 shadow-2xl backdrop:bg-app/40"
     >
-      <div className="flex items-center gap-3 border-b border-sand-100 px-5 py-4">
-        <h2 className="text-sm font-bold text-sand-900">
+      <div className="flex items-center gap-3 border-b border-edge px-5 py-4">
+        <h2 className="text-sm font-bold text-fg">
           {onPick ? `בחירת ${kind ? kindLabels[kind] : 'נכס'}` : 'ספריית הנכסים'}
         </h2>
 
         <div className="relative flex-1">
           <Search
-            className="pointer-events-none absolute inset-y-0 my-auto size-4 text-sand-400 start-3"
+            className="pointer-events-none absolute inset-y-0 my-auto size-4 text-fg-muted start-3"
             aria-hidden
           />
           <input
@@ -160,7 +160,7 @@ export function AssetLibraryModal({ open, onClose, onPick, kind }: AssetLibraryM
             onChange={(event) => setQuery(event.target.value)}
             placeholder="חיפוש לפי שם הקובץ"
             aria-label="חיפוש נכס"
-            className="w-full rounded-lg border border-sand-200 py-1.5 ps-9 pe-3 text-sm focus:border-clay-500 focus:ring-1 focus:ring-clay-500 focus:outline-none"
+            className="w-full rounded-lg border border-edge py-1.5 ps-9 pe-3 text-sm focus:border-volt-dim focus:ring-1 focus:ring-volt focus:outline-none"
           />
         </div>
 
@@ -168,7 +168,7 @@ export function AssetLibraryModal({ open, onClose, onPick, kind }: AssetLibraryM
           type="button"
           disabled={busy}
           onClick={() => inputRef.current?.click()}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-clay-600 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-clay-700 disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-volt px-3 py-1.5 text-sm font-semibold text-app transition hover:bg-volt-bright disabled:opacity-50"
         >
           <Upload className="size-4" aria-hidden />
           {busy ? 'מעלה…' : 'העלאה'}
@@ -178,7 +178,7 @@ export function AssetLibraryModal({ open, onClose, onPick, kind }: AssetLibraryM
           type="button"
           onClick={onClose}
           aria-label="סגירת ספריית הנכסים"
-          className="rounded-lg p-1.5 text-sand-400 transition hover:bg-sand-100 hover:text-sand-700"
+          className="rounded-lg p-1.5 text-fg-muted transition hover:bg-panel-2 hover:text-fg-soft"
         >
           <X className="size-4" aria-hidden />
         </button>
@@ -198,7 +198,7 @@ export function AssetLibraryModal({ open, onClose, onPick, kind }: AssetLibraryM
       />
 
       {errors.length > 0 && (
-        <ul className="border-b border-ochre-100 bg-ochre-50 px-5 py-3 text-xs leading-relaxed text-ochre-800">
+        <ul className="border-b border-warn bg-warn-soft px-5 py-3 text-xs leading-relaxed text-warn">
           {errors.map((error) => (
             <li key={error} className="flex items-start gap-2">
               <AlertCircle className="mt-0.5 size-3.5 shrink-0" aria-hidden />
@@ -211,16 +211,16 @@ export function AssetLibraryModal({ open, onClose, onPick, kind }: AssetLibraryM
       <div
         className={cn(
           'max-h-[60vh] min-h-[16rem] overflow-y-auto p-5 transition',
-          dragging && 'bg-clay-50/60 ring-2 ring-inset ring-clay-400',
+          dragging && 'bg-volt-soft/60 ring-2 ring-inset ring-volt',
         )}
       >
         {visible.length === 0 ? (
-          <div className="flex h-56 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-sand-200 text-center">
-            <ImageIcon className="size-8 text-sand-300" aria-hidden />
-            <p className="text-sm font-semibold text-sand-500">
+          <div className="flex h-56 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-edge text-center">
+            <ImageIcon className="size-8 text-fg-muted" aria-hidden />
+            <p className="text-sm font-semibold text-fg-muted">
               {assets.length === 0 ? 'עדיין אין נכסים בפרויקט' : 'אין נכס שתואם את החיפוש'}
             </p>
-            <p className="max-w-sm text-xs leading-relaxed text-sand-400">
+            <p className="max-w-sm text-xs leading-relaxed text-fg-muted">
               גררו לכאן תמונות או סרטונים, או לחצו על "העלאה". הקבצים נשמרים בתוך הפרויקט ונארזים
               איתו לקובץ ולתוצר המיוצא.
             </p>
@@ -238,13 +238,13 @@ export function AssetLibraryModal({ open, onClose, onPick, kind }: AssetLibraryM
                     onClick={() => onPick?.(asset.id)}
                     disabled={!onPick}
                     className={cn(
-                      'block w-full overflow-hidden rounded-xl border border-sand-200 bg-white text-start transition',
+                      'block w-full overflow-hidden rounded-xl border border-edge bg-panel text-start transition',
                       onPick
-                        ? 'hover:-translate-y-0.5 hover:border-clay-400 hover:shadow-md'
+                        ? 'hover:-translate-y-0.5 hover:border-volt-dim hover:shadow-md'
                         : 'cursor-default',
                     )}
                   >
-                    <span className="flex h-28 items-center justify-center bg-sand-50">
+                    <span className="flex h-28 items-center justify-center bg-app">
                       {asset.kind === 'image' && url ? (
                         <img
                           src={url}
@@ -253,15 +253,15 @@ export function AssetLibraryModal({ open, onClose, onPick, kind }: AssetLibraryM
                           loading="lazy"
                         />
                       ) : (
-                        <Film className="size-7 text-sand-300" aria-hidden />
+                        <Film className="size-7 text-fg-muted" aria-hidden />
                       )}
                     </span>
 
                     <span className="block px-2.5 py-2">
-                      <span className="block truncate text-xs font-semibold text-sand-800">
+                      <span className="block truncate text-xs font-semibold text-fg">
                         {asset.originalName}
                       </span>
-                      <span className="mt-0.5 flex items-center gap-1.5 text-[11px] text-sand-400">
+                      <span className="mt-0.5 flex items-center gap-1.5 text-[11px] text-fg-muted">
                         <span dir="ltr">{formatBytes(asset.size)}</span>
                         {asset.width && asset.height && (
                           <span dir="ltr">
@@ -270,7 +270,7 @@ export function AssetLibraryModal({ open, onClose, onPick, kind }: AssetLibraryM
                         )}
                       </span>
                       {unused && (
-                        <span className="mt-1.5 inline-block rounded-md bg-sand-100 px-1.5 py-0.5 text-[10px] font-medium text-sand-500">
+                        <span className="mt-1.5 inline-block rounded-md bg-panel-2 px-1.5 py-0.5 text-[10px] font-medium text-fg-muted">
                           לא בשימוש
                         </span>
                       )}
@@ -281,7 +281,7 @@ export function AssetLibraryModal({ open, onClose, onPick, kind }: AssetLibraryM
                     type="button"
                     onClick={() => setPendingDelete(asset)}
                     aria-label={`מחיקת ${asset.originalName}`}
-                    className="absolute end-1.5 top-1.5 rounded-lg bg-white/90 p-1.5 text-sand-400 opacity-0 shadow-sm transition group-hover:opacity-100 hover:text-plum-600 focus:opacity-100"
+                    className="absolute end-1.5 top-1.5 rounded-lg bg-panel/90 p-1.5 text-fg-muted opacity-0 shadow-sm transition group-hover:opacity-100 hover:text-danger focus:opacity-100"
                   >
                     <Trash2 className="size-3.5" aria-hidden />
                   </button>
@@ -330,10 +330,10 @@ function DeleteAssetConfirm({
     <div
       role="alertdialog"
       aria-label="אישור מחיקת נכס"
-      className="border-t border-sand-100 bg-sand-50 px-5 py-4"
+      className="border-t border-edge bg-app px-5 py-4"
     >
-      <p className="text-sm font-semibold text-sand-900">מחיקת "{asset.originalName}"?</p>
-      <p className="mt-1 text-xs leading-relaxed text-sand-600">
+      <p className="text-sm font-semibold text-fg">מחיקת "{asset.originalName}"?</p>
+      <p className="mt-1 text-xs leading-relaxed text-fg-soft">
         {usage
           ? 'הנכס מופיע בלומדה. אחרי המחיקה הבלוקים שמשתמשים בו יציגו מצב ריק, ותצטרכו לבחור בהם נכס אחר.'
           : 'הנכס אינו בשימוש באף בלוק. המחיקה תפנה את המקום שהוא תופס.'}
@@ -342,14 +342,14 @@ function DeleteAssetConfirm({
         <button
           type="button"
           onClick={onConfirm}
-          className="rounded-lg bg-plum-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-plum-700"
+          className="rounded-lg bg-danger px-3 py-1.5 text-xs font-semibold text-app hover:opacity-90"
         >
           מחיקה
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-lg border border-sand-200 bg-white px-3 py-1.5 text-xs font-semibold text-sand-700 hover:bg-sand-50"
+          className="rounded-lg border border-edge bg-panel px-3 py-1.5 text-xs font-semibold text-fg-soft hover:bg-app"
         >
           ביטול
         </button>
