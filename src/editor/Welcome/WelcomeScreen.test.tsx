@@ -108,7 +108,7 @@ describe('מסך הפתיחה', () => {
     expect(featured).toHaveTextContent('נפתחה אחרונה');
   });
 
-  it('גם עם עשר לומדות שמורות, "בונים לומדה" מופיע לפני הרשימה', async () => {
+  it('גם עם עשר לומדות שמורות, "מתחילים לבנות" מופיע לפני הרשימה', async () => {
     projects = Array.from({ length: 10 }, (_, index) =>
       project(`p${index}`, `לומדה ${index}`, `2026-03-0${(index % 9) + 1}T10:00:00.000Z`),
     );
@@ -116,7 +116,9 @@ describe('מסך הפתיחה', () => {
 
     await setup();
 
-    const newButton = screen.getByRole('button', { name: 'מתחילים לבנות' });
+    // "מתחילים לבנות" מופיע כמה פעמים (רצועת המבקר החוזר, ה-Hero, הסוגר);
+    // הראשון הוא זה שברצועה העליונה, והוא זה שצריך להיות מעל הרשימה
+    const newButton = screen.getAllByRole('button', { name: 'מתחילים לבנות' })[0];
     const listHeading = screen.getByRole('heading', { name: 'הלומדות שלי' });
 
     // DOCUMENT_POSITION_FOLLOWING — הכותרת של הרשימה באה *אחרי* הכפתור
@@ -139,16 +141,20 @@ describe('מסך הפתיחה', () => {
     expect(screen.getByText('לומדה 9')).toBeInTheDocument();
   });
 
-  it('פס "איך עובדים עם לומדי" מוצג למבקר חדש, ונעלם ברגע שיש לומדה שמורה', async () => {
+  it('הנחיתה ("איך עובדים עם לומדי") מוצגת תמיד — גם למבקר חדש וגם כשיש לומדות שמורות', async () => {
+    // מבקר חדש
     await setup();
     expect(screen.getByRole('heading', { name: 'איך עובדים עם לומדי' })).toBeInTheDocument();
 
+    // מבקר חוזר — הנחיתה נשארת נגישה מתחת לרצועת "ממשיכים", ולא נעלמת
     cleanup();
     projects = [project('a', 'לומדה', '2026-03-01T10:00:00.000Z')];
     lastProjectId = 'a';
     await setup();
 
-    expect(screen.queryByRole('heading', { name: 'איך עובדים עם לומדי' })).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'איך עובדים עם לומדי' })).toBeInTheDocument();
+    // ועדיין רואים את רצועת ההמשך של המבקר החוזר
+    expect(screen.getByRole('region', { name: 'ממשיכים מאיפה שעצרתם' })).toBeInTheDocument();
   });
 
   it('קובץ שנגרר לכל מקום במסך נטען כפרויקט', async () => {
