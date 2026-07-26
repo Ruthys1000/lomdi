@@ -105,8 +105,8 @@ export function ThemePanel({ theme }: { theme: Theme }) {
                 title={preset.description}
                 className={
                   isActive
-                    ? 'overflow-hidden rounded-xl border-2 border-blue-500 text-start transition'
-                    : 'overflow-hidden rounded-xl border border-slate-200 text-start transition hover:border-slate-300'
+                    ? 'overflow-hidden rounded-xl border-2 border-clay-500 text-start transition'
+                    : 'overflow-hidden rounded-xl border border-sand-200 text-start transition hover:border-sand-300'
                 }
               >
                 {/* דגימה חיה של הערכה, ולא ארבע נקודות צבע: כך רואים גם את
@@ -131,7 +131,7 @@ export function ThemePanel({ theme }: { theme: Theme }) {
                     aria-hidden
                   />
                 </span>
-                <span className="block truncate px-2.5 py-2 text-xs font-semibold text-slate-900">
+                <span className="block truncate px-2.5 py-2 text-xs font-semibold text-sand-900">
                   {preset.name}
                 </span>
               </button>
@@ -143,7 +143,7 @@ export function ThemePanel({ theme }: { theme: Theme }) {
           <button
             type="button"
             onClick={() => setTheme(themePresets[0].theme)}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-sand-200 px-3 py-2 text-xs font-semibold text-sand-600 transition hover:bg-sand-50"
           >
             <RotateCcw className="size-3.5" aria-hidden />
             חזרה לערכה מוכנה
@@ -155,17 +155,17 @@ export function ThemePanel({ theme }: { theme: Theme }) {
         )}
       </FieldGroup>
 
-      <section className="border-b border-slate-100">
+      <section className="border-b border-sand-100">
         <button
           type="button"
           onClick={() => setShowAdvanced((open) => !open)}
           aria-expanded={showAdvanced}
-          className="flex w-full items-center gap-1.5 px-4 py-3 text-xs font-bold text-slate-900 transition hover:bg-slate-50"
+          className="flex w-full items-center gap-1.5 px-4 py-3 text-xs font-bold text-sand-900 transition hover:bg-sand-50"
         >
           {showAdvanced ? (
-            <ChevronDown className="size-3.5 text-slate-400" aria-hidden />
+            <ChevronDown className="size-3.5 text-sand-400" aria-hidden />
           ) : (
-            <ChevronLeft className="size-3.5 text-slate-400" aria-hidden />
+            <ChevronLeft className="size-3.5 text-sand-400" aria-hidden />
           )}
           התאמה אישית
         </button>

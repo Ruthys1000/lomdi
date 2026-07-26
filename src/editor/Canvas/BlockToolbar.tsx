@@ -35,7 +35,9 @@ export function BlockToolbar({
   return (
     <div
       className={cn(
-        'absolute -top-3.5 z-30 flex items-center gap-0.5 rounded-lg border border-slate-200 bg-white p-0.5 shadow-sm transition',
+        // top-0 ולא -top-3.5: הסרגל יושב במרזב שה-pt-5 של SortableBlock
+        // פותח לו, ולכן אינו נחתך בבלוק הראשון ואינו מכסה תוכן באף בלוק
+        'absolute top-0 z-30 flex items-center gap-0.5 rounded-lg border border-sand-200 bg-white p-0.5 shadow-sm transition',
         'start-2',
         visible ? 'opacity-100' : 'pointer-events-none opacity-0',
       )}
@@ -44,7 +46,7 @@ export function BlockToolbar({
         type="button"
         aria-label="גרירה לשינוי סדר"
         title="גרירה לשינוי סדר"
-        className="cursor-grab rounded p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 active:cursor-grabbing"
+        className="cursor-grab rounded p-1 text-sand-400 transition hover:bg-sand-100 hover:text-sand-700 active:cursor-grabbing"
         {...dragAttributes}
         {...dragListeners}
       >
@@ -60,7 +62,7 @@ export function BlockToolbar({
       />
       <ToolbarAction icon={Copy} label="שכפול" onClick={onDuplicate} />
 
-      <span className="mx-0.5 h-4 w-px bg-slate-200" aria-hidden />
+      <span className="mx-0.5 h-4 w-px bg-sand-200" aria-hidden />
 
       <ToolbarAction icon={Trash2} label="מחיקה" onClick={onDelete} destructive />
     </div>
@@ -90,8 +92,8 @@ function ToolbarAction({
       className={cn(
         'rounded p-1 transition disabled:cursor-not-allowed disabled:opacity-30',
         destructive
-          ? 'text-slate-400 hover:bg-red-50 hover:text-red-600'
-          : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700',
+          ? 'text-sand-400 hover:bg-plum-50 hover:text-plum-600'
+          : 'text-sand-400 hover:bg-sand-100 hover:text-sand-700',
       )}
     >
       <Icon className="size-3.5" aria-hidden />

@@ -4,7 +4,8 @@ import { createQuizOption } from '@/blocks/quiz/content';
 import { createBlock, createChapter, createCourse } from '@/model/factory';
 import { bulletList, heading, paragraph, richText } from '@/model/richText';
 import { getThemePreset } from '@/model/themes';
-import type { Course } from '@/model/types';
+import { courseOutlineIllustration, practiceStopIllustration } from './illustrations';
+import type { TemplateResult } from '@/templates/types';
 
 /**
  * פרויקט הדוגמה (סעיף 21 באפיון).
@@ -13,19 +14,30 @@ import type { Course } from '@/model/types';
  * אפשר יהיה להתרשם מהתוצר, וכדי שבעיות RTL אמיתיות (סימני פיסוק, מספרים
  * בתוך משפט, מירכאות) יתגלו בפיתוח ולא אצל המשתמש.
  *
- * בלוקי התמונה נולדים ריקים במכוון: הדוגמה נטענת בקוד ולא מקובץ, וצירוף
- * תמונות אליה היה מחייב לשמור בינאריים בריפו ולטעון אותם ל-IndexedDB בכל
- * פתיחה. במקום זה הם מציגים מצב ריק שמזמין לבחור תמונה מספריית הנכסים.
+ * הדוגמה מגיעה עם איורים משלה (`illustrations.ts`) ולא עם בלוקי מדיה
+ * ריקים. בלוק תמונה בלי תמונה ובלוק וידאו בלי סרטון נראים כמו לומדה
+ * שבורה, לא כמו הזמנה למלא אותם — וזה בדיוק הרושם ההפוך ממה שדוגמה
+ * אמורה לעשות.
  */
-export function createSampleCourse(): Course {
-  return createCourse({
+export function createSampleCourse(): TemplateResult {
+  const outline = courseOutlineIllustration();
+  const practice = practiceStopIllustration();
+
+  const course = createCourse({
     title: 'איך בונים הדרכה דיגיטלית אפקטיבית',
     subtitle: 'מדריך קצר למי שבונה לומדות בארגון',
     description:
-      'לומדת דוגמה שמדגימה את סוגי הבלוקים במחולל: כותרת, טקסט, כרטיסים, אקורדיון, וידאו ושאלת תרגול.',
-    theme: getThemePreset('clean')!.theme,
-    chapters: [openingChapter(), principlesChapter(), practiceChapter(), summaryChapter()],
+      'לומדת דוגמה שמדגימה את סוגי הבלוקים במחולל: כותרת, טקסט, כרטיסים, תמונה, אקורדיון ושאלת תרגול.',
+    theme: getThemePreset('warmSand')!.theme,
+    chapters: [
+      openingChapter(),
+      principlesChapter(outline.meta.id),
+      practiceChapter(practice.meta.id),
+      summaryChapter(),
+    ],
   });
+
+  return { course, assets: [outline, practice] };
 }
 
 // ─────────────────────────── פרק 1 ───────────────────────────
@@ -40,10 +52,12 @@ function openingChapter() {
           title: 'איך בונים הדרכה דיגיטלית אפקטיבית',
           subtitle: 'מדריך קצר למי שבונה לומדות בארגון',
           intro: 'כשמונה דקות קריאה',
-          backgroundType: 'gradient',
-          backgroundColor: '#2563eb',
-          gradientFrom: '#1d4ed8',
-          gradientTo: '#7c3aed',
+          // צבע אחיד ולא גרדיאנט: הכותרת אמורה להראות איך נראית לומדה
+          // בערכת העיצוב שנבחרה, ולא להציג אפקט שאינו חלק מאף ערכה
+          backgroundType: 'color',
+          backgroundColor: '#33261c',
+          gradientFrom: '#33261c',
+          gradientTo: '#a2543a',
           imageAssetId: '',
           overlayOpacity: 0.45,
           height: 'tall',
@@ -104,7 +118,7 @@ function openingChapter() {
 
 // ─────────────────────────── פרק 2 ───────────────────────────
 
-function principlesChapter() {
+function principlesChapter(outlineAssetId: string) {
   return createChapter({
     title: 'עקרונות בנייה',
     description: 'איך מארגנים את התוכן כך שיהיה אפשר ללמוד ממנו',
@@ -116,8 +130,8 @@ function principlesChapter() {
           verticalAlign: 'center',
           aspectRatio: '4:3',
           roundness: 'medium',
-          imageAssetId: '',
-          alt: 'שרטוט של מבנה לומדה מחולק לפרקים',
+          imageAssetId: outlineAssetId,
+          alt: 'שרטוט של מבנה לומדה מחולק לארבעה פרקים, הראשון מודגש',
           caption: 'מבנה של לומדה בת ארבעה פרקים',
           button: { enabled: false, label: 'קראו עוד', href: '', newTab: true },
           doc: richText(
@@ -186,7 +200,7 @@ function principlesChapter() {
 
 // ─────────────────────────── פרק 3 ───────────────────────────
 
-function practiceChapter() {
+function practiceChapter(practiceAssetId: string) {
   return createChapter({
     title: 'תרגול ובדיקה',
     description: 'איך בודקים שהמסר עבר',
@@ -203,21 +217,24 @@ function practiceChapter() {
         },
       }),
 
-      createBlock('video', {
+      /*
+       * כאן ישב בלוק וידאו ריק.
+       *
+       * לומדת דוגמה לא צריכה לגרור תלות בסרטון של מישהו אחר, אבל בלוק
+       * וידאו בלי מקור מרנדר מלבן ריק עם הוראה — כלומר הדוגמה נפתחה עם
+       * חור באמצע. בלוק תמונה עם איור אמיתי מדגים את אותה יכולת מדיה
+       * ונראה כמו לומדה גמורה. בלוק הווידאו זמין מספריית הבלוקים למי
+       * שרוצה אותו.
+       */
+      createBlock('image', {
         content: {
-          source: 'youtube',
-          // ריק בכוונה: לומדת דוגמה לא צריכה לגרור תלות בסרטון של מישהו
-          // אחר. הדבקת קישור בפאנל ההגדרות תציג נגן מיד.
-          url: '',
-          assetId: '',
-          posterAssetId: '',
-          caption: 'הדביקו קישור לסרטון בפאנל ההגדרות כדי לראות נגן כאן',
-          aspectRatio: '16:9',
+          assetId: practiceAssetId,
+          alt: 'שאלת תרגול עם שלוש אפשרויות, אחת מהן מסומנת כנכונה',
+          caption: 'שאלה קצרה סמוך לתוכן — לא מבחן בסוף',
+          aspectRatio: '4:3',
+          fit: 'contain',
           roundness: 'medium',
-          autoplay: false,
-          controls: true,
-          loop: false,
-          muted: false,
+          lightbox: true,
         },
       }),
 

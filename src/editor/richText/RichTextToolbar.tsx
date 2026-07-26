@@ -33,7 +33,7 @@ export function RichTextToolbar({ editor }: { editor: Editor }) {
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-0.5 rounded-lg border border-slate-200 bg-white p-1 shadow-sm">
+    <div className="flex flex-wrap items-center gap-0.5 rounded-lg border border-sand-200 bg-white p-1 shadow-sm">
       <ToolbarButton
         icon={Bold}
         label="מודגש"
@@ -102,7 +102,7 @@ export function RichTextToolbar({ editor }: { editor: Editor }) {
 }
 
 function Separator() {
-  return <span className="mx-0.5 h-5 w-px bg-slate-200" aria-hidden />;
+  return <span className="mx-0.5 h-5 w-px bg-sand-200" aria-hidden />;
 }
 
 function ToolbarButton({
@@ -126,7 +126,7 @@ function ToolbarButton({
       onClick={onClick}
       className={cn(
         'rounded p-1.5 transition',
-        active ? 'bg-blue-100 text-blue-700' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900',
+        active ? 'bg-clay-100 text-clay-700' : 'text-sand-500 hover:bg-sand-100 hover:text-sand-900',
       )}
     >
       <Icon className="size-4" aria-hidden />

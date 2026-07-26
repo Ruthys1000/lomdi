@@ -67,14 +67,14 @@ export function BlockLibraryModal({ open, onClose, onPick }: BlockLibraryModalPr
         onClose();
       }}
       onClose={onClose}
-      className="m-auto w-[min(46rem,calc(100vw-2rem))] rounded-2xl border border-slate-200 p-0 shadow-2xl backdrop:bg-slate-900/40"
+      className="m-auto w-[min(46rem,calc(100vw-2rem))] rounded-2xl border border-sand-200 p-0 shadow-2xl backdrop:bg-sand-900/40"
     >
-      <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
-        <h2 className="text-sm font-bold text-slate-900">הוספת בלוק</h2>
+      <div className="flex items-center gap-3 border-b border-sand-100 px-5 py-4">
+        <h2 className="text-sm font-bold text-sand-900">הוספת בלוק</h2>
 
         <div className="relative flex-1">
           <Search
-            className="pointer-events-none absolute inset-y-0 my-auto size-4 text-slate-400 start-3"
+            className="pointer-events-none absolute inset-y-0 my-auto size-4 text-sand-400 start-3"
             aria-hidden
           />
           <input
@@ -83,7 +83,7 @@ export function BlockLibraryModal({ open, onClose, onPick }: BlockLibraryModalPr
             onChange={(event) => setQuery(event.target.value)}
             placeholder="חיפוש בלוק"
             aria-label="חיפוש בלוק"
-            className="w-full rounded-lg border border-slate-200 py-2 text-sm ps-9 pe-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+            className="w-full rounded-lg border border-sand-200 py-2 text-sm ps-9 pe-3 focus:border-clay-500 focus:ring-1 focus:ring-clay-500 focus:outline-none"
           />
         </div>
 
@@ -91,13 +91,13 @@ export function BlockLibraryModal({ open, onClose, onPick }: BlockLibraryModalPr
           type="button"
           onClick={onClose}
           aria-label="סגירה"
-          className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+          className="rounded-lg p-1.5 text-sand-400 transition hover:bg-sand-100 hover:text-sand-700"
         >
           <X className="size-4" aria-hidden />
         </button>
       </div>
 
-      <div className="flex gap-1 border-b border-slate-100 px-5 py-2.5" role="tablist">
+      <div className="flex gap-1 border-b border-sand-100 px-5 py-2.5" role="tablist">
         {categories.map((item) => (
           <button
             key={item.id}
@@ -108,8 +108,8 @@ export function BlockLibraryModal({ open, onClose, onPick }: BlockLibraryModalPr
             className={cn(
               'rounded-lg px-3 py-1 text-xs font-semibold transition',
               category === item.id
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900',
+                ? 'bg-sand-900 text-white'
+                : 'text-sand-500 hover:bg-sand-100 hover:text-sand-900',
             )}
           >
             {item.label}
@@ -119,7 +119,7 @@ export function BlockLibraryModal({ open, onClose, onPick }: BlockLibraryModalPr
 
       <div className="max-h-[55vh] overflow-y-auto p-5">
         {results.length === 0 ? (
-          <p className="py-10 text-center text-sm text-slate-400">
+          <p className="py-10 text-center text-sm text-sand-400">
             לא נמצא בלוק שמתאים ל&quot;{query}&quot;.
           </p>
         ) : (
@@ -137,27 +137,27 @@ export function BlockLibraryModal({ open, onClose, onPick }: BlockLibraryModalPr
                     className={cn(
                       'group h-full w-full rounded-xl border p-3 text-start transition',
                       available
-                        ? 'border-slate-200 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md'
-                        : 'cursor-not-allowed border-dashed border-slate-200 opacity-55',
+                        ? 'border-sand-200 hover:-translate-y-0.5 hover:border-clay-300 hover:shadow-md'
+                        : 'cursor-not-allowed border-dashed border-sand-200 opacity-55',
                     )}
                   >
                     <span
                       className={cn(
                         'flex size-8 items-center justify-center rounded-lg transition',
                         available
-                          ? 'bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white'
-                          : 'bg-slate-100 text-slate-400',
+                          ? 'bg-clay-50 text-clay-600 group-hover:bg-clay-600 group-hover:text-white'
+                          : 'bg-sand-100 text-sand-400',
                       )}
                     >
                       <Icon className="size-4" aria-hidden />
                     </span>
 
                     <span className="mt-2 flex items-baseline gap-1.5">
-                      <span className="text-sm font-semibold text-slate-900">{definition.label}</span>
-                      {!available && <span className="text-[10px] text-slate-400">בקרוב</span>}
+                      <span className="text-sm font-semibold text-sand-900">{definition.label}</span>
+                      {!available && <span className="text-[10px] text-sand-400">בקרוב</span>}
                     </span>
 
-                    <span className="mt-0.5 block text-[11px] leading-relaxed text-slate-500">
+                    <span className="mt-0.5 block text-[11px] leading-relaxed text-sand-500">
                       {definition.description}
                     </span>
                   </button>

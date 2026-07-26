@@ -1,98 +1,112 @@
-import { useEffect, useState } from 'react';
-import { Clock, Trash2 } from 'lucide-react';
-import { deleteProject, listProjects, type ProjectSummary } from '@/persistence/db';
-import { openStoredProject } from '@/persistence/session';
+import { useState } from 'react';
+import { ChevronDown, Trash2 } from 'lucide-react';
+import type { ProjectSummary } from '@/persistence/db';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 
 /**
  * "המשך מהמקום שבו הפסקת" (סעיף 12).
  *
- * נטען מ-IndexedDB ולא מהזיכרון, ולכן שורד רענון, סגירת לשונית וכיבוי
- * מחשב. אם האחסון חסום — הרשימה פשוט לא מוצגת, ומסך הפתיחה נשאר שמיש.
+ * שני רכיבים ולא אחד, מסיבה מבנית: הלומדה האחרונה צריכה לשבת בפס הפעולה
+ * העליון לצד "לומדה חדשה", ואילו שאר הרשימה יושבת הרבה מתחתיו. רכיב אחד
+ * שמרנדר את שניהם היה מכריח את "לומדה חדשה" לרדת אל מתחת לרשימה — ומי
+ * שהתחיל עשר לומדות היה מגלגל כדי למצוא אותו.
+ *
+ * הנתונים מגיעים מ-`useRecentProjects`.
  */
-export function RecentProjects({ onOpened }: { onOpened: () => void }) {
-  const [projects, setProjects] = useState<ProjectSummary[]>([]);
-  const [pendingDelete, setPendingDelete] = useState<ProjectSummary | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let active = true;
+/** כמה לומדות מוצגות לפני "עוד" — רשימה ארוכה דוחפת את שאר המסך מטה */
+const COLLAPSED_COUNT = 4;
 
-    listProjects()
-      .then((list) => {
-        if (active) setProjects(list);
-      })
-      .catch((cause: unknown) => {
-        if (active) setError(cause instanceof Error ? cause.message : 'טעינת הפרויקטים נכשלה.');
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const open = async (id: string) => {
-    const result = await openStoredProject(id);
-    if (result.ok) onOpened();
-    else setError(result.errors[0]);
-  };
-
-  const remove = async (project: ProjectSummary) => {
-    setPendingDelete(null);
-    try {
-      await deleteProject(project.id);
-      setProjects((current) => current.filter((item) => item.id !== project.id));
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'מחיקת הפרויקט נכשלה.');
-    }
-  };
-
-  if (error) {
-    return (
-      <p className="mt-6 rounded-xl bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-800">
-        {error}
-      </p>
-    );
-  }
-
-  if (projects.length === 0) return null;
-
+/** כרטיס הלומדה האחרונה — הפעולה הסבירה ביותר של מי שכבר עבד כאן */
+export function FeaturedProject({
+  project,
+  onOpen,
+}: {
+  project: ProjectSummary;
+  onOpen: () => void;
+}) {
   return (
-    // ה--mt-8 מרים את הכרטיס אל תוך פס הגרדיאנט של מסך הפתיחה. הכותרת
-    // יושבת בתוך הכרטיס הלבן ולא מעליו, כדי שלא תיפול על רקע כחול
-    <section className="-mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg" aria-labelledby="recent-heading">
-      <h2
-        id="recent-heading"
-        className="border-b border-slate-100 px-4 py-3 text-sm font-bold text-slate-900"
-      >
+    <section
+      className="flex flex-col rounded-2xl border border-sand-200 bg-white p-5"
+      aria-labelledby="featured-heading"
+    >
+      <h2 id="featured-heading" className="text-xs font-bold tracking-wide text-sand-500 uppercase">
         המשך מהמקום שבו הפסקת
       </h2>
 
-      <ul className="divide-y divide-slate-100">
-        {projects.map((project) => (
-          <li key={project.id} className="group flex items-center gap-3 ps-4 pe-2">
+      <p className="mt-3 truncate text-lg font-bold text-sand-900">
+        {project.title || 'לומדה ללא שם'}
+      </p>
+      <p className="mt-1 text-sm text-sand-500">
+        {project.chapterCount} פרקים · {project.blockCount} בלוקים · {formatSavedAt(project.savedAt)}
+      </p>
+
+      <button
+        type="button"
+        onClick={onOpen}
+        className="mt-4 self-start rounded-xl bg-sand-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-sand-800"
+      >
+        המשך לערוך
+      </button>
+    </section>
+  );
+}
+
+/** שאר הלומדות. מקופלת מעבר ל-COLLAPSED_COUNT כדי לא לדחוף את המסך */
+export function ProjectList({
+  projects,
+  onOpen,
+  onRemove,
+}: {
+  projects: ProjectSummary[];
+  onOpen: (id: string) => void;
+  onRemove: (project: ProjectSummary) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<ProjectSummary | null>(null);
+
+  if (projects.length === 0) return null;
+
+  const visible = expanded ? projects : projects.slice(0, COLLAPSED_COUNT);
+  const hidden = projects.length - visible.length;
+
+  return (
+    <section className="mt-10" aria-labelledby="all-projects-heading">
+      <h2 id="all-projects-heading" className="text-base font-bold text-sand-900">
+        הלומדות שלי
+      </h2>
+
+      <ul className="mt-3 overflow-hidden rounded-2xl border border-sand-200 bg-white">
+        {visible.map((project) => (
+          <li
+            key={project.id}
+            className="flex items-center gap-2 border-b border-sand-200 ps-4 pe-2 last:border-b-0"
+          >
             <button
               type="button"
-              onClick={() => void open(project.id)}
-              className="flex min-w-0 flex-1 items-center gap-3 py-3 text-start"
+              onClick={() => onOpen(project.id)}
+              className="min-w-0 flex-1 py-3 text-start"
             >
-              <Clock className="size-4 shrink-0 text-slate-300" aria-hidden />
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-semibold text-slate-900">
-                  {project.title || 'לומדה ללא שם'}
-                </span>
-                <span className="mt-0.5 block text-xs text-slate-400">
-                  {project.chapterCount} פרקים · {project.blockCount} בלוקים ·{' '}
-                  {formatSavedAt(project.savedAt)}
-                </span>
+              <span className="block truncate text-sm font-semibold text-sand-900">
+                {project.title || 'לומדה ללא שם'}
+              </span>
+              <span className="mt-0.5 block text-xs text-sand-500">
+                {project.chapterCount} פרקים · {project.blockCount} בלוקים ·{' '}
+                {formatSavedAt(project.savedAt)}
               </span>
             </button>
 
+            {/*
+              גלוי תמיד ולא ב-hover בלבד: כפתור שמופיע רק בריחוף אינו קיים
+              במסך מגע, ומחיקת לומדה הייתה הופכת לפעולה שאי אפשר להגיע
+              אליה מטאבלט
+            */}
             <button
               type="button"
               onClick={() => setPendingDelete(project)}
               aria-label={`מחיקת ${project.title || 'הלומדה'}`}
-              className="rounded-lg p-2 text-slate-300 opacity-0 transition group-hover:opacity-100 hover:bg-red-50 hover:text-red-600 focus:opacity-100"
+              title="מחיקה"
+              className="rounded-lg p-2 text-sand-400 transition hover:bg-plum-50 hover:text-plum-600"
             >
               <Trash2 className="size-4" aria-hidden />
             </button>
@@ -100,11 +114,25 @@ export function RecentProjects({ onOpened }: { onOpened: () => void }) {
         ))}
       </ul>
 
+      {hidden > 0 && (
+        <button
+          type="button"
+          onClick={() => setExpanded(true)}
+          className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-clay-700 transition hover:text-clay-800"
+        >
+          <ChevronDown className="size-4" aria-hidden />
+          עוד {hidden} לומדות
+        </button>
+      )}
+
       <ConfirmDialog
         open={pendingDelete !== null}
         title="מחיקת הפרויקט מהמחשב"
         message={`"${pendingDelete?.title || 'לומדה ללא שם'}" יימחק מהאחסון של הדפדפן יחד עם הנכסים שלו. אם יש לכם קובץ ‎.course.zip‎ שמור, אפשר יהיה לפתוח אותו שוב.`}
-        onConfirm={() => pendingDelete && void remove(pendingDelete)}
+        onConfirm={() => {
+          if (pendingDelete) onRemove(pendingDelete);
+          setPendingDelete(null);
+        }}
         onCancel={() => setPendingDelete(null)}
       />
     </section>

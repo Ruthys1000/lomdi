@@ -22,8 +22,8 @@ export function InspectorPanel() {
 
   return (
     <aside className="flex min-h-0 flex-col bg-white" aria-label="הגדרות">
-      <div className="border-b border-slate-200 px-4 py-3">
-        <h2 className="text-xs font-bold tracking-wide text-slate-500 uppercase">
+      <div className="border-b border-sand-200 px-4 py-3">
+        <h2 className="text-xs font-bold tracking-wide text-sand-500 uppercase">
           {location ? blockLabel(location.block.type) : 'הגדרות הלומדה'}
         </h2>
       </div>

@@ -86,21 +86,21 @@ export function ExportDialog({ open, onClose }: { open: boolean; onClose: () => 
       }}
       onClose={onClose}
       aria-label="ייצוא הלומדה"
-      className="m-auto w-[min(34rem,calc(100vw-2rem))] rounded-2xl border border-slate-200 p-0 shadow-2xl backdrop:bg-slate-900/40"
+      className="m-auto w-[min(34rem,calc(100vw-2rem))] rounded-2xl border border-sand-200 p-0 shadow-2xl backdrop:bg-sand-900/40"
     >
-      <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
-        <span className="flex size-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+      <div className="flex items-center gap-3 border-b border-sand-100 px-5 py-4">
+        <span className="flex size-8 items-center justify-center rounded-lg bg-clay-50 text-clay-600">
           <FileArchive className="size-4" aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
-          <h2 className="text-sm font-bold text-slate-900">ייצוא לומדה עצמאית</h2>
-          <p className="truncate text-xs text-slate-500">{course.title}</p>
+          <h2 className="text-sm font-bold text-sand-900">ייצוא לומדה עצמאית</h2>
+          <p className="truncate text-xs text-sand-500">{course.title}</p>
         </div>
         <button
           type="button"
           onClick={onClose}
           aria-label="סגירת חלון הייצוא"
-          className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+          className="rounded-lg p-1.5 text-sand-400 transition hover:bg-sand-100 hover:text-sand-700"
         >
           <X className="size-4" aria-hidden />
         </button>
@@ -109,16 +109,16 @@ export function ExportDialog({ open, onClose }: { open: boolean; onClose: () => 
       <div className="max-h-[70vh] overflow-y-auto px-5 py-4">
         <dl className="grid grid-cols-4 gap-2">
           {stats.map((stat) => (
-            <div key={stat.label} className="rounded-xl bg-slate-50 px-3 py-2 text-center">
-              <dt className="text-[11px] text-slate-500">{stat.label}</dt>
-              <dd className="mt-0.5 text-sm font-bold text-slate-900" dir="ltr">
+            <div key={stat.label} className="rounded-xl bg-sand-50 px-3 py-2 text-center">
+              <dt className="text-[11px] text-sand-500">{stat.label}</dt>
+              <dd className="mt-0.5 text-sm font-bold text-sand-900" dir="ltr">
                 {stat.value}
               </dd>
             </div>
           ))}
         </dl>
 
-        <p className="mt-4 text-xs leading-relaxed text-slate-600">
+        <p className="mt-4 text-xs leading-relaxed text-sand-600">
           הארכיון מכיל תיקייה אחת עם <code dir="ltr">index.html</code>, חבילת הלומדה והנכסים.
           פותחים את <code dir="ltr">index.html</code> בדאבל-קליק — בלי שרת, בלי התקנה ובלי חיבור
           לאינטרנט.
@@ -126,7 +126,7 @@ export function ExportDialog({ open, onClose }: { open: boolean; onClose: () => 
 
         <pre
           dir="ltr"
-          className="mt-3 overflow-x-auto rounded-xl bg-slate-900 px-4 py-3 text-left text-[11px] leading-relaxed text-slate-300"
+          className="mt-3 overflow-x-auto rounded-xl bg-sand-900 px-4 py-3 text-left text-[11px] leading-relaxed text-sand-300"
         >
           {`${exportFileName(course.title)}
 └─ ${exportFolderName(course.title)}/
@@ -139,7 +139,7 @@ export function ExportDialog({ open, onClose }: { open: boolean; onClose: () => 
         </pre>
 
         {summary.warnings.length > 0 && (
-          <ul className="mt-4 space-y-2 rounded-xl bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-800">
+          <ul className="mt-4 space-y-2 rounded-xl bg-ochre-50 px-4 py-3 text-xs leading-relaxed text-ochre-800">
             {summary.warnings.map((warning) => (
               <li key={warning} className="flex items-start gap-2">
                 <AlertCircle className="mt-0.5 size-3.5 shrink-0" aria-hidden />
@@ -152,18 +152,18 @@ export function ExportDialog({ open, onClose }: { open: boolean; onClose: () => 
         {error && (
           <p
             role="alert"
-            className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-xs leading-relaxed text-red-700"
+            className="mt-4 rounded-xl bg-plum-50 px-4 py-3 text-xs leading-relaxed text-plum-700"
           >
             {error}
           </p>
         )}
       </div>
 
-      <div className="flex items-center justify-end gap-2 border-t border-slate-100 px-5 py-4">
+      <div className="flex items-center justify-end gap-2 border-t border-sand-100 px-5 py-4">
         <button
           type="button"
           onClick={onClose}
-          className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          className="rounded-lg border border-sand-200 px-4 py-2 text-sm font-semibold text-sand-700 hover:bg-sand-50"
         >
           ביטול
         </button>
@@ -171,7 +171,7 @@ export function ExportDialog({ open, onClose }: { open: boolean; onClose: () => 
           type="button"
           disabled={busy}
           onClick={() => void handleExport()}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-clay-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-clay-700 disabled:opacity-50"
         >
           <Download className="size-4" aria-hidden />
           {busy ? 'אורז…' : 'ייצוא ZIP'}
