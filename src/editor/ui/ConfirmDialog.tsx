@@ -45,7 +45,7 @@ export function ConfirmDialog({
         onCancel();
       }}
       onClose={onCancel}
-      className="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-2xl border border-edge p-0 shadow-xl backdrop:bg-app/40"
+      className="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-2xl border border-edge bg-panel text-fg p-0 shadow-xl backdrop:bg-scrim/40"
     >
       <div className="p-6 text-right">
         <h2 className="text-base font-bold text-fg">{title}</h2>
@@ -57,8 +57,8 @@ export function ConfirmDialog({
             onClick={onConfirm}
             className={
               destructive
-                ? 'rounded-lg bg-danger px-4 py-2 text-sm font-semibold text-app hover:opacity-90'
-                : 'rounded-lg bg-volt px-4 py-2 text-sm font-semibold text-app hover:bg-volt-bright'
+                ? 'rounded-lg bg-danger px-4 py-2 text-sm font-semibold text-on-danger hover:opacity-90'
+                : 'rounded-lg bg-volt px-4 py-2 text-sm font-semibold text-on-volt hover:bg-volt-bright'
             }
           >
             {confirmLabel}

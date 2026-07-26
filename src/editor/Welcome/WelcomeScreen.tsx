@@ -79,20 +79,21 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
         if (file) void handleFile(file);
       }}
     >
-      <header className="border-b border-edge bg-panel">
+      {/* אותו פס כהה של העורך — רצועת הזיהוי היחידה בשני המסכים */}
+      <header className="lc-shell border-b border-shell-edge bg-shell">
         <div className="mx-auto flex max-w-5xl items-center gap-3 px-6 py-4">
-          <span className="flex size-9 items-center justify-center rounded-xl bg-volt text-app">
+          <span className="flex size-9 items-center justify-center rounded-xl bg-volt text-on-volt">
             <BookOpen className="size-5" aria-hidden />
           </span>
           <div className="min-w-0">
-            <h1 className="text-base font-bold tracking-tight text-fg">{APP_NAME}</h1>
-            <p className="text-xs text-fg-muted">בונים לומדה, מקבלים אתר</p>
+            <h1 className="text-base font-bold tracking-tight text-shell-fg">{APP_NAME}</h1>
+            <p className="text-xs text-shell-muted">בונים לומדה, מקבלים אתר</p>
           </div>
 
-          <ul className="ms-auto hidden gap-5 text-xs text-fg-muted lg:flex">
+          <ul className="ms-auto hidden gap-5 text-xs text-shell-muted lg:flex">
             {SELLING_POINTS.map(({ icon: Icon, text }) => (
               <li key={text} className="flex items-center gap-1.5">
-                <Icon className="size-3.5 text-fg-muted" aria-hidden />
+                <Icon className="size-3.5 text-shell-muted" aria-hidden />
                 {text}
               </li>
             ))}
@@ -155,8 +156,8 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
               className={cn(
                 'mt-5 inline-flex items-center gap-2 rounded-xl font-semibold transition',
                 featured
-                  ? 'self-start border border-edge-strong px-5 py-2.5 text-sm text-fg hover:border-volt hover:text-volt'
-                  : 'bg-volt px-7 py-3.5 text-base text-app hover:bg-volt-bright',
+                  ? 'self-start border border-edge-strong px-5 py-2.5 text-sm text-fg hover:border-volt-dim hover:text-volt-ink'
+                  : 'bg-volt px-7 py-3.5 text-base text-on-volt hover:bg-volt-bright',
               )}
             >
               <Plus className="size-4" aria-hidden />
@@ -170,7 +171,7 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
               <button
                 type="button"
                 onClick={() => startTemplate('shortTraining')}
-                className="font-semibold text-volt underline underline-offset-2 transition hover:text-volt-bright"
+                className="font-semibold text-volt-ink underline underline-offset-2 transition hover:text-fg"
               >
                 מבנה מוכן
               </button>{' '}
@@ -178,7 +179,7 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
               <button
                 type="button"
                 onClick={() => startTemplate('sample')}
-                className="font-semibold text-volt underline underline-offset-2 transition hover:text-volt-bright"
+                className="font-semibold text-volt-ink underline underline-offset-2 transition hover:text-fg"
               >
                 לומדת הדוגמה
               </button>
@@ -217,7 +218,7 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
               type="button"
               disabled={loading}
               onClick={() => fileInputRef.current?.click()}
-              className="rounded-xl border border-edge-strong px-4 py-2 text-sm font-semibold text-fg-soft transition hover:border-volt-dim hover:text-volt disabled:opacity-50"
+              className="rounded-xl border border-edge-strong px-4 py-2 text-sm font-semibold text-fg-soft transition hover:border-volt-dim hover:text-volt-ink disabled:opacity-50"
             >
               {loading ? 'טוען…' : 'בחירת קובץ'}
             </button>
@@ -264,7 +265,7 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
       {dragging && (
         <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-app/85 p-8">
           <div className="flex w-full max-w-xl flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-volt-dim bg-panel/90 px-8 py-12">
-            <FileUp className="size-8 text-volt" aria-hidden />
+            <FileUp className="size-8 text-volt-ink" aria-hidden />
             <p className="text-lg font-bold text-fg">שחררו. זה נטען לבד.</p>
             <p className="text-sm text-fg-muted">‎.course.zip‎</p>
           </div>

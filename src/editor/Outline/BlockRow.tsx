@@ -39,7 +39,7 @@ export function BlockRow({ block, selected, onSelect }: BlockRowProps) {
         className={cn(
           'flex min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-1 text-start text-xs transition',
           selected
-            ? 'bg-volt-soft font-semibold text-volt'
+            ? 'bg-volt-soft font-semibold text-volt-ink'
             : 'text-fg-muted hover:bg-app hover:text-fg',
         )}
       >

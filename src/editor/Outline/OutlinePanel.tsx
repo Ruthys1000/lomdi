@@ -94,7 +94,7 @@ export function OutlinePanel() {
           type="button"
           onClick={handleAddChapter}
           title="הוספת פרק"
-          className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-volt transition hover:bg-volt-soft"
+          className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-volt-ink transition hover:bg-volt-soft"
         >
           <Plus className="size-3.5" aria-hidden />
           פרק

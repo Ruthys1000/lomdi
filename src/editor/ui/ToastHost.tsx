@@ -48,7 +48,7 @@ export function ToastHost() {
                   toastItem.action?.run();
                   dismiss(toastItem.id);
                 }}
-                className="rounded-lg px-2 py-1 text-xs font-semibold text-volt transition hover:bg-panel/10"
+                className="rounded-lg px-2 py-1 text-xs font-semibold text-volt-ink transition hover:bg-panel/10"
               >
                 {toastItem.action.label}
               </button>

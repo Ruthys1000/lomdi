@@ -42,14 +42,14 @@ export function PreviewOverlay() {
   const width = viewportWidths[viewport];
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-app" role="dialog" aria-modal="true" aria-label="תצוגה מקדימה">
-      <div className="flex h-14 shrink-0 items-center justify-between gap-4 px-4 text-fg">
+    <div className="lc-shell fixed inset-0 z-50 flex flex-col bg-shell" role="dialog" aria-modal="true" aria-label="תצוגה מקדימה">
+      <div className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-shell-edge px-4 text-shell-fg">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold">תצוגה מקדימה</span>
-          <span className="text-xs text-fg-muted">{course.title}</span>
+          <span className="text-xs text-shell-muted">{course.title}</span>
         </div>
 
-        <div className="flex items-center gap-0.5 rounded-lg bg-panel/10 p-0.5">
+        <div className="flex items-center gap-0.5 rounded-lg bg-shell-2 p-0.5">
           {devices.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
@@ -60,8 +60,8 @@ export function PreviewOverlay() {
               aria-label={label}
               className={
                 viewport === id
-                  ? 'rounded-md bg-panel px-2 py-1.5 text-fg'
-                  : 'rounded-md px-2 py-1.5 text-fg-muted hover:text-fg'
+                  ? 'rounded-md bg-volt px-2 py-1.5 text-on-volt'
+                  : 'rounded-md px-2 py-1.5 text-shell-muted hover:text-shell-fg'
               }
             >
               <Icon className="size-4" aria-hidden />
@@ -74,7 +74,7 @@ export function PreviewOverlay() {
         </IconButton>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto bg-panel-2 p-4">
+      <div className="min-h-0 flex-1 overflow-y-auto bg-shell-2 p-4">
         <div
           className="mx-auto min-h-full overflow-hidden rounded-xl bg-white shadow-2xl transition-[max-width] duration-200"
           style={{ maxWidth: width ? `${width}px` : '1100px' }}

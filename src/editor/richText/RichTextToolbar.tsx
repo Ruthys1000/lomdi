@@ -33,7 +33,12 @@ export function RichTextToolbar({ editor }: { editor: Editor }) {
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-0.5 rounded-lg border border-edge bg-panel p-1 shadow-sm">
+    /*
+     * flex-nowrap ולא flex-wrap: שבירה לשתי שורות מגדילה את גובה הסרגל,
+     * והוא צף מעל הבלוק — כלומר הוא היה גדל כלפי מעלה ויוצא מהמסך. במסך
+     * צר מדי הוא נגלל לרוחב במקום להישבר.
+     */
+    <div className="flex max-w-[calc(100vw-1rem)] flex-nowrap items-center gap-0.5 overflow-x-auto rounded-lg border border-edge bg-panel p-1 shadow-lg">
       <ToolbarButton
         icon={Bold}
         label="מודגש"
@@ -102,7 +107,7 @@ export function RichTextToolbar({ editor }: { editor: Editor }) {
 }
 
 function Separator() {
-  return <span className="mx-0.5 h-5 w-px bg-edge" aria-hidden />;
+  return <span className="mx-0.5 h-5 w-px shrink-0 bg-edge" aria-hidden />;
 }
 
 function ToolbarButton({
@@ -125,8 +130,8 @@ function ToolbarButton({
       onMouseDown={(event) => event.preventDefault()}
       onClick={onClick}
       className={cn(
-        'rounded p-1.5 transition',
-        active ? 'bg-volt-soft text-volt' : 'text-fg-muted hover:bg-panel-2 hover:text-fg',
+        'shrink-0 rounded p-1.5 transition',
+        active ? 'bg-volt-soft text-volt-ink' : 'text-fg-muted hover:bg-panel-2 hover:text-fg',
       )}
     >
       <Icon className="size-4" aria-hidden />

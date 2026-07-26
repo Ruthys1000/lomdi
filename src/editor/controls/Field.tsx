@@ -27,7 +27,7 @@ export function TextField({
 }) {
   const id = useId();
   const className =
-    'w-full rounded-lg border border-edge px-2.5 py-1.5 text-sm text-fg focus:border-volt-dim focus:ring-1 focus:ring-volt focus:outline-none';
+    'w-full rounded-lg border border-edge bg-field px-2.5 py-1.5 text-sm text-fg placeholder:text-fg-muted focus:border-volt-dim focus:ring-1 focus:ring-volt-dim focus:outline-none';
 
   return (
     <div>
@@ -83,7 +83,7 @@ export function SelectField<T extends string>({
         id={id}
         value={value}
         onChange={(event) => onChange(event.target.value as T)}
-        className="w-full rounded-lg border border-edge bg-panel px-2.5 py-1.5 text-sm text-fg focus:border-volt-dim focus:ring-1 focus:ring-volt focus:outline-none"
+        className="w-full rounded-lg border border-edge bg-field px-2.5 py-1.5 text-sm text-fg focus:border-volt-dim focus:ring-1 focus:ring-volt-dim focus:outline-none"
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>
@@ -160,7 +160,7 @@ export function SwitchField({
         type="checkbox"
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
-        className="mt-0.5 size-4 shrink-0 rounded border-edge-strong text-volt focus:ring-volt"
+        className="mt-0.5 size-4 shrink-0 rounded border-edge-strong text-volt-ink focus:ring-volt-dim"
       />
     </div>
   );

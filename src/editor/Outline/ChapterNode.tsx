@@ -84,7 +84,7 @@ export function ChapterNode({ chapter, index, canDelete, onRequestDelete }: Chap
               if (event.key === 'Enter') event.currentTarget.blur();
               if (event.key === 'Escape') setRenaming(false);
             }}
-            className="min-w-0 flex-1 rounded border border-volt-dim px-1.5 py-0.5 text-sm focus:outline-none"
+            className="min-w-0 flex-1 rounded border border-volt-dim bg-field px-1.5 py-0.5 text-sm text-fg focus:outline-none"
           />
         ) : (
           <button
@@ -93,7 +93,7 @@ export function ChapterNode({ chapter, index, canDelete, onRequestDelete }: Chap
             onDoubleClick={() => setRenaming(true)}
             className={cn(
               'min-w-0 flex-1 truncate text-start text-sm',
-              isActiveChapter ? 'font-semibold text-volt' : 'text-fg-soft',
+              isActiveChapter ? 'font-semibold text-volt-ink' : 'text-fg-soft',
             )}
           >
             {chapter.title || 'פרק ללא שם'}

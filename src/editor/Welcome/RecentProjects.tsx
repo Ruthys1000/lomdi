@@ -44,7 +44,7 @@ export function FeaturedProject({
       <button
         type="button"
         onClick={onOpen}
-        className="mt-4 self-start rounded-xl bg-volt px-5 py-2.5 text-sm font-semibold text-app transition hover:bg-volt-bright"
+        className="mt-4 self-start rounded-xl bg-volt px-5 py-2.5 text-sm font-semibold text-on-volt transition hover:bg-volt-bright"
       >
         ממשיכים
       </button>
@@ -118,7 +118,7 @@ export function ProjectList({
         <button
           type="button"
           onClick={() => setExpanded(true)}
-          className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-volt transition hover:text-volt"
+          className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-volt-ink transition hover:text-fg"
         >
           <ChevronDown className="size-4" aria-hidden />
           עוד {hidden} לומדות
