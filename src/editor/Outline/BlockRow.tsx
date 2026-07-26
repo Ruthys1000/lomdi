@@ -26,7 +26,7 @@ export function BlockRow({ block, selected, onSelect }: BlockRowProps) {
       <button
         type="button"
         aria-label={`גרירת ${blockLabel(block.type)}`}
-        className="cursor-grab rounded p-0.5 text-slate-300 opacity-0 transition group-focus-within/row:opacity-100 group-hover/row:opacity-100 hover:text-slate-600 active:cursor-grabbing"
+        className="cursor-grab rounded p-0.5 text-sand-300 opacity-0 transition group-focus-within/row:opacity-100 group-hover/row:opacity-100 hover:text-sand-600 active:cursor-grabbing"
         {...attributes}
         {...listeners}
       >
@@ -39,8 +39,8 @@ export function BlockRow({ block, selected, onSelect }: BlockRowProps) {
         className={cn(
           'flex min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-1 text-start text-xs transition',
           selected
-            ? 'bg-blue-100 font-semibold text-blue-900'
-            : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800',
+            ? 'bg-clay-100 font-semibold text-clay-900'
+            : 'text-sand-500 hover:bg-sand-50 hover:text-sand-800',
         )}
       >
         <span className="size-1.5 shrink-0 rounded-full bg-current opacity-40" />

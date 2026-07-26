@@ -1,44 +1,41 @@
 import { useRef, useState } from 'react';
-import { BookOpen, FileUp, FolderOpen, Globe, Languages, WifiOff } from 'lucide-react';
+import { BookOpen, FileUp, Globe, Languages, Plus, Upload, WifiOff } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { openProjectFile } from '@/persistence/session';
-import { courseTemplates } from '@/templates';
-import type { Course } from '@/model/types';
+import { getTemplate } from '@/templates';
+import type { TemplateResult } from '@/templates';
 import { APP_NAME, APP_VERSION } from '@/version';
-import { RecentProjects } from './RecentProjects';
-import { TemplatePreview } from './TemplatePreview';
-
-/** "פרק אחד" ולא "1 פרקים" — צורת רבים שגויה בעברית קופצת לעין מיד */
-function countLabel(count: number, singular: string, plural: string): string {
-  if (count === 1) return `${singular} אחד`;
-  return `${count} ${plural}`;
-}
+import { FeaturedProject, ProjectList } from './RecentProjects';
+import { useRecentProjects } from './useRecentProjects';
 
 interface WelcomeScreenProps {
-  onStart: (course: Course) => void;
+  onStart: (result: TemplateResult) => void;
   /** נקרא כשפרויקט קיים נטען ישירות ל-stores, בלי לעבור דרך onStart */
   onOpened: () => void;
 }
+
+const SELLING_POINTS = [
+  { icon: WifiOff, text: 'רץ בלי שרת ובלי אינטרנט' },
+  { icon: Languages, text: 'עברית ו-RTL מהיסוד' },
+  { icon: Globe, text: 'ZIP להעלאה ל-Moodle' },
+];
 
 /**
  * מסך הפתיחה (סעיף 5).
  *
  * שלוש החלטות שמעצבות אותו:
  *
- * 1. **כרטיס תבנית מראה את התבנית.** `TemplatePreview` מרנדר סקיצה בצבעי
- *    הערכה של אותה תבנית, במקום אותו אייקון בשלושה כרטיסים זהים.
- * 2. **פרויקטים אחרונים קודמים לתבניות.** מי שכבר עבד כאן בא להמשיך, לא
- *    לבחור מחדש. כשאין פרויקטים הרכיב אינו מרנדר דבר, והתבניות עולות
- *    למעלה מאליהן.
- * 3. **גרירת קובץ פרויקט חלה על כל המסך** ולא על קופסה קטנה בתחתית —
- *    אותו דפוס שכבר קיים בספריית הנכסים.
- *
- * תבניות שעדיין אינן ממומשות מוצגות כשורת טקסט אחת ולא ככרטיסים מושבתים:
- * ההבטחה נשמרת בלי שלושה כרטיסים מתים שתופסים את מרכז המסך.
+ * 1. **הפעולות קודמות לרשימה.** "לומדה חדשה" ו"המשך לערוך" יושבים בפס
+ *    אחד מתחת לכותרת, לפני כל רשימה. מי שהתחיל עשר לומדות רואה את שתי
+ *    הפעולות מיד, ולא מגלגל מתחת לרשימה כדי למצוא אותן.
+ * 2. **אין גלריית תבניות.** שלושה כרטיסים עם סקיצות מופשטות נראו כמעט
+ *    זהים ולא עזרו לבחור. במקומם כפתור ראשי אחד, ושתי נקודות כניסה
+ *    נוספות כקישורי טקסט למי שרוצה מבנה מוכן או דוגמה.
+ * 3. **גרירת קובץ פרויקט חלה על כל המסך**, עם שכבת יעד על כל המסך בזמן
+ *    גרירה — ולא הצהבה של קופסה קטנה שקשה לכוון אליה.
  */
 export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
-  const ready = courseTemplates.filter((template) => template.create);
-  const planned = courseTemplates.filter((template) => !template.create);
+  const { featured, rest, error, open, remove } = useRecentProjects(onOpened);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileErrors, setFileErrors] = useState<string[]>([]);
@@ -56,16 +53,21 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
     else setFileErrors(result.errors);
   };
 
+  const startTemplate = (id: string) => {
+    const create = getTemplate(id)?.create;
+    if (create) onStart(create());
+  };
+
   return (
     <main
-      className="min-h-full overflow-y-auto bg-slate-50"
+      className="relative min-h-full overflow-y-auto bg-sand-50"
       onDragOver={(event) => {
         event.preventDefault();
         setDragging(true);
       }}
       onDragLeave={(event) => {
         // dragleave נורה גם במעבר בין אלמנטים פנימיים; בלי הבדיקה הזו
-        // המסגרת הכחולה מהבהבת בזמן שגוררים מעל הכרטיסים
+        // שכבת היעד מהבהבת בזמן שגוררים מעל הכרטיסים
         if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
         setDragging(false);
       }}
@@ -76,30 +78,20 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
         if (file) void handleFile(file);
       }}
     >
-      <header className="bg-linear-to-bl from-blue-700 via-blue-600 to-violet-600 text-white">
-        <div className="mx-auto max-w-5xl px-6 pt-14 pb-16">
-          <div className="flex items-center gap-3">
-            <span className="flex size-11 items-center justify-center rounded-2xl bg-white/15 backdrop-blur">
-              <BookOpen className="size-6" aria-hidden />
-            </span>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">{APP_NAME}</h1>
-              <p className="text-sm text-white/70">מחולל לומדות HTML מבוסס בלוקים</p>
-            </div>
+      <header className="border-b border-sand-200 bg-white">
+        <div className="mx-auto flex max-w-5xl items-center gap-3 px-6 py-4">
+          <span className="flex size-9 items-center justify-center rounded-xl bg-sand-900 text-white">
+            <BookOpen className="size-5" aria-hidden />
+          </span>
+          <div className="min-w-0">
+            <h1 className="text-base font-bold tracking-tight text-sand-900">{APP_NAME}</h1>
+            <p className="text-xs text-sand-500">מחולל לומדות HTML מבוסס בלוקים</p>
           </div>
 
-          <p className="mt-8 max-w-2xl text-2xl leading-relaxed font-semibold text-balance">
-            בונים לומדה מבלוקים, עורכים אותה על הקנבס, ומקבלים תיקייה שרצה לבד בכל דפדפן.
-          </p>
-
-          <ul className="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/80">
-            {[
-              { icon: WifiOff, text: 'התוצר רץ בלי שרת ובלי אינטרנט' },
-              { icon: Languages, text: 'עברית ו-RTL מהיסוד' },
-              { icon: Globe, text: 'ZIP להעלאה ל-Moodle' },
-            ].map(({ icon: Icon, text }) => (
-              <li key={text} className="flex items-center gap-2">
-                <Icon className="size-4 text-white/60" aria-hidden />
+          <ul className="ms-auto hidden gap-5 text-xs text-sand-500 lg:flex">
+            {SELLING_POINTS.map(({ icon: Icon, text }) => (
+              <li key={text} className="flex items-center gap-1.5">
+                <Icon className="size-3.5 text-sand-400" aria-hidden />
                 {text}
               </li>
             ))}
@@ -107,102 +99,114 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
         </div>
       </header>
 
-      <div className="mx-auto max-w-5xl px-6 pb-16">
-        {/* כרטיס הפרויקטים האחרונים עולה אל תוך פס הגרדיאנט (ה--mt-8 שלו),
-            כדי שהמסך ייראה כיחידה אחת. כשאין פרויקטים הוא אינו מרנדר דבר
-            והתבניות עולות למעלה מאליהן */}
-        <RecentProjects onOpened={onOpened} />
+      <div className="mx-auto max-w-5xl px-6 py-8">
+        {/*
+          פס הפעולה. שתי העמודות הן שתי הפעולות שבשבילן באים לכאן, והן מעל
+          הקיפול תמיד — גם כשיש עשרות לומדות שמורות.
+        */}
+        <div className={cn('grid gap-4', featured && 'sm:grid-cols-2')}>
+          {featured && <FeaturedProject project={featured} onOpen={() => void open(featured.id)} />}
 
-        <section className="mt-10" aria-labelledby="start-heading">
-          <h2 id="start-heading" className="text-sm font-bold text-slate-900">
-            התחלת לומדה חדשה
-          </h2>
-
-          <div className="mt-4 grid gap-4 sm:grid-cols-3">
-            {ready.map((template) => {
-              const course = template.create!();
-              const blocks = course.chapters.reduce(
-                (sum, chapter) => sum + chapter.blocks.length,
-                0,
-              );
-
-              return (
-                <button
-                  key={template.id}
-                  type="button"
-                  onClick={() => onStart(template.create!())}
-                  className={cn(
-                    'group overflow-hidden rounded-2xl border border-slate-200 bg-white text-start transition',
-                    'hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-lg',
-                  )}
-                >
-                  <TemplatePreview course={course} />
-
-                  <span className="block border-t border-slate-100 p-4">
-                    <span className="block text-sm font-semibold text-slate-900">
-                      {template.name}
-                    </span>
-                    <span className="mt-1 block text-xs leading-relaxed text-slate-500">
-                      {template.description}
-                    </span>
-                    <span className="mt-2 block text-[11px] text-slate-400">
-                      {countLabel(course.chapters.length, 'פרק', 'פרקים')} ·{' '}
-                      {countLabel(blocks, 'בלוק', 'בלוקים')}
-                    </span>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {planned.length > 0 && (
-            <p className="mt-3 text-xs text-slate-400">
-              בקרוב: {planned.map((template) => template.name).join(' · ')}
-            </p>
-          )}
-        </section>
-
-        <section
-          className={cn(
-            'mt-8 rounded-2xl border border-dashed p-5 transition',
-            dragging ? 'border-blue-400 bg-blue-50' : 'border-slate-200 bg-white/60',
-          )}
-          aria-labelledby="open-heading"
-        >
-          <div className="flex items-start gap-3">
-            {dragging ? (
-              <FileUp className="mt-0.5 size-5 shrink-0 text-blue-500" aria-hidden />
-            ) : (
-              <FolderOpen className="mt-0.5 size-5 shrink-0 text-slate-400" aria-hidden />
+          {/*
+            בלי לומדות שמורות זהו כל המסך, ולכן הוא ממורכז ונדיב. עם לומדה
+            מובילה לצדו הוא חצי שורה, ולכן הוא מיושר להתחלה כמו שכנו.
+          */}
+          <section
+            className={cn(
+              'flex flex-col rounded-2xl border border-sand-200 bg-white p-5',
+              !featured && 'items-center px-6 py-12 text-center',
             )}
+            aria-labelledby="new-heading"
+          >
+            <h2 id="new-heading" className="text-xs font-bold tracking-wide text-sand-500 uppercase">
+              לומדה חדשה
+            </h2>
 
-            <div className="min-w-0 flex-1">
-              <h2 id="open-heading" className="text-sm font-semibold text-slate-700">
-                {dragging ? 'שחררו כאן את הקובץ' : 'המשך מקובץ פרויקט'}
-              </h2>
-              <p className="mt-1 text-xs leading-relaxed text-slate-500">
-                גררו לכאן קובץ ‎.course.zip‎ — לכל מקום במסך — או בחרו אותו ידנית. הקובץ כולל את
-                התוכן, העיצוב והתמונות.
-              </p>
+            <p
+              className={cn(
+                'mt-3 font-bold text-balance text-sand-900',
+                featured ? 'text-lg' : 'max-w-lg text-2xl leading-snug',
+              )}
+            >
+              בונים מבלוקים, ומקבלים תיקייה שרצה לבד בכל דפדפן.
+            </p>
 
+            <button
+              type="button"
+              onClick={() => startTemplate('blank')}
+              className={cn(
+                'mt-4 inline-flex items-center gap-2 rounded-xl bg-clay-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-clay-700',
+                featured ? 'self-start' : 'px-6 py-3 text-base',
+              )}
+            >
+              <Plus className="size-4" aria-hidden />
+              לומדה חדשה
+            </button>
+
+            {/* שתי נקודות כניסה נוספות כטקסט ולא ככרטיסים: הן נחוצות פעם
+                אחת בחיים של משתמש, ולא מגיע להן שליש מהמסך */}
+            <p className="mt-3 text-sm text-sand-500">
+              או{' '}
               <button
                 type="button"
-                disabled={loading}
-                onClick={() => fileInputRef.current?.click()}
-                className="mt-3 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-blue-300 hover:text-blue-700 disabled:opacity-50"
+                onClick={() => startTemplate('shortTraining')}
+                className="font-semibold text-clay-700 underline underline-offset-2 transition hover:text-clay-800"
               >
-                {loading ? 'טוען…' : 'בחירת קובץ'}
+                מבנה מוכן של שלושה פרקים
+              </button>{' '}
+              ·{' '}
+              <button
+                type="button"
+                onClick={() => startTemplate('sample')}
+                className="font-semibold text-clay-700 underline underline-offset-2 transition hover:text-clay-800"
+              >
+                לומדת הדוגמה
               </button>
+            </p>
+          </section>
+        </div>
 
-              {fileErrors.length > 0 && (
-                <ul className="mt-3 space-y-1 rounded-lg bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-800">
-                  {fileErrors.map((message) => (
-                    <li key={message}>{message}</li>
-                  ))}
-                </ul>
-              )}
-            </div>
+        {error && (
+          <p className="mt-6 rounded-xl bg-ochre-50 px-4 py-3 text-sm leading-relaxed text-ochre-800">
+            {error}
+          </p>
+        )}
+
+        <ProjectList
+          projects={rest}
+          onOpen={(id) => void open(id)}
+          onRemove={(project) => void remove(project)}
+        />
+
+        <section className="mt-10" aria-labelledby="open-heading">
+          <h2 id="open-heading" className="text-base font-bold text-sand-900">
+            פתיחה מקובץ פרויקט
+          </h2>
+
+          <div className="mt-3 flex flex-wrap items-center gap-4 rounded-2xl border border-dashed border-sand-300 bg-white px-5 py-4">
+            <Upload className="size-5 shrink-0 text-sand-400" aria-hidden />
+
+            <p className="min-w-0 flex-1 text-sm leading-relaxed text-sand-500">
+              גררו לכאן קובץ ‎.course.zip‎ — לכל מקום במסך. הוא כולל את התוכן, העיצוב והתמונות.
+            </p>
+
+            <button
+              type="button"
+              disabled={loading}
+              onClick={() => fileInputRef.current?.click()}
+              className="rounded-xl border border-sand-300 px-4 py-2 text-sm font-semibold text-sand-700 transition hover:border-clay-300 hover:text-clay-700 disabled:opacity-50"
+            >
+              {loading ? 'טוען…' : 'בחירת קובץ'}
+            </button>
           </div>
+
+          {fileErrors.length > 0 && (
+            <ul className="mt-3 space-y-1 rounded-xl bg-ochre-50 px-4 py-3 text-sm leading-relaxed text-ochre-800">
+              {fileErrors.map((message) => (
+                <li key={message}>{message}</li>
+              ))}
+            </ul>
+          )}
 
           <input
             ref={fileInputRef}
@@ -217,10 +221,32 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
           />
         </section>
 
-        <p className="mt-8 text-center text-[11px] text-slate-400">
+        {/* אותן שלוש נקודות שבכותרת, למסכים צרים שבהם הן אינן נכנסות לשם */}
+        <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-xs text-sand-500 lg:hidden">
+          {SELLING_POINTS.map(({ icon: Icon, text }) => (
+            <li key={text} className="flex items-center gap-1.5">
+              <Icon className="size-3.5 text-sand-400" aria-hidden />
+              {text}
+            </li>
+          ))}
+        </ul>
+
+        <p className="mt-8 text-center text-xs text-sand-400">
           {APP_NAME} {APP_VERSION} · הלומדות נשמרות בדפדפן שלכם בלבד ואינן נשלחות לשום שרת
         </p>
       </div>
+
+      {/* שכבת היעד. על כל המסך ולא על קופסה אחת — הגרירה תמיד תפסה את כל
+          המסך, אבל שום דבר לא הראה את זה */}
+      {dragging && (
+        <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-sand-50/85 p-8">
+          <div className="flex w-full max-w-xl flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-clay-400 bg-white/90 px-8 py-12">
+            <FileUp className="size-8 text-clay-600" aria-hidden />
+            <p className="text-lg font-bold text-sand-900">שחררו כאן את קובץ הפרויקט</p>
+            <p className="text-sm text-sand-500">‎.course.zip‎</p>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

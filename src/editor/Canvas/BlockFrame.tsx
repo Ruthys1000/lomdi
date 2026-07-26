@@ -40,8 +40,8 @@ export function BlockFrame({ block, selected, onSelect, children }: BlockFramePr
         'group relative transition',
         'before:pointer-events-none before:absolute before:inset-0 before:rounded-lg before:transition',
         selected
-          ? 'before:ring-2 before:ring-blue-500'
-          : 'before:ring-1 before:ring-transparent hover:before:ring-slate-300',
+          ? 'before:ring-2 before:ring-clay-500'
+          : 'before:ring-1 before:ring-transparent hover:before:ring-sand-300',
       )}
       data-selected={selected || undefined}
     >
@@ -56,10 +56,12 @@ export function BlockFrame({ block, selected, onSelect, children }: BlockFramePr
 
       <span
         className={cn(
-          'absolute -top-2.5 end-2 z-20 rounded-md px-1.5 py-0.5 text-[11px] font-semibold transition',
+          // -top-6 מציב את התווית בתוך המרזב שה-pt-7 של SortableBlock פותח,
+          // בקצה הנגדי לסרגל הפעולות
+          'absolute -top-6 end-2 z-20 rounded-md px-1.5 py-0.5 text-[11px] font-semibold transition',
           selected
-            ? 'bg-blue-600 text-white opacity-100'
-            : 'bg-slate-700 text-white opacity-0 group-hover:opacity-100',
+            ? 'bg-clay-600 text-white opacity-100'
+            : 'bg-sand-700 text-white opacity-0 group-hover:opacity-100',
         )}
       >
         {blockLabel(block.type)}

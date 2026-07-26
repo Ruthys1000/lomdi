@@ -26,7 +26,7 @@ describe('validateProjectFile', () => {
   });
 
   it('מקבלת את לומדת הדוגמה על כל סוגי הבלוקים שבה', () => {
-    const project = projectFile({ course: createSampleCourse() });
+    const project = projectFile({ course: createSampleCourse().course });
     const result = validateProjectFile(roundTrip(project));
 
     if (!result.ok) throw new Error(`נכשל: ${result.errors.join(', ')}`);
@@ -34,7 +34,7 @@ describe('validateProjectFile', () => {
   });
 
   it('שומרת על התוכן במעבר הלוך ושוב דרך JSON', () => {
-    const project = projectFile({ course: createSampleCourse() });
+    const project = projectFile({ course: createSampleCourse().course });
     const result = validateProjectFile(roundTrip(project));
 
     if (!result.ok) throw new Error('אימות נכשל');

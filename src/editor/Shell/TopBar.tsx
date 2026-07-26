@@ -6,6 +6,8 @@ import {
   FolderOpen,
   Images,
   Monitor,
+  PanelLeft,
+  PanelRight,
   Redo2,
   Save,
   Smartphone,
@@ -42,6 +44,10 @@ export function TopBar() {
   const viewport = useEditorStore((state) => state.viewport);
   const setViewport = useEditorStore((state) => state.setViewport);
   const setPreviewOpen = useEditorStore((state) => state.setPreviewOpen);
+  const isOutlineOpen = useEditorStore((state) => state.isOutlineOpen);
+  const isInspectorOpen = useEditorStore((state) => state.isInspectorOpen);
+  const setOutlineOpen = useEditorStore((state) => state.setOutlineOpen);
+  const setInspectorOpen = useEditorStore((state) => state.setInspectorOpen);
   const { canUndo, canRedo } = useHistoryState();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -76,15 +82,31 @@ export function TopBar() {
   };
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-4">
+    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-sand-200 bg-white px-4">
       <div className="flex items-center gap-2">
-        <span className="flex size-8 items-center justify-center rounded-lg bg-blue-600 text-white">
+        <span className="flex size-8 items-center justify-center rounded-lg bg-sand-900 text-white">
           <BookOpen className="size-4" aria-hidden />
         </span>
-        <span className="text-sm font-bold tracking-tight">LearnIt</span>
+        <span className="hidden text-sm font-bold tracking-tight sm:inline">LearnIt</span>
       </div>
 
-      <div className="mx-1 h-6 w-px bg-slate-200" />
+      {/* פותחי המגירות. מוסתרים מ-lg ומעלה, שם שני הפאנלים בגריד ממילא */}
+      <div className="flex items-center gap-1 lg:hidden">
+        <IconButton
+          icon={PanelRight}
+          label="מבנה הלומדה"
+          active={isOutlineOpen}
+          onClick={() => setOutlineOpen(!isOutlineOpen)}
+        />
+        <IconButton
+          icon={PanelLeft}
+          label="הגדרות"
+          active={isInspectorOpen}
+          onClick={() => setInspectorOpen(!isInspectorOpen)}
+        />
+      </div>
+
+      <div className="mx-1 hidden h-6 w-px bg-sand-200 sm:block" />
 
       <label className="min-w-0 flex-1">
         <span className="sr-only">שם הפרויקט</span>
@@ -92,7 +114,7 @@ export function TopBar() {
           value={course.title}
           onChange={(event) => updateCourse({ title: event.target.value })}
           placeholder="שם הלומדה"
-          className="w-full max-w-xs truncate rounded-lg border border-transparent px-2 py-1.5 text-sm font-semibold hover:border-slate-200 focus:border-blue-500 focus:bg-white focus:outline-none"
+          className="w-full min-w-24 max-w-xs truncate rounded-lg border border-transparent px-2 py-1.5 text-sm font-semibold hover:border-sand-200 focus:border-clay-500 focus:bg-white focus:outline-none"
         />
       </label>
 
@@ -119,10 +141,10 @@ export function TopBar() {
         />
       </div>
 
-      <div className="mx-1 h-6 w-px bg-slate-200" />
+      <div className="mx-1 h-6 w-px bg-sand-200" />
 
       <div
-        className="flex items-center gap-0.5 rounded-lg bg-slate-100 p-0.5"
+        className="hidden items-center gap-0.5 rounded-lg bg-sand-100 p-0.5 lg:flex"
         role="group"
         aria-label="תצוגה לפי מכשיר"
       >
@@ -137,7 +159,7 @@ export function TopBar() {
         ))}
       </div>
 
-      <div className="mx-1 h-6 w-px bg-slate-200" />
+      <div className="mx-1 h-6 w-px bg-sand-200" />
 
       <div className="flex items-center gap-1">
         <IconButton icon={Images} label="ספריית הנכסים" onClick={() => setAssetsOpen(true)} />

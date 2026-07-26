@@ -24,6 +24,15 @@ interface EditorState {
   viewport: Viewport;
   isPreviewOpen: boolean;
   /**
+   * האם הפאנלים הצדדיים פתוחים.
+   *
+   * רלוונטי רק מתחת ל-lg, שם הפריסה עוברת לעמודה אחת והם הופכים למגירות.
+   * מעל lg הם תמיד בגריד והדגלים אינם משפיעים — ולכן ברירת המחדל היא
+   * סגור: מסך צר אמור להיפתח על הקנבס, לא על שני פאנלים שמכסים אותו.
+   */
+  isOutlineOpen: boolean;
+  isInspectorOpen: boolean;
+  /**
    * בלוק שממתין לאישור מחיקה.
    *
    * חי כאן ולא ב-state מקומי של הקנבס, כי גם סרגל הפעולות של הבלוק וגם
@@ -39,6 +48,8 @@ interface EditorState {
   setChapterCollapsed: (chapterId: string, collapsed: boolean) => void;
   setViewport: (viewport: Viewport) => void;
   setPreviewOpen: (open: boolean) => void;
+  setOutlineOpen: (open: boolean) => void;
+  setInspectorOpen: (open: boolean) => void;
   requestBlockDelete: (blockId: string) => void;
   cancelBlockDelete: () => void;
   reset: () => void;
@@ -50,6 +61,8 @@ const initial = {
   collapsedChapterIds: [] as string[],
   viewport: 'desktop' as Viewport,
   isPreviewOpen: false,
+  isOutlineOpen: false,
+  isInspectorOpen: false,
   blockPendingDelete: null as string | null,
 };
 
@@ -84,6 +97,11 @@ export const useEditorStore = create<EditorState>((set) => ({
 
   setViewport: (viewport) => set({ viewport }),
   setPreviewOpen: (isPreviewOpen) => set({ isPreviewOpen }),
+
+  // פתיחת מגירה אחת סוגרת את השנייה: מתחת ל-lg שתיהן מכסות את הקנבס,
+  // ושתיים פתוחות בו-זמנית משאירות את המשתמש בלי שום תצוגה של הלומדה
+  setOutlineOpen: (isOutlineOpen) => set({ isOutlineOpen, isInspectorOpen: false }),
+  setInspectorOpen: (isInspectorOpen) => set({ isInspectorOpen, isOutlineOpen: false }),
 
   requestBlockDelete: (blockId) => set({ blockPendingDelete: blockId }),
   cancelBlockDelete: () => set({ blockPendingDelete: null }),

@@ -14,6 +14,63 @@
 @theme {
   --font-sans: 'Heebo Variable', Heebo, system-ui, -apple-system, 'Segoe UI', 'Noto Sans Hebrew',
     Arial, sans-serif;
+
+  /*
+   * פלטת צ'רום העורך.
+   *
+   * ארבע משפחות שמחליפות את slate/blue/red/amber של ברירת המחדל. הן חיות
+   * כאן ולא ב-course.css: אלה צבעי הכלי, לא צבעי הלומדה. ללומדה יש ערכות
+   * עיצוב משלה (model/themes.ts), והתוצר המיוצא לא רואה את הקובץ הזה.
+   *
+   * שתי מוסכמות שמסבירות את הבחירות:
+   *
+   * 1. **הנייטרל חם בקצה הבהיר וקריר בקצה הכהה.** sand-50 הוא שמנת,
+   *    sand-900 הוא ירוק-טורקיז עמוק. טקסט על נייר חם צריך גוון שאינו
+   *    שחור טהור, אחרת הניגוד צורם.
+   * 2. **הטרהקוטה היא צבע המצב היחיד.** בחירה, פוקוס ופריט פעיל — כולם
+   *    clay. צבע אחד ולא שלושה הוא מה שמאפשר לזהות "מה נבחר עכשיו" במבט,
+   *    וגם מה שמבטיח שטבעת הבחירה תיראה מעל לומדה בכל ערכת עיצוב.
+   */
+
+  /* נייטרל חם */
+  --color-sand-50: #faf9f6;
+  --color-sand-100: #f2f0ea;
+  --color-sand-200: #e5e2da;
+  --color-sand-300: #d2cec4;
+  --color-sand-400: #a9a79c;
+  --color-sand-500: #7c857f;
+  --color-sand-600: #5f6b66;
+  --color-sand-700: #4e5c59;
+  --color-sand-800: #3a4846;
+  --color-sand-900: #2b3a38;
+
+  /* טרהקוטה — בחירה, פוקוס, פעולה */
+  --color-clay-50: #fbede4;
+  --color-clay-100: #f7ddcd;
+  --color-clay-200: #f3c9a8;
+  --color-clay-300: #eaa77c;
+  --color-clay-400: #e28e66;
+  --color-clay-500: #dc7e5b;
+  --color-clay-600: #c4643f;
+  --color-clay-700: #a34e2e;
+  --color-clay-800: #864026;
+  --color-clay-900: #6f3520;
+
+  /* שזיף — פעולות הרסניות */
+  --color-plum-50: #f7e9ec;
+  --color-plum-100: #efd6dc;
+  --color-plum-400: #c07286;
+  --color-plum-600: #9c3d4f;
+  --color-plum-700: #82303f;
+
+  /* חמרה — התראות ואזהרות */
+  --color-ochre-50: #fbf2e3;
+  --color-ochre-100: #f4e5c9;
+  --color-ochre-800: #7a5a22;
+
+  /* מרווה — הצלחה */
+  --color-sage-400: #7e948a;
+  --color-sage-600: #4a6151;
 }
 
 @layer base {
@@ -25,14 +82,14 @@
 
   body {
     margin: 0;
-    background: var(--color-slate-50);
-    color: var(--color-slate-900);
+    background: var(--color-sand-50);
+    color: var(--color-sand-900);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-blue-600);
+    outline: 2px solid var(--color-clay-500);
     outline-offset: 2px;
   }
 }
@@ -61,11 +118,11 @@
 }
 
 .lc-inline-text:hover {
-  box-shadow: 0 0 0 1px rgb(148 163 184 / 0.5);
+  box-shadow: 0 0 0 1px var(--color-sand-300);
 }
 
 .lc-inline-text:focus {
-  box-shadow: 0 0 0 2px var(--color-blue-500);
+  box-shadow: 0 0 0 2px var(--color-clay-500);
 }
 
 /* ─── עורך הטקסט העשיר (TipTap) ─── */

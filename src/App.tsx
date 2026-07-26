@@ -1,9 +1,10 @@
 import { openCourse } from './persistence/session';
+import type { TemplateResult } from './templates';
 import { PreviewOverlay } from './editor/Preview/PreviewOverlay';
 import { EditorLayout } from './editor/Shell/EditorLayout';
 import { ToastHost } from './editor/ui/ToastHost';
 import { WelcomeScreen } from './editor/Welcome/WelcomeScreen';
-import type { Course } from './model/types';
+
 import { useCourseStore } from './state/courseStore';
 
 /**
@@ -15,7 +16,8 @@ import { useCourseStore } from './state/courseStore';
 export function App() {
   const course = useCourseStore((state) => state.course);
 
-  const handleStart = (newCourse: Course) => openCourse(newCourse);
+  const handleStart = ({ course: newCourse, assets }: TemplateResult) =>
+    void openCourse(newCourse, assets);
 
   if (!course) {
     // onOpened אינו צריך לעשות דבר: הפרויקט כבר נטען ל-store, והרינדור

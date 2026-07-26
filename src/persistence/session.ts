@@ -1,4 +1,5 @@
 import { downloadBlob } from '@/lib/download';
+import type { TemplateAsset } from '@/sample/illustrations';
 import type { Course } from '@/model/types';
 import { useAssetStore } from '@/state/assetStore';
 import { useCourseStore } from '@/state/courseStore';
@@ -30,11 +31,29 @@ function resetSession() {
   useSaveStore.getState().reset();
 }
 
-/** פתיחת לומדה חדשה מתבנית */
-export function openCourse(course: Course): void {
+/**
+ * פתיחת לומדה חדשה מתבנית.
+ *
+ * ה-`saveNow` בסוף אינו ייעול אלא תיקון: השמירה האוטומטית נרשמת ב-
+ * `EditorLayout`, כלומר *אחרי* שהלומדה כבר נטענה ל-store, והיא מאזינה
+ * לשינויים בלבד. בלי כתיבה מפורשת כאן, לומדה שנוצרה מתבנית ולא נערכה
+ * מעולם אינה קיימת באחסון — רענון מחק אותה, והיא לא הופיעה ב"המשך
+ * מהמקום שבו הפסקת". `openProjectFile` כבר עשה את זה; רק המסלול הזה פוספס.
+ */
+export async function openCourse(course: Course, assets: TemplateAsset[] = []): Promise<void> {
   resetSession();
+
+  // אותו סדר כמו ב-openProjectFile: הבלובים נכתבים ל-IndexedDB לפני
+  // שהלומדה נטענת ל-state, כדי שרענון מיד אחרי היצירה יחזיר לומדה שלמה
+  // ולא בלוקים שמפנים לאיורים שאינם קיימים
+  for (const { meta, blob } of assets) {
+    await putAsset(course.id, meta, blob);
+  }
+  useAssetStore.getState().loadAssets(assets);
+
   useCourseStore.getState().loadCourse(course);
   useEditorStore.getState().selectChapter(course.chapters[0]?.id ?? null);
+  await saveNow();
 }
 
 export type OpenResult = { ok: true } | { ok: false; errors: string[] };
