@@ -22,9 +22,11 @@ interface HeroProps {
   onBuild: () => void;
   /** פותח את לומדת הדוגמה (תבנית sample) */
   onSample: () => void;
+  /** מתחיל ממבנה מוכן (תבנית shortTraining) */
+  onShort: () => void;
 }
 
-export function Hero({ onBuild, onSample }: HeroProps) {
+export function Hero({ onBuild, onSample, onShort }: HeroProps) {
   return (
     <section className="relative z-[2] overflow-hidden bg-shell text-shell-fg shadow-[0_22px_40px_-26px_rgba(9,11,15,0.55)]">
       {/* זוהר הדגש מאחורי הוויזואל */}
@@ -65,6 +67,17 @@ export function Hero({ onBuild, onSample }: HeroProps) {
               רואים לומדה לדוגמה
             </button>
           </div>
+
+          <p className="mt-3 text-sm text-shell-muted">
+            או{' '}
+            <button
+              type="button"
+              onClick={onShort}
+              className="font-semibold text-volt underline underline-offset-2 transition hover:text-volt-bright"
+            >
+              מתחילים ממבנה מוכן
+            </button>
+          </p>
 
           <ul className="mt-6 flex flex-wrap gap-2.5">
             {PROOF.map((text) => (
