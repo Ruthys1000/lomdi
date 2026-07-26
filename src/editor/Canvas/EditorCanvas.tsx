@@ -196,7 +196,7 @@ export function EditorCanvas() {
         <button
           type="button"
           onClick={() => setLibraryIndex(chapter?.blocks.length ?? 0)}
-          className="flex items-center gap-2 rounded-xl border border-dashed border-edge-strong bg-panel px-4 py-2.5 text-sm font-semibold text-fg-soft transition hover:border-volt-dim hover:text-volt"
+          className="flex items-center gap-2 rounded-xl border border-dashed border-edge-strong bg-panel px-4 py-2.5 text-sm font-semibold text-fg-soft transition hover:border-volt-dim hover:text-volt-ink"
         >
           <Plus className="size-4" aria-hidden />
           הוספת בלוק

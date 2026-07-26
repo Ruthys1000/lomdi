@@ -86,10 +86,10 @@ export function ExportDialog({ open, onClose }: { open: boolean; onClose: () => 
       }}
       onClose={onClose}
       aria-label="ייצוא הלומדה"
-      className="m-auto w-[min(34rem,calc(100vw-2rem))] rounded-2xl border border-edge p-0 shadow-2xl backdrop:bg-app/40"
+      className="m-auto w-[min(34rem,calc(100vw-2rem))] rounded-2xl border border-edge bg-panel text-fg p-0 shadow-2xl backdrop:bg-scrim/40"
     >
       <div className="flex items-center gap-3 border-b border-edge px-5 py-4">
-        <span className="flex size-8 items-center justify-center rounded-lg bg-volt-soft text-volt">
+        <span className="flex size-8 items-center justify-center rounded-lg bg-volt-soft text-volt-ink">
           <FileArchive className="size-4" aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
@@ -171,7 +171,7 @@ export function ExportDialog({ open, onClose }: { open: boolean; onClose: () => 
           type="button"
           disabled={busy}
           onClick={() => void handleExport()}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-volt px-4 py-2 text-sm font-semibold text-app transition hover:bg-volt-bright disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-volt px-4 py-2 text-sm font-semibold text-on-volt transition hover:bg-volt-bright disabled:opacity-50"
         >
           <Download className="size-4" aria-hidden />
           {busy ? 'אורז…' : 'ייצוא ZIP'}

@@ -55,7 +55,7 @@ export function AssetField({ label, assetId, onChange, kind = 'image', hint }: A
           <button
             type="button"
             onClick={() => setPickerOpen(true)}
-            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold text-volt transition hover:bg-volt-soft"
+            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold text-volt-ink transition hover:bg-volt-soft"
           >
             {assetId ? <Replace className="size-3.5" aria-hidden /> : <ImagePlus className="size-3.5" aria-hidden />}
             {assetId ? 'החלפה' : 'בחירה מהספרייה'}

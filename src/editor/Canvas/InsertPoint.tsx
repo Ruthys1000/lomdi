@@ -18,7 +18,7 @@ export function InsertPoint({ label, onClick }: { label: string; onClick: () => 
           onClick={onClick}
           aria-label={label}
           title={label}
-          className="relative z-10 flex size-6 items-center justify-center rounded-full bg-volt text-app shadow-sm transition hover:bg-volt-bright"
+          className="relative z-10 flex size-6 items-center justify-center rounded-full bg-volt text-on-volt shadow-sm transition hover:bg-volt-bright"
         >
           <Plus className="size-3.5" aria-hidden />
         </button>

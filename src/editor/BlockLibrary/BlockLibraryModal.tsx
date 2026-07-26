@@ -67,7 +67,7 @@ export function BlockLibraryModal({ open, onClose, onPick }: BlockLibraryModalPr
         onClose();
       }}
       onClose={onClose}
-      className="m-auto w-[min(46rem,calc(100vw-2rem))] rounded-2xl border border-edge p-0 shadow-2xl backdrop:bg-app/40"
+      className="m-auto w-[min(46rem,calc(100vw-2rem))] rounded-2xl border border-edge bg-panel text-fg p-0 shadow-2xl backdrop:bg-scrim/40"
     >
       <div className="flex items-center gap-3 border-b border-edge px-5 py-4">
         <h2 className="text-sm font-bold text-fg">הוספת בלוק</h2>
@@ -83,7 +83,7 @@ export function BlockLibraryModal({ open, onClose, onPick }: BlockLibraryModalPr
             onChange={(event) => setQuery(event.target.value)}
             placeholder="חיפוש בלוק"
             aria-label="חיפוש בלוק"
-            className="w-full rounded-lg border border-edge py-2 text-sm ps-9 pe-3 focus:border-volt-dim focus:ring-1 focus:ring-volt focus:outline-none"
+            className="w-full rounded-lg border border-edge py-2 text-sm ps-9 pe-3 bg-field text-fg placeholder:text-fg-muted focus:border-volt-dim focus:ring-1 focus:ring-volt focus:outline-none"
           />
         </div>
 
@@ -108,7 +108,7 @@ export function BlockLibraryModal({ open, onClose, onPick }: BlockLibraryModalPr
             className={cn(
               'rounded-lg px-3 py-1 text-xs font-semibold transition',
               category === item.id
-                ? 'bg-volt text-app'
+                ? 'bg-volt text-on-volt'
                 : 'text-fg-muted hover:bg-panel-2 hover:text-fg',
             )}
           >
@@ -145,7 +145,7 @@ export function BlockLibraryModal({ open, onClose, onPick }: BlockLibraryModalPr
                       className={cn(
                         'flex size-8 items-center justify-center rounded-lg transition',
                         available
-                          ? 'bg-volt-soft text-volt group-hover:bg-volt group-hover:text-app'
+                          ? 'bg-volt-soft text-volt-ink group-hover:bg-volt group-hover:text-on-volt'
                           : 'bg-panel-2 text-fg-muted',
                       )}
                     >

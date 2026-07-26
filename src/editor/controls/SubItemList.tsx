@@ -121,7 +121,7 @@ export function SubItemList<T extends Identified>({
         type="button"
         disabled={items.length >= maxItems}
         onClick={() => onChange([...items, createItem()])}
-        className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-edge-strong px-3 py-2 text-xs font-semibold text-fg-soft transition hover:border-volt-dim hover:text-volt disabled:cursor-not-allowed disabled:opacity-40"
+        className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-edge-strong px-3 py-2 text-xs font-semibold text-fg-soft transition hover:border-volt-dim hover:text-volt-ink disabled:cursor-not-allowed disabled:opacity-40"
       >
         <Plus className="size-3.5" aria-hidden />
         {addLabel}

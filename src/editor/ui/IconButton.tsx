@@ -33,9 +33,9 @@ export function IconButton({
         'inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium transition',
         'disabled:cursor-not-allowed disabled:opacity-40',
         variant === 'solid'
-          ? 'bg-volt text-app hover:bg-volt-bright'
+          ? 'bg-volt text-on-volt hover:bg-volt-bright'
           : active
-            ? 'bg-volt-soft text-volt'
+            ? 'bg-volt-soft text-volt-ink'
             : 'text-fg-soft hover:bg-panel-2 hover:text-fg',
       )}
     >

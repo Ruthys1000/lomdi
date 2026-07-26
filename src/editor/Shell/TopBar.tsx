@@ -83,12 +83,12 @@ export function TopBar() {
   };
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-edge bg-panel px-4">
+    <header className="lc-shell flex h-14 shrink-0 items-center gap-3 border-b border-shell-edge bg-shell px-4">
       <div className="flex items-center gap-2">
-        <span className="flex size-8 items-center justify-center rounded-lg bg-volt text-app">
+        <span className="flex size-8 items-center justify-center rounded-lg bg-volt text-on-volt">
           <BookOpen className="size-4" aria-hidden />
         </span>
-        <span className="hidden text-sm font-bold tracking-tight sm:inline">{APP_NAME}</span>
+        <span className="hidden text-sm font-bold tracking-tight text-shell-fg sm:inline">{APP_NAME}</span>
       </div>
 
       {/* פותחי המגירות. מוסתרים מ-lg ומעלה, שם שני הפאנלים בגריד ממילא */}
@@ -107,7 +107,7 @@ export function TopBar() {
         />
       </div>
 
-      <div className="mx-1 hidden h-6 w-px bg-edge sm:block" />
+      <div className="mx-1 hidden h-6 w-px bg-shell-edge sm:block" />
 
       <label className="min-w-0 flex-1">
         <span className="sr-only">שם הפרויקט</span>
@@ -142,10 +142,10 @@ export function TopBar() {
         />
       </div>
 
-      <div className="mx-1 h-6 w-px bg-edge" />
+      <div className="mx-1 h-6 w-px bg-shell-edge" />
 
       <div
-        className="hidden items-center gap-0.5 rounded-lg bg-panel-2 p-0.5 lg:flex"
+        className="hidden items-center gap-0.5 rounded-lg bg-shell-2 p-0.5 lg:flex"
         role="group"
         aria-label="תצוגה לפי מכשיר"
       >
@@ -160,7 +160,7 @@ export function TopBar() {
         ))}
       </div>
 
-      <div className="mx-1 h-6 w-px bg-edge" />
+      <div className="mx-1 h-6 w-px bg-shell-edge" />
 
       <div className="flex items-center gap-1">
         <IconButton icon={Images} label="ספריית הנכסים" onClick={() => setAssetsOpen(true)} />

@@ -131,7 +131,7 @@ function ToolbarButton({
       onClick={onClick}
       className={cn(
         'shrink-0 rounded p-1.5 transition',
-        active ? 'bg-volt-soft text-volt' : 'text-fg-muted hover:bg-panel-2 hover:text-fg',
+        active ? 'bg-volt-soft text-volt-ink' : 'text-fg-muted hover:bg-panel-2 hover:text-fg',
       )}
     >
       <Icon className="size-4" aria-hidden />

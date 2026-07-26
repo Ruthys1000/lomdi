@@ -61,7 +61,7 @@ export function SaveIndicator() {
 
   return (
     <span
-      className="inline-flex items-center gap-1.5 whitespace-nowrap px-2 text-xs text-fg-muted"
+      className="inline-flex items-center gap-1.5 whitespace-nowrap px-2 text-xs text-shell-muted"
       role="status"
       aria-live="polite"
     >

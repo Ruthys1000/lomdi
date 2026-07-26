@@ -43,7 +43,7 @@ export function HowItWorks() {
             className="rounded-2xl border border-edge bg-panel p-5"
           >
             <div className="flex items-center gap-3">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-volt-soft text-volt">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-volt-soft text-volt-ink">
                 <Icon className="size-4.5" aria-hidden />
               </span>
               <span className="text-sm font-bold text-fg">

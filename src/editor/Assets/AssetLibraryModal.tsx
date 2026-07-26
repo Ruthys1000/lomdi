@@ -143,7 +143,7 @@ export function AssetLibraryModal({ open, onClose, onPick, kind }: AssetLibraryM
         void handleFiles(event.dataTransfer.files);
       }}
       aria-label="ספריית הנכסים"
-      className="m-auto w-[min(52rem,calc(100vw-2rem))] rounded-2xl border border-edge p-0 shadow-2xl backdrop:bg-app/40"
+      className="m-auto w-[min(52rem,calc(100vw-2rem))] rounded-2xl border border-edge bg-panel text-fg p-0 shadow-2xl backdrop:bg-scrim/40"
     >
       <div className="flex items-center gap-3 border-b border-edge px-5 py-4">
         <h2 className="text-sm font-bold text-fg">
@@ -160,7 +160,7 @@ export function AssetLibraryModal({ open, onClose, onPick, kind }: AssetLibraryM
             onChange={(event) => setQuery(event.target.value)}
             placeholder="חיפוש לפי שם הקובץ"
             aria-label="חיפוש נכס"
-            className="w-full rounded-lg border border-edge py-1.5 ps-9 pe-3 text-sm focus:border-volt-dim focus:ring-1 focus:ring-volt focus:outline-none"
+            className="w-full rounded-lg border border-edge py-1.5 ps-9 pe-3 text-sm bg-field text-fg placeholder:text-fg-muted focus:border-volt-dim focus:ring-1 focus:ring-volt focus:outline-none"
           />
         </div>
 
@@ -168,7 +168,7 @@ export function AssetLibraryModal({ open, onClose, onPick, kind }: AssetLibraryM
           type="button"
           disabled={busy}
           onClick={() => inputRef.current?.click()}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-volt px-3 py-1.5 text-sm font-semibold text-app transition hover:bg-volt-bright disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-volt px-3 py-1.5 text-sm font-semibold text-on-volt transition hover:bg-volt-bright disabled:opacity-50"
         >
           <Upload className="size-4" aria-hidden />
           {busy ? 'מעלה…' : 'העלאה'}
@@ -342,7 +342,7 @@ function DeleteAssetConfirm({
         <button
           type="button"
           onClick={onConfirm}
-          className="rounded-lg bg-danger px-3 py-1.5 text-xs font-semibold text-app hover:opacity-90"
+          className="rounded-lg bg-danger px-3 py-1.5 text-xs font-semibold text-on-danger hover:opacity-90"
         >
           מחיקה
         </button>

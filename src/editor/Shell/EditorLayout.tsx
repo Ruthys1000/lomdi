@@ -87,7 +87,7 @@ function Drawer({
           type="button"
           aria-label="סגירת הפאנל"
           onClick={onClose}
-          className="fixed inset-0 z-30 bg-app/40 lg:hidden"
+          className="fixed inset-0 z-30 bg-scrim/40 lg:hidden"
         />
       )}
 
