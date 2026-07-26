@@ -14,7 +14,12 @@ import {
   Tablet,
   Undo2,
 } from 'lucide-react';
-import { downloadProjectFile, openProjectFile } from '@/persistence/session';
+import {
+  closeToWelcome,
+  downloadProjectFile,
+  forceCloseToWelcome,
+  openProjectFile,
+} from '@/persistence/session';
 import { courseHistory, useCourseStore } from '@/state/courseStore';
 import { useEditorStore, type Viewport } from '@/state/editorStore';
 import { toast } from '@/state/toastStore';
@@ -22,6 +27,7 @@ import { APP_NAME } from '@/version';
 import { AssetLibraryModal } from '../Assets/AssetLibraryModal';
 import { ExportDialog } from '../Export/ExportDialog';
 import { useHistoryState } from '../shortcuts/useHistoryState';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { IconButton } from '../ui/IconButton';
 import { SaveIndicator } from './SaveIndicator';
 
@@ -55,8 +61,19 @@ export function TopBar() {
   const [assetsOpen, setAssetsOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [confirmLeave, setConfirmLeave] = useState(false);
 
   if (!course) return null;
+
+  /**
+   * חזרה לדף הבית. closeToWelcome שומר קודם, ולכן העבודה חוזרת כ"המשך
+   * מהמקום שבו הפסקת". רק אם השמירה נכשלה (אחסון חסום) נפתח אישור לפני
+   * שנוותר על השינויים האחרונים.
+   */
+  const handleGoHome = async () => {
+    const ok = await closeToWelcome();
+    if (!ok) setConfirmLeave(true);
+  };
 
   const handleDownload = async () => {
     setDownloading(true);
@@ -84,12 +101,21 @@ export function TopBar() {
 
   return (
     <header className="lc-shell flex h-14 shrink-0 items-center gap-3 border-b border-shell-edge bg-shell px-4">
-      <div className="flex items-center gap-2">
+      {/* הלוגו הוא הדרך לחזור לדף הבית מכל מקום בעורך */}
+      <button
+        type="button"
+        onClick={() => void handleGoHome()}
+        title="חזרה לדף הבית"
+        aria-label="חזרה לדף הבית"
+        className="group flex items-center gap-2 rounded-lg px-1 py-1 transition hover:bg-shell-2 focus-visible:outline-2 focus-visible:outline-volt"
+      >
         <span className="flex size-8 items-center justify-center rounded-lg bg-volt text-on-volt">
           <BookOpen className="size-4" aria-hidden />
         </span>
-        <span className="hidden text-sm font-bold tracking-tight text-shell-fg sm:inline">{APP_NAME}</span>
-      </div>
+        <span className="hidden text-sm font-bold tracking-tight text-shell-fg sm:inline">
+          {APP_NAME}
+        </span>
+      </button>
 
       {/* פותחי המגירות. מוסתרים מ-lg ומעלה, שם שני הפאנלים בגריד ממילא */}
       <div className="flex items-center gap-1 lg:hidden">
@@ -197,6 +223,19 @@ export function TopBar() {
 
       <AssetLibraryModal open={assetsOpen} onClose={() => setAssetsOpen(false)} />
       <ExportDialog open={exportOpen} onClose={() => setExportOpen(false)} />
+
+      <ConfirmDialog
+        open={confirmLeave}
+        title="לחזור לדף הבית?"
+        message="השמירה האוטומטית נכשלה, וייתכן שהשינויים האחרונים לא נשמרו. כדאי לשמור קובץ פרויקט (‎.course.zip‎) לפני שחוזרים."
+        confirmLabel="חזרה בכל זאת"
+        cancelLabel="נשארים"
+        onConfirm={() => {
+          setConfirmLeave(false);
+          forceCloseToWelcome();
+        }}
+        onCancel={() => setConfirmLeave(false)}
+      />
     </header>
   );
 }

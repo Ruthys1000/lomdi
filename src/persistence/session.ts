@@ -32,6 +32,31 @@ function resetSession() {
 }
 
 /**
+ * חזרה למסך הפתיחה מתוך העורך.
+ *
+ * שוטף שמירה תלויה ל-IndexedDB לפני האיפוס, כך שהחזרה אינה מאבדת עבודה
+ * והלומדה חוזרת כ"המשך מהמקום שבו הפסקת" (saveNow מעדכן גם את lastProjectId).
+ * אם השמירה נכשלת (אחסון חסום) — לא מאפסים, ומחזירים false כדי שהקורא
+ * יוכל להזהיר לפני איבוד שינויים.
+ */
+export async function closeToWelcome(): Promise<boolean> {
+  const { course } = useCourseStore.getState();
+  if (!course) return true;
+
+  const saved = await saveNow();
+  if (!saved) return false;
+
+  forceCloseToWelcome();
+  return true;
+}
+
+/** איפוס וחזרה למסך הפתיחה בלי לשמור — רק אחרי שהמשתמש אישר איבוד שינויים. */
+export function forceCloseToWelcome(): void {
+  resetSession();
+  useCourseStore.getState().closeCourse();
+}
+
+/**
  * פתיחת לומדה חדשה מתבנית.
  *
  * ה-`saveNow` בסוף אינו ייעול אלא תיקון: השמירה האוטומטית נרשמת ב-
