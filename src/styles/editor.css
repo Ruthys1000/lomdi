@@ -27,7 +27,7 @@
    * 1. **טוקנים לפי תפקיד ולא סולם מספרי.** `text-fg` ו-`bg-panel` אומרים
    *    מה תפקיד הצבע; `text-…-900` אומר רק כמה הוא כהה, ומתפרק ברגע
    *    שאזור אחד במסך הופך כהה והשאר בהיר — בדיוק המצב כאן.
-   * 2. **הלאים הוא צבע המצב היחיד.** בחירה, פוקוס ופעולה ראשית — כולם
+   * 2. **הדגש הוא צבע המצב היחיד.** בחירה, פוקוס ופעולה ראשית — כולם
    *    volt. צבע אחד ולא שלושה הוא מה שמאפשר לראות "מה פעיל עכשיו" במבט,
    *    וגם מה שמבטיח שטבעת הבחירה תיראה מעל לומדה בכל ערכת עיצוב.
    * 3. **אפור בהיר בכל מקום, כהה רק בפס העליון ובתצוגה המקדימה, ולבן
@@ -64,19 +64,20 @@
   --color-scrim: #14181d;
 
   /*
-   * volt ולא lime — הסולם `lime-*` כבר קיים ב-Tailwind, ושם זהה היה
-   * מייצר `bg-lime` לצד `bg-lime-500` שאינם קרובים בכלל.
+   * volt — צבע הדגש. הגוון הוא אקווה-מנטה (#2de1c2), ולא הסולם `teal-*`
+   * של Tailwind: שם ייעודי משאיר `bg-volt` כתפקיד ("צבע המצב") במקום
+   * לכבול אותו לגוון מספרי שיתפרק אם נכוונן אותו.
    *
-   * **הלאים הוא צבע רקע, לא צבע טקסט.** #c9f24d על רקע בהיר נותן יחס
-   * ניגודיות של פחות מ-1.6:1 — קישור בצבע הזה פשוט אינו נקרא. לכן יש שני
-   * טוקנים נפרדים: `volt` לרקעים, ו-`volt-ink` לטקסט ולאייקונים. הטקסט
-   * *על* הלאים הוא `on-volt`, כמעט-שחור, בערך 14:1.
+   * **הדגש הוא צבע רקע, לא צבע טקסט.** #2de1c2 על רקע בהיר נותן ניגודיות
+   * נמוכה מדי — קישור בצבע הזה אינו נקרא. לכן יש שני טוקנים נפרדים: `volt`
+   * לרקעים, ו-`volt-ink` (טורקיז כהה, ≥4.5:1) לטקסט ולאייקונים. הטקסט
+   * *על* הדגש הוא `on-volt`, כמעט-שחור, בערך 13:1.
    */
-  --color-volt: #c9f24d;
-  --color-volt-bright: #d7f76f;
-  --color-volt-dim: #a9cc3e;
-  --color-volt-ink: #46650a;
-  --color-volt-soft: #eef8d2;
+  --color-volt: #2de1c2;
+  --color-volt-bright: #5eead0;
+  --color-volt-dim: #17bfa6;
+  --color-volt-ink: #0b6b5e;
+  --color-volt-soft: #d6f7ef;
   --color-on-volt: #14181d;
 
   --color-danger: #c02626;
@@ -110,9 +111,9 @@
   }
 
   /*
-   * טבעת הפוקוס היא הדיו הכהה ולא הלאים עצמו: #c9f24d על צ'רום בהיר נותן
-   * פחות מ-1.6:1, כלומר טבעת שקיימת אבל לא נראית. באזורים הכהים ההיגיון
-   * מתהפך, ולכן שם היא חוזרת להיות הלאים.
+   * טבעת הפוקוס היא הדיו הכהה ולא הדגש עצמו: אקווה בהיר על צ'רום בהיר נותן
+   * ניגודיות נמוכה מדי, כלומר טבעת שקיימת אבל לא נראית. באזורים הכהים
+   * ההיגיון מתהפך, ולכן שם היא חוזרת להיות הדגש.
    */
   :focus-visible {
     outline: 2px solid var(--color-volt-ink);
@@ -172,4 +173,70 @@
   block-size: 0;
   opacity: 0.45;
   pointer-events: none;
+}
+
+/*
+ * ─── מסך הפתיחה: אנימציית ה-Hero ("מיני-לומדי") ───
+ *
+ * חי כאן ולא ב-Tailwind כי keyframes אינם utility. השאר (פריסה, צבע)
+ * נשאר ב-Tailwind בקומפוננטה. הלולאה מספרת את הליבה: בונים מבלוקים (שכבת
+ * "עריכה") → הבזק → מקבלים אתר מעוצב (שכבת "מיוצא"), ובחזרה.
+ */
+
+/* במה מוערמת: שתי השכבות + ההבזק יושבים באותו תא רשת */
+.lc-stage { display: grid; }
+.lc-stage > * { grid-area: 1 / 1; }
+
+/* מצב מנוחה (וגם ברירת המחדל למי שאין לו no-preference): מראים עריכה */
+.lc-hero-export,
+.lc-status-export,
+.lc-flash,
+.lc-filechip { opacity: 0; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .lc-hero-edit     { animation: lc-edit 6.5s ease-in-out infinite; }
+  .lc-hero-export   { animation: lc-export 6.5s ease-in-out infinite; }
+  .lc-status-edit   { animation: lc-edit 6.5s ease-in-out infinite; }
+  .lc-status-export { animation: lc-export 6.5s ease-in-out infinite; }
+  .lc-flash         { animation: lc-flash 6.5s ease-in-out infinite; }
+  .lc-filechip      { animation: lc-chip 6.5s ease-in-out infinite; }
+  .lc-blk-1 { animation: lc-b1 6.5s ease-in-out infinite; }
+  .lc-blk-2 { animation: lc-b2 6.5s ease-in-out infinite; }
+  .lc-blk-3 { animation: lc-b3 6.5s ease-in-out infinite; }
+  .lc-insert { animation: lc-pulse 6.5s ease-in-out infinite; }
+}
+
+@keyframes lc-b1 { 0% { opacity: 0; transform: translateY(12px); } 9%, 100% { opacity: 1; transform: none; } }
+@keyframes lc-b2 { 0%, 10% { opacity: 0; transform: translateY(12px); } 20%, 100% { opacity: 1; transform: none; } }
+@keyframes lc-b3 { 0%, 22% { opacity: 0; transform: translateY(12px); } 32%, 100% { opacity: 1; transform: none; } }
+@keyframes lc-pulse { 0%, 30% { opacity: 0; } 38% { opacity: 1; } 46%, 100% { opacity: 0; } }
+@keyframes lc-edit { 0% { opacity: 1; } 46% { opacity: 1; } 53% { opacity: 0; } 93% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes lc-export { 0% { opacity: 0; } 46% { opacity: 0; } 53% { opacity: 1; } 93% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes lc-flash { 0%, 44% { opacity: 0; } 49% { opacity: 0.85; } 58%, 100% { opacity: 0; } }
+@keyframes lc-chip { 0%, 52% { opacity: 0; transform: translateY(6px); } 60% { opacity: 1; transform: none; } 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
+
+/* מצב מופחת-תנועה: מקפיאים על הפריים ה"מיוצא" (התוצאה) */
+@media (prefers-reduced-motion: reduce) {
+  .lc-hero-edit { opacity: 0; }
+  .lc-hero-export { opacity: 1; }
+  .lc-status-edit { opacity: 0; }
+  .lc-status-export { opacity: 1; }
+  .lc-filechip { opacity: 1; }
+}
+
+/*
+ * קו מחבר בפס "איך עובדים": מקצה ה-end של המספר עד קצה העמודה, מצביע אל
+ * השלב הבא (משמאל ב-RTL). לוגי, לא פיזי, כדי שיתהפך נכון אם יתווסף LTR.
+ */
+.lc-step-line::after {
+  content: "";
+  position: absolute;
+  top: 44px;
+  height: 0;
+  inset-inline-start: 64px;
+  inset-inline-end: 0;
+  border-top: 2px dashed var(--color-edge-strong);
+}
+@media (max-width: 640px) {
+  .lc-step-line::after { display: none; }
 }

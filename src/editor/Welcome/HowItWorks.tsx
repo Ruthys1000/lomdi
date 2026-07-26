@@ -1,7 +1,8 @@
 import { Blocks, PackageCheck, Palette } from 'lucide-react';
+import { cn } from '@/lib/cn';
 
 /**
- * פס "איך זה עובד" (אונבורדינג).
+ * פס "איך עובדים עם לומדי" — שלושת השלבים כ"פס ייצור" (סעיף אונבורדינג).
  *
  * מרונדר רק כשאין עדיין לומדה שמורה, ומי שקורא לו אחראי על התנאי.
  *
@@ -9,51 +10,56 @@ import { Blocks, PackageCheck, Palette } from 'lucide-react';
  * הדגל שנשמר ל-localStorage, נשכח, ואז מישהו מגלה שאי אפשר להחזיר אותו.
  * קיום הלומדה הראשונה הוא כבר הסימן שההסבר מיותר — הוא נעלם מעצמו, וחוזר
  * מעצמו אם מוחקים הכול.
+ *
+ * הקו המחבר בין השלבים (`lc-step-line`) חי ב-editor.css: הוא ::after שזורם
+ * לפי כיוון הכתיבה, מהמספר אל השלב הבא (משמאל ב-RTL).
  */
 
 const STEPS = [
   {
     icon: Blocks,
-    title: 'מרכיבים',
-    text: 'גוררים בלוקים: טקסט, תמונה, שאלה.',
+    title: 'מרכיבים מבלוקים',
+    text: 'גוררים פנימה בלוקים מוכנים — טקסט, תמונה, וידאו, שאלה — וממלאים בתוכן שלכם.',
+    kbd: '9 סוגי בלוקים',
   },
   {
     icon: Palette,
-    title: 'מעצבים',
-    text: 'בוחרים ערכה, והכל מתיישר.',
+    title: 'בוחרים עיצוב',
+    text: 'בוחרים ערכה אחת מתוך שש, וכל הלומדה מתלבשת עליה — קריא בכל מסך, גם בטלפון.',
+    kbd: '6 ערכות מוכנות',
   },
   {
     icon: PackageCheck,
-    title: 'מוציאים',
-    text: 'ZIP שנפתח בכל דפדפן.',
+    title: 'מייצאים ומעבירים',
+    text: 'מקבלים קובץ ZIP שנפתח בכל דפדפן, גם אופליין — ל-Moodle, בווטסאפ או מדיסק-און-קי.',
+    kbd: '.course.zip',
   },
 ];
 
 export function HowItWorks() {
   return (
-    <section className="mt-10" aria-labelledby="how-heading">
-      <h2 id="how-heading" className="text-base font-bold text-fg">
-        איך זה עובד
+    <section className="mx-auto max-w-5xl px-6 py-14" aria-labelledby="how-heading">
+      <p className="text-xs font-bold tracking-[0.08em] text-fg-muted uppercase">שלושה שלבים</p>
+      <h2 id="how-heading" className="mt-2 text-2xl font-extrabold tracking-tight text-fg md:text-3xl">
+        איך עובדים עם לומדי
       </h2>
 
-      <ol className="mt-3 grid gap-3 sm:grid-cols-3">
-        {STEPS.map(({ icon: Icon, title, text }, index) => (
-          <li
-            key={title}
-            className="rounded-2xl border border-edge bg-panel p-5"
-          >
-            <div className="flex items-center gap-3">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-volt-soft text-volt-ink">
-                <Icon className="size-4.5" aria-hidden />
-              </span>
-              <span className="text-sm font-bold text-fg">
-                {/* המספר נשאר טקסט ולא ::before, כדי שקורא מסך יקריא
-                    "1 מרכיבים" ולא רק "מרכיבים" */}
-                <span className="text-fg-muted">{index + 1}</span> {title}
-              </span>
-            </div>
+      <ol className="mt-8 grid sm:grid-cols-3">
+        {STEPS.map(({ icon: Icon, title, text, kbd }, index) => (
+          <li key={title} className={cn('relative p-6', index < STEPS.length - 1 && 'lc-step-line')}>
+            {/* המספר טקסט ולא ::before, כדי שקורא מסך יקריא "1 מרכיבים" */}
+            <span className="flex size-10 items-center justify-center rounded-xl bg-volt-soft text-lg font-extrabold text-volt-ink">
+              {index + 1}
+            </span>
 
-            <p className="mt-3 text-sm leading-relaxed text-fg-muted">{text}</p>
+            <h3 className="mt-4 text-lg font-extrabold text-fg">{title}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-fg-muted">{text}</p>
+
+            <span className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-edge bg-panel px-2.5 py-1.5 text-xs font-bold text-fg-soft">
+              <Icon className="size-3.5 text-volt-ink" aria-hidden />
+              {/* bdi מבודד ערך לטיני (‎.course.zip‎) כך שלא יתהפך בתוך שורה עברית */}
+              <bdi>{kbd}</bdi>
+            </span>
           </li>
         ))}
       </ol>

@@ -48,24 +48,27 @@ async function setup() {
 }
 
 describe('מסך הפתיחה', () => {
-  it('מציג פעולה ראשית אחת ליצירת לומדה, ושתי נקודות כניסה נוספות', async () => {
+  it('מבקר חדש רואה פעולה ראשית "מתחילים לבנות" וקישור ללומדת דוגמה', async () => {
     await setup();
 
-    expect(screen.getByRole('button', { name: 'בונים לומדה' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /מבנה מוכן/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /לומדת הדוגמה/ })).toBeInTheDocument();
+    // ה-CTA הראשי מופיע גם ב-Hero וגם בסוגר — לכן getAllByRole
+    expect(screen.getAllByRole('button', { name: 'מתחילים לבנות' }).length).toBeGreaterThan(0);
+    expect(screen.getByRole('button', { name: 'רואים לומדה לדוגמה' })).toBeInTheDocument();
   });
 
-  it('לחיצה על "בונים לומדה" מחזירה לומדה עם פרק, ולא רק שם תבנית', async () => {
+  it('לחיצה על "מתחילים לבנות" מחזירה לומדה עם פרק, ולא רק שם תבנית', async () => {
     const { onStart } = await setup();
 
-    fireEvent.click(screen.getByRole('button', { name: 'בונים לומדה' }));
+    fireEvent.click(screen.getAllByRole('button', { name: 'מתחילים לבנות' })[0]);
 
     expect(onStart).toHaveBeenCalledTimes(1);
     expect(onStart.mock.calls[0][0].course.chapters.length).toBeGreaterThan(0);
   });
 
   it('"מבנה מוכן" מגיע עם תוכן ועם האיור שלו, ולא עם בלוקים ריקים', async () => {
+    // "מבנה מוכן" ו"לומדת הדוגמה" הן נקודות כניסה של המבקר החוזר (המשגר)
+    projects = [project('a', 'לומדה', '2026-03-01T10:00:00.000Z')];
+    lastProjectId = 'a';
     const { onStart } = await setup();
 
     fireEvent.click(screen.getByRole('button', { name: /מבנה מוכן/ }));
@@ -113,7 +116,7 @@ describe('מסך הפתיחה', () => {
 
     await setup();
 
-    const newButton = screen.getByRole('button', { name: 'בונים לומדה' });
+    const newButton = screen.getByRole('button', { name: 'מתחילים לבנות' });
     const listHeading = screen.getByRole('heading', { name: 'הלומדות שלי' });
 
     // DOCUMENT_POSITION_FOLLOWING — הכותרת של הרשימה באה *אחרי* הכפתור
@@ -136,16 +139,16 @@ describe('מסך הפתיחה', () => {
     expect(screen.getByText('לומדה 9')).toBeInTheDocument();
   });
 
-  it('פס "איך זה עובד" מוצג בלי לומדות שמורות, ונעלם ברגע שיש אחת', async () => {
+  it('פס "איך עובדים עם לומדי" מוצג למבקר חדש, ונעלם ברגע שיש לומדה שמורה', async () => {
     await setup();
-    expect(screen.getByRole('heading', { name: 'איך זה עובד' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'איך עובדים עם לומדי' })).toBeInTheDocument();
 
     cleanup();
     projects = [project('a', 'לומדה', '2026-03-01T10:00:00.000Z')];
     lastProjectId = 'a';
     await setup();
 
-    expect(screen.queryByRole('heading', { name: 'איך זה עובד' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'איך עובדים עם לומדי' })).not.toBeInTheDocument();
   });
 
   it('קובץ שנגרר לכל מקום במסך נטען כפרויקט', async () => {
