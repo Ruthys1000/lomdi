@@ -50,6 +50,7 @@ function shortTrainingTemplate(): TemplateResult {
         blocks: [
           createBlock('hero', {
             content: {
+              variant: 'spotlight',
               title: 'שם ההדרכה',
               subtitle: 'משפט אחד שמסביר למי ההדרכה מיועדת',
               intro: 'כרבע שעה',
@@ -117,6 +118,7 @@ function shortTrainingTemplate(): TemplateResult {
 
           createBlock('cards', {
             content: {
+              variant: 'gradient',
               columns: 3,
               media: 'icon',
               roundness: 'medium',
@@ -212,6 +214,7 @@ function policyTemplate(): TemplateResult {
         blocks: [
           createBlock('hero', {
             content: {
+              variant: 'panel',
               title: 'שם הנוהל',
               subtitle: 'משפט אחד שמסביר מה הנוהל בא להסדיר',
               intro: 'קריאה חובה',
@@ -359,6 +362,7 @@ function onboardingTemplate(): TemplateResult {
         blocks: [
           createBlock('hero', {
             content: {
+              variant: 'spotlight',
               title: 'ברוכים הבאים לצוות',
               subtitle: 'שמחים שהצטרפתם. הלומדה הקצרה הזו תעזור לכם להתחיל.',
               intro: 'כעשר דקות',
@@ -393,6 +397,7 @@ function onboardingTemplate(): TemplateResult {
         blocks: [
           createBlock('cards', {
             content: {
+              variant: 'gradient',
               columns: 3,
               media: 'icon',
               roundness: 'medium',

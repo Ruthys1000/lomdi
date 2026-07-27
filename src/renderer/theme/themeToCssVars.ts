@@ -60,6 +60,8 @@ export function themeToCssVarMap(theme: Theme): Record<string, string> {
     '--lc-color-on-accent': readableTextOn(colors.accent),
 
     '--lc-font-family': FONT_STACKS[typography.fontFamily],
+    // גופן הכותרות נופל לגופן הגוף כשלא נבחר גופן נפרד — כך ההוספה תואמת אחורה
+    '--lc-heading-family': FONT_STACKS[typography.headingFamily ?? typography.fontFamily],
     '--lc-font-size-base': `${typography.baseSize}px`,
     '--lc-line-height': String(LINE_HEIGHT[layout.density]),
     '--lc-heading-weight': String(typography.headingWeight),

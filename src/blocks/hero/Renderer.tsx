@@ -29,6 +29,8 @@ export function HeroRenderer({ block }: { block: BlockOf<HeroContent> }) {
     <section
       className={[
         'lc-hero',
+        // fallback ל-centered גם לתוכן ישן/ידני שלא עבר אימות עם ברירת המחדל
+        `lc-hero--v-${content.variant || 'centered'}`,
         `lc-hero--h-${content.height}`,
         `lc-hero--align-${content.alignment}`,
         content.fullBleed ? 'lc-hero--full' : 'lc-hero--contained',

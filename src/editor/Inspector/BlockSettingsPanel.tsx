@@ -30,6 +30,8 @@ const backgroundOptions: Option<BlockBackground>[] = [
   { value: 'muted', label: 'עמום' },
   { value: 'primary', label: 'צבע ראשי' },
   { value: 'accent', label: 'צבע הדגשה' },
+  { value: 'gradientSoft', label: 'גרדיאנט עדין' },
+  { value: 'gradient', label: 'גרדיאנט מלא' },
 ];
 
 const spacingOptions: Option<Spacing>[] = [

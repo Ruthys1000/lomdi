@@ -19,6 +19,13 @@ interface SettingsProps {
   onChange: (content: HeroContent) => void;
 }
 
+const variantOptions: Option<HeroContent['variant']>[] = [
+  { value: 'centered', label: 'ממורכז' },
+  { value: 'spotlight', label: 'זרקור' },
+  { value: 'panel', label: 'פאנל' },
+  { value: 'minimal', label: 'מינימלי' },
+];
+
 const heightOptions: Option<HeroContent['height']>[] = [
   { value: 'compact', label: 'נמוך' },
   { value: 'medium', label: 'בינוני' },
@@ -50,6 +57,15 @@ export function HeroSettings({ block, onChange }: SettingsProps) {
 
   return (
     <>
+      <FieldGroup title="סגנון">
+        <SelectField
+          label="וריאציה"
+          value={content.variant}
+          options={variantOptions}
+          onChange={(variant) => update({ variant })}
+        />
+      </FieldGroup>
+
       <FieldGroup title="רקע">
         <SegmentedField
           label="סוג רקע"

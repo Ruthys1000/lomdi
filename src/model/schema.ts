@@ -17,7 +17,16 @@ const hexColor = z
 export const blockSettingsSchema = z.object({
   width: z.enum(['narrow', 'normal', 'wide', 'full']),
   alignment: z.enum(['start', 'center', 'end']),
-  background: z.enum(['transparent', 'surface', 'primary', 'accent', 'muted']),
+  // הרחבת enum בלבד: קובץ ישן עם ערך קיים נשאר תקין
+  background: z.enum([
+    'transparent',
+    'surface',
+    'primary',
+    'accent',
+    'muted',
+    'gradient',
+    'gradientSoft',
+  ]),
   spacingTop: z.enum(['none', 'small', 'medium', 'large']),
   spacingBottom: z.enum(['none', 'small', 'medium', 'large']),
 });
@@ -32,6 +41,8 @@ export const themeSchema = z.object({
     'warmSand',
     'forest',
     'highContrast',
+    'sunset',
+    'midnight',
     'custom',
   ]),
   colors: z.object({
@@ -46,6 +57,8 @@ export const themeSchema = z.object({
   }),
   typography: z.object({
     fontFamily: z.enum(['system', 'heebo', 'assistant', 'rubik']),
+    // גופן כותרות נפרד — אופציונלי כדי שקבצים ישנים בלי השדה יישארו תקינים
+    headingFamily: z.enum(['system', 'heebo', 'assistant', 'rubik']).optional(),
     baseSize: z.number().min(12).max(28),
     headingWeight: z.union([z.literal(600), z.literal(700), z.literal(800)]),
     headingStyle: z.enum(['plain', 'underline', 'accentBar']),

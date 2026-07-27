@@ -12,6 +12,8 @@ export function CardsRenderer({ block }: { block: BlockOf<CardsContent> }) {
       <ul
         className={[
           'lc-cards',
+          // fallback ל-plain גם לתוכן ישן/ידני שלא עבר אימות עם ברירת המחדל
+          `lc-cards--v-${content.variant || 'plain'}`,
           `lc-cards--cols-${content.columns}`,
           `lc-cards--align-${content.textAlign}`,
         ].join(' ')}

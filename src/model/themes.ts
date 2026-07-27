@@ -153,6 +153,48 @@ export const themePresets: ThemePreset[] = [
       layout: { contentMaxWidth: 760, density: 'comfortable' },
     },
   },
+  {
+    id: 'sunset',
+    name: 'שקיעה',
+    description: 'ורוד עז וענבר על רקע חם. נועז וחגיגי — לאונבורדינג, השקות וקמפיינים.',
+    theme: {
+      preset: 'sunset',
+      colors: {
+        primary: '#be185d',
+        secondary: '#7c2d12',
+        accent: '#f59e0b',
+        background: '#fff7f9',
+        surface: '#fdeef4',
+        text: '#3b0a22',
+        textMuted: '#7a2f52',
+        border: '#f6cddd',
+      },
+      typography: { ...baseTypography, headingWeight: 800, headingStyle: 'accentBar' },
+      shape: { radius: 22, shadow: 'medium', buttonStyle: 'solid', cardStyle: 'elevated' },
+      layout: { contentMaxWidth: 820, density: 'spacious' },
+    },
+  },
+  {
+    id: 'midnight',
+    name: 'חצות',
+    description: 'רקע כהה עמוק עם ניאון תכלת וסגול. דרמטי ומודרני — למצגות ולתוכן קצר.',
+    theme: {
+      preset: 'midnight',
+      colors: {
+        primary: '#4f46e5',
+        secondary: '#c7d2fe',
+        accent: '#22d3ee',
+        background: '#0a0f1e',
+        surface: '#131a30',
+        text: '#f5f7ff',
+        textMuted: '#9fb0d0',
+        border: '#263154',
+      },
+      typography: { ...baseTypography, headingWeight: 800 },
+      shape: { radius: 18, shadow: 'medium', buttonStyle: 'solid', cardStyle: 'elevated' },
+      layout: { contentMaxWidth: 800, density: 'spacious' },
+    },
+  },
 ];
 
 export const defaultTheme: Theme = themePresets[0].theme;
