@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ProjectSummary } from '@/persistence/db';
 import { WelcomeScreen } from './WelcomeScreen';
@@ -112,8 +112,10 @@ describe('מסך הפתיחה', () => {
     await setup();
     fireEvent.click(screen.getByRole('button', { name: 'הלומדות שלי' }));
 
+    // מחפשים בתוך המגירה בלבד: לכרטיסי הגלריה יש גם הם "פרקים" בתיאור
+    const drawer = screen.getByRole('dialog', { name: 'הלומדות שלי' });
     // שורות הרשימה נושאות את מטא-הנתונים ("פרקים"); הראשונה היא האחרונה שנפתחה
-    const rows = screen.getAllByRole('button', { name: /פרקים/ });
+    const rows = within(drawer).getAllByRole('button', { name: /פרקים/ });
     expect(rows[0]).toHaveTextContent('נפתחה אחרונה');
   });
 

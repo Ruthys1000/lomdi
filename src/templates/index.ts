@@ -490,6 +490,8 @@ export const courseTemplates: CourseTemplate[] = [
     id: 'sample',
     name: 'לומדת הדוגמה',
     description: 'ארבעה פרקים עם תוכן מלא בעברית שמדגים את סוגי הבלוקים.',
+    // דוגמת הדגל המקיפה ביותר — מוצגת ראשונה בגלריה (מדגימה את כל הבלוקים)
+    featured: true,
     create: createSampleCourse,
   },
   // דוגמאות הדגל — לומדות מוגמרות שמוצגות בגלריית דף הבית עם תצוגה חיה
