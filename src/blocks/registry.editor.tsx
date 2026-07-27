@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react';
 import {
+  BarChart3,
   Columns2,
   Heading1,
   Image as ImageIcon,
@@ -7,6 +8,7 @@ import {
   ListCollapse,
   Minus,
   PlayCircle,
+  Quote as QuoteIcon,
   SquareCheckBig,
   Type,
   type LucideIcon,
@@ -29,6 +31,8 @@ import { AccordionSettings } from './accordion/Settings';
 import { VideoSettings } from './video/Settings';
 import { QuizEditor } from './quiz/Editor';
 import { QuizSettings } from './quiz/Settings';
+import { StatsSettings } from './stats/Settings';
+import { QuoteSettings } from './quote/Settings';
 
 /**
  * הרגיסטרי של העורך — Editor, Settings ואייקונים.
@@ -77,6 +81,9 @@ const registrations: Record<string, Registration> = {
   // לווידאו אין עריכה ישירה: הוא נערך מהפאנל, כמו תמונה ומפריד
   video: { icon: PlayCircle, SettingsComponent: VideoSettings },
   quiz: { icon: SquareCheckBig, EditorComponent: QuizEditor, SettingsComponent: QuizSettings },
+  // למספרים ולציטוט אין עריכה ישירה בקנבס: נערכים מהפאנל, כמו תמונה ומפריד
+  stats: { icon: BarChart3, SettingsComponent: StatsSettings },
+  quote: { icon: QuoteIcon, SettingsComponent: QuoteSettings },
 };
 
 function build(type: string): EditorBlockDefinition | undefined {

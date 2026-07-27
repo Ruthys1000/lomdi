@@ -5,6 +5,23 @@ import '@testing-library/jest-dom/vitest';
  * "הלומדות שלי"). polyfill מינימלי ומוגן — חל רק אם המימוש חסר, כך שהוא
  * לא נוגע בדפדפן אמיתי ולא בגרסאות jsdom שכבר תומכות.
  */
+/*
+ * jsdom אינו מממש את ResizeObserver ואת URL.createObjectURL — שניהם
+ * נדרשים לתצוגה החיה של גלריית הדוגמאות (ExamplesGallery). polyfill
+ * מינימלי ומוגן, כך שהוא לא נוגע בדפדפן אמיתי.
+ */
+if (typeof globalThis.ResizeObserver === 'undefined') {
+  globalThis.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+}
+if (typeof URL.createObjectURL !== 'function') {
+  URL.createObjectURL = () => 'blob:mock';
+  URL.revokeObjectURL = () => {};
+}
+
 if (typeof HTMLDialogElement !== 'undefined') {
   const proto = HTMLDialogElement.prototype;
   if (!proto.showModal) {

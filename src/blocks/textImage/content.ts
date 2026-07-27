@@ -7,7 +7,12 @@ import { aspectRatioSchema, assetRefSchema, buttonSchema, collectAssetIds, creat
  * גם בלומדה בעברית וגם בלומדה באנגלית. במובייל הפריסה עוברת אוטומטית
  * לאנכית (סעיף 7.4).
  */
+/** וריאציית פריסה. `.default` שומר על תאימות אחורה. */
+export const textImageVariantSchema = z.enum(['standard', 'feature']).default('standard');
+export type TextImageVariant = z.infer<typeof textImageVariantSchema>;
+
 export const textImageContentSchema = z.object({
+  variant: textImageVariantSchema,
   doc: richTextDocSchema,
   imageAssetId: assetRefSchema,
   alt: z.string(),
@@ -25,6 +30,7 @@ export type TextImageContent = z.infer<typeof textImageContentSchema>;
 export const createTextImageContent = (
   overrides: Partial<TextImageContent> = {},
 ): TextImageContent => ({
+  variant: 'standard',
   doc: emptyRichText(),
   imageAssetId: '',
   alt: '',

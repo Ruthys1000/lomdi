@@ -10,6 +10,8 @@ import { accordionContentSchema, createAccordionContent, accordionAssetIds } fro
 import { videoContentSchema, createVideoContent, videoAssetIds } from './video/content';
 import { quizContentSchema, createQuizContent, quizAssetIds } from './quiz/content';
 import { dividerContentSchema, createDividerContent, dividerAssetIds } from './divider/content';
+import { statsContentSchema, createStatsContent, statsAssetIds } from './stats/content';
+import { quoteContentSchema, createQuoteContent, quoteAssetIds } from './quote/content';
 
 /**
  * הרגיסטרי המשותף — הצד של הבלוקים שאין בו React.
@@ -133,6 +135,24 @@ export const sharedBlockRegistry: Record<string, SharedBlockDefinition<unknown>>
     createContent: createDividerContent,
     usedAssetIds: dividerAssetIds,
     defaultSettings: { spacingTop: 'none', spacingBottom: 'none' },
+  }),
+  stats: define({
+    type: 'stats',
+    label: blockLabels.stats,
+    description: 'מספרים גדולים שנסרקים במבט — נתונים, יעדים או הישגים.',
+    category: 'content',
+    schema: statsContentSchema,
+    createContent: createStatsContent,
+    usedAssetIds: statsAssetIds,
+  }),
+  quote: define({
+    type: 'quote',
+    label: blockLabels.quote,
+    description: 'ציטוט או המלצה בולטים, עם ייחוס.',
+    category: 'content',
+    schema: quoteContentSchema,
+    createContent: createQuoteContent,
+    usedAssetIds: quoteAssetIds,
   }),
 };
 

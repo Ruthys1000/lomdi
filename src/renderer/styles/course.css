@@ -60,6 +60,8 @@
 
   /* סקאלת עומק — הצל היחיד היה שטוח מדי; הרמות האלה נותנות לוריאציות עומק */
   --lc-shadow-lg: 0 10px 24px rgb(15 23 42 / 0.1), 0 28px 64px rgb(15 23 42 / 0.14);
+  /* צל מעודן לכרטיסים — רך ומפוזר, לא ה"בוטסטרפ" הכבד */
+  --lc-shadow-card: 0 4px 12px rgb(15 23 42 / 0.05), 0 16px 36px rgb(15 23 42 / 0.07);
 
   /* טבעת הדגשה עדינה סביב אלמנטים אינטראקטיביים */
   --lc-ring: color-mix(in srgb, var(--lc-color-primary) 22%, transparent);
@@ -1458,11 +1460,24 @@
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: radial-gradient(
-    120% 90% at 50% 0%,
-    rgb(255 255 255 / 0.22),
-    transparent 60%
-  );
+  /* שלוש שכבות: זוהר עליון בהיר, נגיעת אור בפינה, והכהיה בתחתית — נותנות
+     עומק במקום מלבן גרדיאנט שטוח. הטקסט הלבן נשאר קריא (השכבות עדינות). */
+  background:
+    radial-gradient(90% 60% at 50% -5%, rgb(255 255 255 / 0.28), transparent 62%),
+    radial-gradient(60% 70% at 12% 8%, rgb(255 255 255 / 0.14), transparent 60%),
+    linear-gradient(to bottom, transparent 55%, rgb(8 12 22 / 0.28));
+  pointer-events: none;
+}
+/* נקודות אור עדינות מאחורי התוכן — טקסטורה קלה שמפרקת את השטיחות */
+.lc-hero--v-spotlight::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: radial-gradient(rgb(255 255 255 / 0.14) 1px, transparent 1.4px);
+  background-size: 22px 22px;
+  opacity: 0.5;
+  mask-image: radial-gradient(80% 70% at 50% 0%, #000, transparent 70%);
   pointer-events: none;
 }
 .lc-hero--v-spotlight .lc-hero__title {
@@ -1538,7 +1553,7 @@
 .lc-course .lc-cards--v-gradient .lc-card {
   background: var(--lc-color-background);
   border: 0;
-  box-shadow: var(--lc-shadow-lg);
+  box-shadow: var(--lc-shadow-card);
 }
 .lc-cards--v-gradient .lc-card__icon {
   background: var(--lc-gradient-brand);
@@ -1551,4 +1566,159 @@
   border: 1px solid var(--lc-color-border);
   border-block-start: 3px solid var(--lc-color-primary);
   box-shadow: none;
+}
+
+/* ═══════════════════ רצועות רוחב-מלא (קצב סקשנים) ═══════════════════
+   בלוק ברוחב מלא עם רקע צבעוני הופך לרצועה edge-to-edge: הרקע יוצא לקצוות
+   והתוכן נשאר ברוחב קריאה דרך ה-.lc-container הפנימי של הבלוק. כך העמוד
+   מקבל קצב במקום "מסמך בודד במרכז ואקום". המרווח האנכי מגיע מהגדרות הבלוק
+   (spacingTop/Bottom), ולכן אין כאן padding-block שיתנגש איתן. */
+.lc-block--w-full.lc-block--bg-surface,
+.lc-block--w-full.lc-block--bg-muted,
+.lc-block--w-full.lc-block--bg-primary,
+.lc-block--w-full.lc-block--bg-accent,
+.lc-block--w-full.lc-block--bg-gradient,
+.lc-block--w-full.lc-block--bg-gradientSoft {
+  border-radius: 0;
+  padding-inline: 0;
+}
+
+/* ═══════════════════ מספרים / סטטיסטיקה ═══════════════════ */
+
+.lc-stats {
+  display: grid;
+  gap: calc(var(--lc-space-unit) * 2.5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lc-stats--cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.lc-stats--cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.lc-stats--cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.lc-stat {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--lc-space-unit) * 0.5);
+  text-align: start;
+}
+.lc-stat__value {
+  font-family: var(--lc-heading-family);
+  font-weight: 800;
+  font-size: clamp(2.2em, 5vw, 3.2em);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  /* המספר הגדול נצבע בגרדיאנט המותג — ההדגשה החזותית של הבלוק */
+  background: var(--lc-gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.lc-stat__label {
+  font-weight: 700;
+  font-size: 1.02em;
+  margin-block-start: calc(var(--lc-space-unit) * 0.5);
+}
+.lc-stat__sub {
+  color: var(--lc-color-text-muted);
+  font-size: 0.9em;
+  line-height: 1.55;
+}
+
+/* וריאציית כרטיסים — כל מספר בקופסה עם משטח ומסגרת */
+.lc-stats--v-cards .lc-stat {
+  padding: calc(var(--lc-space-unit) * 3);
+  border: 1px solid var(--lc-color-border);
+  border-radius: var(--lc-radius);
+  background: var(--lc-color-surface);
+}
+
+/* וריאציית רצועת גרדיאנט — המספרים על משטח מותג, הטקסט הופך ללבן/כהה */
+.lc-stats--v-gradient {
+  padding: calc(var(--lc-space-unit) * 4);
+  border-radius: var(--lc-radius);
+  background: var(--lc-gradient-brand);
+  color: var(--lc-color-on-primary);
+}
+.lc-stats--v-gradient .lc-stat__value {
+  /* על רקע הגרדיאנט לא צובעים טקסט בגרדיאנט — הוא היה נעלם */
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  color: inherit;
+}
+.lc-stats--v-gradient .lc-stat__sub {
+  color: inherit;
+  opacity: 0.85;
+}
+
+/* ═══════════════════ ציטוט ═══════════════════ */
+
+.lc-quote {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--lc-space-unit) * 2);
+}
+.lc-quote__text {
+  margin: 0;
+  font-family: var(--lc-heading-family);
+  font-weight: 600;
+  font-size: clamp(1.3em, 3vw, 1.9em);
+  line-height: 1.4;
+  text-wrap: balance;
+}
+.lc-quote__cite {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-style: normal;
+}
+.lc-quote__author {
+  font-weight: 700;
+}
+.lc-quote__role {
+  color: var(--lc-color-text-muted);
+  font-size: 0.9em;
+}
+
+/* Emphasis — סימן ציטוט גדול בצבע המותג מעל הטקסט */
+.lc-quote--v-emphasis .lc-quote__text::before {
+  content: '\201D';
+  display: block;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 2.4em;
+  line-height: 0.6;
+  color: var(--lc-color-primary);
+  margin-block-end: calc(var(--lc-space-unit) * 1);
+}
+
+/* Band — רצועת גרדיאנט עדין מסביב לציטוט, עם קו הדגשה בהתחלה */
+.lc-quote--v-band {
+  padding: calc(var(--lc-space-unit) * 4);
+  border-radius: var(--lc-radius);
+  background: var(--lc-gradient-soft);
+  border-inline-start: 4px solid var(--lc-color-primary);
+}
+
+/* ═══════════════════ טקסט-ותמונה: וריאציית feature ═══════════════════
+   פיצול גדול ובולט לפתיח סקשן — התמונה תופסת נתח גדול והכותרת גדלה. */
+.lc-text-image--v-feature {
+  gap: calc(var(--lc-space-unit) * 5);
+  align-items: center;
+}
+.lc-text-image--v-feature .lc-text-image__text h2,
+.lc-text-image--v-feature .lc-text-image__text h3 {
+  font-size: 1.6em;
+}
+@media (min-width: 721px) {
+  .lc-text-image--v-feature.lc-text-image--ratio-50-50 {
+    grid-template-columns: 5fr 7fr;
+  }
 }

@@ -41,6 +41,15 @@ export function TextImageSettings({
     <>
       <FieldGroup title="פריסה">
         <SelectField
+          label="וריאציה"
+          value={content.variant}
+          options={[
+            { value: 'standard', label: 'רגיל' },
+            { value: 'feature', label: 'פיצ׳ר גדול' },
+          ]}
+          onChange={(variant) => update({ variant })}
+        />
+        <SelectField
           label="מיקום התמונה"
           value={content.layout}
           options={layoutOptions}

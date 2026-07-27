@@ -9,6 +9,8 @@ import { CardsRenderer } from './cards/Renderer';
 import { AccordionRenderer } from './accordion/Renderer';
 import { VideoRenderer } from './video/Renderer';
 import { QuizRenderer } from './quiz/Renderer';
+import { StatsRenderer } from './stats/Renderer';
+import { QuoteRenderer } from './quote/Renderer';
 
 /**
  * רגיסטרי ה-Renderers — הצד שנארז לתוך הלומדה המיוצאת.
@@ -34,6 +36,8 @@ const registry = {
   accordion: AccordionRenderer,
   video: VideoRenderer,
   quiz: QuizRenderer,
+  stats: StatsRenderer,
+  quote: QuoteRenderer,
 } as unknown as Record<string, BlockRendererComponent>;
 
 export const rendererRegistry = registry;

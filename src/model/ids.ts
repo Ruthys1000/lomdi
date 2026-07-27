@@ -10,7 +10,15 @@ import { customAlphabet } from 'nanoid';
 const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
 const generate = customAlphabet(alphabet, 10);
 
-export type IdPrefix = 'course' | 'chapter' | 'block' | 'asset' | 'item' | 'card' | 'option';
+export type IdPrefix =
+  | 'course'
+  | 'chapter'
+  | 'block'
+  | 'asset'
+  | 'item'
+  | 'card'
+  | 'option'
+  | 'stat';
 
 export function createId(prefix: IdPrefix): string {
   return `${prefix}-${generate()}`;
