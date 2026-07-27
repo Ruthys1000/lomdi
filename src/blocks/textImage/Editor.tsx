@@ -19,6 +19,9 @@ export function TextImageEditor({ block, onChange }: TextImageEditorProps) {
       className={[
         'lc-container',
         'lc-text-image',
+        // מחלקת הווריאציה הראשית חייבת להיות זהה ל-Renderer, אחרת בזמן עריכה
+        // (כשהקנבס מציג את ה-Editor במקום ה-Renderer) הווריאציה לא מיושמת חי
+        `lc-text-image--v-${content.variant || 'standard'}`,
         `lc-text-image--${content.layout}`,
         `lc-text-image--ratio-${content.ratio}`,
         `lc-text-image--v-${content.verticalAlign}`,

@@ -38,6 +38,9 @@ export function HeroEditor({ block, onChange }: HeroEditorProps) {
     <section
       className={[
         'lc-hero',
+        // מחלקת הווריאציה חייבת להיות זהה ל-Renderer, אחרת בזמן עריכה (כשהקנבס
+        // מציג את ה-Editor במקום ה-Renderer) הווריאציה לא מיושמת חי
+        `lc-hero--v-${content.variant || 'centered'}`,
         `lc-hero--h-${content.height}`,
         `lc-hero--align-${content.alignment}`,
         content.fullBleed ? 'lc-hero--full' : 'lc-hero--contained',

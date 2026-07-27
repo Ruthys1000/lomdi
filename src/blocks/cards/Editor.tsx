@@ -30,6 +30,9 @@ export function CardsEditor({ block, onChange }: CardsEditorProps) {
       <ul
         className={[
           'lc-cards',
+          // מחלקת הווריאציה חייבת להיות זהה ל-Renderer, אחרת בזמן עריכה
+          // (כשהקנבס מציג את ה-Editor במקום ה-Renderer) הווריאציה לא מיושמת חי
+          `lc-cards--v-${content.variant || 'plain'}`,
           `lc-cards--cols-${content.columns}`,
           `lc-cards--align-${content.textAlign}`,
         ].join(' ')}
