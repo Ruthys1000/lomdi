@@ -38,6 +38,27 @@ describe('CourseRenderer', () => {
     expect(root).toHaveAttribute('lang', 'he');
   });
 
+  it('מרנדר כותרת פרק נראית עם eyebrow "פרק N" במצב גלילה', () => {
+    render(<CourseRenderer course={course} resolveAssetUrl={() => undefined} />);
+
+    // הכותרת מופיעה חזותית כ-heading, לא רק כתווית aria על ה-section
+    expect(screen.getByRole('heading', { name: 'פתיחה' })).toBeInTheDocument();
+    expect(screen.getByText('פרק 1')).toBeInTheDocument();
+    expect(screen.getByText('פרק 2')).toBeInTheDocument();
+  });
+
+  it('אינו מציג eyebrow "פרק N" במצב פרקים (המונה כבר בסרגל)', () => {
+    const chaptersMode: Course = {
+      ...course,
+      navigation: { ...defaultNavigation, mode: 'chapters' },
+    };
+    render(<CourseRenderer course={chaptersMode} resolveAssetUrl={() => undefined} />);
+
+    // הכותרת עצמה כן מוצגת, אבל בלי ה-eyebrow שמשכפל את המונה בסרגל
+    expect(screen.getByRole('heading', { name: 'פתיחה' })).toBeInTheDocument();
+    expect(screen.queryByText('פרק 1')).toBeNull();
+  });
+
   it('מדלג בשקט על בלוק מסוג לא מוכר בתוצר, ומסמן אותו בעורך', () => {
     const withUnknown: Course = {
       ...course,

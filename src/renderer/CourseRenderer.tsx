@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Block, Chapter, Course } from '@/model/types';
 import { BlockRenderer } from './BlockRenderer';
 import { ChapterNavigation } from './ChapterNavigation';
 import { RenderContext, type RenderContextValue } from './RenderContext';
 import { ScrollNavigation } from './ScrollNavigation';
+import { useScrollReveal } from './scrollEffects';
 import { themeToCssVarMap } from './theme/themeToCssVars';
 import './styles/course.css';
 
@@ -40,6 +41,15 @@ export function CourseRenderer({
   renderBlockWrapper,
 }: CourseRendererProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  // חשיפה הדרגתית פעילה רק בתוצר ובתצוגה המקדימה — בקנבס העריכה התוכן
+  // חייב להיות גלוי תמיד. revealKey מריץ מחדש כשמבנה התוכן משתנה.
+  const revealKey = useMemo(
+    () => course.chapters.map((chapter) => `${chapter.id}:${chapter.blocks.length}`).join('|'),
+    [course.chapters],
+  );
+  useScrollReveal(rootRef, !isEditing, revealKey);
 
   const ctx: RenderContextValue = useMemo(
     () => ({ direction: course.direction, resolveAssetUrl, isEditing }),
@@ -58,28 +68,52 @@ export function CourseRenderer({
     }
   }, [activeIndex, course.chapters.length]);
 
-  const renderChapter = (chapter: Chapter, index: number) => (
-    <section
-      key={chapter.id}
-      className="lc-chapter"
-      aria-label={chapter.title}
-      data-chapter-id={chapter.id}
-      data-chapter-index={index}
-    >
-      {chapter.blocks.map((block) => {
-        const rendered = <BlockRenderer block={block} isEditing={isEditing} />;
-        return (
-          <div key={block.id} className="lc-block-slot" data-block-id={block.id}>
-            {renderBlockWrapper ? renderBlockWrapper(block, rendered) : rendered}
-          </div>
-        );
-      })}
+  const nav = course.navigation;
+  // המונה של מצב פרקים כבר בסרגל, ולכן ה-eyebrow "פרק N" בכותרת מיותר שם;
+  // הוא מוצג במצב גלילה ובקנבס העריכה, ששם אין סרגל מונה
+  const inChapterBarMode = nav.mode === 'chapters' && forcedChapterIndex === undefined;
+  const showChapterEyebrow = nav.showChapterNumber && !inChapterBarMode;
 
-      {chapter.blocks.length === 0 && isEditing && (
-        <p className="lc-empty-chapter">הפרק ריק. הוסיפו בלוק כדי להתחיל.</p>
-      )}
-    </section>
-  );
+  const renderChapter = (chapter: Chapter, index: number) => {
+    const hasHeader = Boolean(chapter.title) || Boolean(chapter.description) || showChapterEyebrow;
+
+    return (
+      <section
+        key={chapter.id}
+        className="lc-chapter"
+        aria-label={chapter.title}
+        data-chapter-id={chapter.id}
+        data-chapter-index={index}
+      >
+        {hasHeader && (
+          <header className="lc-chapter-header lc-container lc-reveal">
+            {showChapterEyebrow && (
+              <p className="lc-chapter-header__eyebrow">
+                {nav.labels.chapter} {index + 1}
+              </p>
+            )}
+            {chapter.title && <h2 className="lc-chapter-header__title">{chapter.title}</h2>}
+            {chapter.description && (
+              <p className="lc-chapter-header__desc">{chapter.description}</p>
+            )}
+          </header>
+        )}
+
+        {chapter.blocks.map((block) => {
+          const rendered = <BlockRenderer block={block} isEditing={isEditing} />;
+          return (
+            <div key={block.id} className="lc-block-slot lc-reveal" data-block-id={block.id}>
+              {renderBlockWrapper ? renderBlockWrapper(block, rendered) : rendered}
+            </div>
+          );
+        })}
+
+        {chapter.blocks.length === 0 && isEditing && (
+          <p className="lc-empty-chapter">הפרק ריק. הוסיפו בלוק כדי להתחיל.</p>
+        )}
+      </section>
+    );
+  };
 
   const chapterIndex = forcedChapterIndex ?? activeIndex;
   const useChapterMode = course.navigation.mode === 'chapters' && forcedChapterIndex === undefined;
@@ -92,6 +126,7 @@ export function CourseRenderer({
         בבורר אחד לכל אחת, במקום לשכפל קלאסים בכל בלוק בנפרד.
       */}
       <div
+        ref={rootRef}
         className="lc-course"
         dir={course.direction}
         lang={course.language}
@@ -121,7 +156,12 @@ export function CourseRenderer({
             renderChapter={renderChapter}
           />
         ) : forcedChapterIndex === undefined ? (
-          <ScrollNavigation chapters={course.chapters} renderChapter={renderChapter} />
+          <ScrollNavigation
+            chapters={course.chapters}
+            renderChapter={renderChapter}
+            showProgress={course.navigation.showProgress}
+            rootRef={rootRef}
+          />
         ) : (
           <main className="lc-scroll-mode">
             {course.chapters[chapterIndex]

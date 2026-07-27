@@ -358,6 +358,85 @@
   display: block;
 }
 
+/* ─────────────────────── כותרת פרק ─────────────────────── */
+
+/*
+ * מבנה חזותי לפרקים. במצב גלילה זה מה שהופך זרם בלוקים אחיד ללומדה עם
+ * פרקים; במצב פרקים זו הכותרת לגוף הפרק, שקודם לכן הייתה קיימת רק
+ * כתווית נגישות.
+ */
+.lc-chapter-header {
+  margin-block: calc(var(--lc-space-unit) * 6) calc(var(--lc-space-unit) * 3);
+}
+
+.lc-chapter:first-child .lc-chapter-header {
+  margin-block-start: calc(var(--lc-space-unit) * 4);
+}
+
+.lc-chapter-header__eyebrow {
+  color: var(--lc-color-primary);
+  font-size: 0.8em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-block-end: calc(var(--lc-space-unit) * 1);
+}
+
+.lc-chapter-header__title {
+  font-size: 1.9em;
+  line-height: 1.2;
+}
+
+.lc-chapter-header__desc {
+  max-inline-size: 60ch;
+  margin-block-start: calc(var(--lc-space-unit) * 1.5);
+  color: var(--lc-color-text-muted);
+  font-size: 1.05em;
+  line-height: 1.6;
+}
+
+/* מפריד תחתון רק במצב גלילה — שם הפרקים זורמים ברצף וזקוקים לגבול ברור */
+.lc-course[data-navigation='scroll'] .lc-chapter-header {
+  padding-block-end: calc(var(--lc-space-unit) * 2);
+  border-block-end: 1px solid var(--lc-color-border);
+}
+
+/* ─────────────────────── פס התקדמות קריאה ─────────────────────── */
+
+.lc-reading-progress {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 6;
+  block-size: 3px;
+  background: color-mix(in srgb, var(--lc-color-border) 55%, transparent);
+}
+
+.lc-reading-progress__bar {
+  block-size: 100%;
+  inline-size: var(--lc-progress, 0%);
+  background: var(--lc-color-primary);
+  transition: inline-size 0.1s linear;
+}
+
+/* ─────────────────────── חשיפה הדרגתית בגלילה ─────────────────────── */
+
+/*
+ * ההסתרה ההתחלתית חלה רק אחרי ש-JS הוסיף `lc-animate-ready`, ורק כשלא
+ * ביקשו לצמצם תנועה. כך בלי JS או תחת prefers-reduced-motion התוכן גלוי
+ * מיד ולא נעלם.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .lc-course.lc-animate-ready .lc-reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .lc-course.lc-animate-ready .lc-reveal.lc-reveal--in {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* ─────────────────────── מצבים ─────────────────────── */
 
 .lc-empty-chapter,
@@ -561,14 +640,18 @@
   min-block-size: 82vh;
 }
 
+/* scrim גרדיאנט (ולא כיסוי אחיד) — כהה יותר בתחתית, שם יושב הטקסט, ובהיר
+   יותר למעלה כדי לא להטביע את התמונה. ה-opacity נשלט מה-Renderer. */
 .lc-hero__overlay {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: #0b1220;
+  background: linear-gradient(to bottom, rgb(8 12 22 / 0.35), rgb(8 12 22 / 0.9));
 }
 
 .lc-hero__inner {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: calc(var(--lc-space-unit) * 1.5);
@@ -596,7 +679,8 @@
 }
 
 .lc-hero__title {
-  font-size: clamp(1.9em, 4.5vw, 3em);
+  font-size: clamp(2em, 5vw, 3.4em);
+  line-height: 1.1;
   color: inherit;
 }
 
@@ -958,6 +1042,24 @@
   box-shadow: var(--lc-shadow);
 }
 
+/* הרמת hover עדינה — מיקרו-אינטראקציה שמוסיפה חיות, בכיבוד reduced-motion */
+@media (prefers-reduced-motion: no-preference) {
+  .lc-course[data-card-style='elevated'] .lc-card,
+  .lc-course[data-card-style='bordered'] .lc-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .lc-course[data-card-style='elevated'] .lc-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--lc-shadow), 0 12px 32px rgb(15 23 42 / 0.1);
+  }
+
+  .lc-course[data-card-style='bordered'] .lc-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--lc-color-primary);
+  }
+}
+
 /* ═══════════════════ כרטיסים ═══════════════════ */
 
 .lc-cards {
@@ -1101,6 +1203,25 @@
   padding: 0 calc(var(--lc-space-unit) * 2.5) calc(var(--lc-space-unit) * 2.5);
   padding-inline-start: calc(var(--lc-space-unit) * 5.5);
   color: var(--lc-color-text-muted);
+}
+
+/* הפאנל נטען ל-DOM רק בפתיחה, ולכן אנימציית כניסה עדינה מספיקה בלי לגעת
+   בגובה הדינמי. מכובד ל-reduced-motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .lc-accordion__panel {
+    animation: lc-accordion-in 0.22s ease;
+  }
+}
+
+@keyframes lc-accordion-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* ═══════════════════ וידאו ═══════════════════ */
