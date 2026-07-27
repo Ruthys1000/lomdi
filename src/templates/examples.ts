@@ -88,6 +88,22 @@ function onboardingExample(): TemplateResult {
               ),
             },
           }),
+          createBlock('richText', {
+            content: {
+              maxWidth: 'normal',
+              doc: richText(
+                heading(2, 'מה מחכה לך כאן'),
+                paragraph(
+                  'הלומדה הקצרה הזו מחולקת לשלושה חלקים, וכולם יחד לוקחים כעשר דקות. אין כאן מה לשנן — רק להכיר את הקרקע לפני שמתחילים.',
+                ),
+                bulletList([
+                  'מי האנשים סביבך, ואל מי לפנות בכל נושא.',
+                  'איך נראה השבוע הראשון, יום אחר יום.',
+                  'התשובות לשאלות שכל מי שהתחיל כאן שאל.',
+                ]),
+              ),
+            },
+          }),
         ],
       }),
 
@@ -149,12 +165,23 @@ function onboardingExample(): TemplateResult {
             },
           }),
           createBlock('quote', {
-            settings: { width: 'full', background: 'gradientSoft', spacingTop: 'large', spacingBottom: 'large' },
+            settings: { width: 'full', background: 'gradientSoft', spacingTop: 'large', spacingBottom: 'medium' },
             content: {
               variant: 'emphasis',
               text: 'בשבוע הראשון הרגשתי שמישהו באמת חשב עליי מראש. זה נשאר איתי.',
               author: 'עובדת בצוות',
               role: 'שנה וחצי אצלנו',
+            },
+          }),
+          createBlock('richText', {
+            content: {
+              maxWidth: 'normal',
+              doc: richText(
+                heading(2, 'הצעד הראשון שלך'),
+                paragraph(
+                  'זהו — אלה כל היסודות. עכשיו, לפני שממשיכים: שלח הודעה קצרה למנטור/ית שלך ותיאמו קפה ראשון. ההיכרות האישית הזו שווה יותר מכל מסמך, ומשם הכול נפתח.',
+                ),
+              ),
             },
           }),
         ],
@@ -188,6 +215,19 @@ function productExample(): TemplateResult {
             gradientFrom: '#0a0f1e',
             gradientTo: '#4f46e5',
             height: 'tall',
+          }),
+          createBlock('richText', {
+            content: {
+              maxWidth: 'normal',
+              doc: richText(
+                paragraph(
+                  'עד היום, כדי לבצע את הפעולה הזו היה צריך לעבור בין שלושה מסכים ולזכור איפה כל דבר יושב. שמענו את התסכול, ובנינו מחדש את כל הזרימה סביב שאלה אחת: מה הכי חשוב לך לעשות מהר.',
+                ),
+                paragraph(
+                  'התוצאה היא יכולת אחת שמרכזת את מה שהיה מפוזר — פחות קליקים, פחות מעברים, ואותה עבודה בשליש מהזמן. בפרק הבא נראה בדיוק איך היא עובדת.',
+                ),
+              ),
+            },
           }),
           createBlock('stats', {
             settings: { width: 'wide', background: 'transparent', spacingTop: 'large', spacingBottom: 'medium' },
@@ -240,20 +280,81 @@ function productExample(): TemplateResult {
               ],
             },
           }),
+          createBlock('accordion', {
+            content: {
+              mode: 'single',
+              openFirstByDefault: false,
+              items: [
+                createAccordionItem({
+                  title: 'צריך להתקין משהו?',
+                  doc: richText(
+                    paragraph('לא. היכולת כבר זמינה בממשק הקיים — בפעם הבאה שתיכנס פשוט תמצא אותה במקום העבודה הרגיל, בלי עדכון ובלי הגדרה.'),
+                  ),
+                }),
+                createAccordionItem({
+                  title: 'מה קורה לדרך הישנה שהכרתי?',
+                  doc: richText(
+                    paragraph('היא עדיין כאן. הדרך החדשה היא קיצור, לא החלפה — אפשר להמשיך לעבוד כרגיל בזמן שמתרגלים אותה בקצב שלך.'),
+                  ),
+                }),
+                createAccordionItem({
+                  title: 'זה עובד גם בלי חיבור לרשת?',
+                  doc: richText(
+                    paragraph('כן. הפעולה מתבצעת מקומית בדפדפן, כך שהיא זמינה גם כשאין אינטרנט — והתוצאה מסתנכרנת כשהחיבור חוזר.'),
+                  ),
+                }),
+              ],
+            },
+          }),
         ],
       }),
 
       createChapter({
         title: 'מה אומרים',
-        description: '',
+        description: 'מי שכבר עבר לדרך החדשה, ומה יצא לו מזה',
         blocks: [
           createBlock('quote', {
-            settings: { width: 'full', background: 'gradient', spacingTop: 'large', spacingBottom: 'large' },
+            settings: { width: 'full', background: 'gradient', spacingTop: 'large', spacingBottom: 'medium' },
             content: {
               variant: 'plain',
               text: 'חשבתי שזה עוד כפתור. בפועל זה חסך לי חצי שעה כבר ביום הראשון.',
               author: 'משתמש מוקדם',
               role: 'צוות התפעול',
+            },
+          }),
+          createBlock('stats', {
+            settings: { width: 'wide', background: 'transparent', spacingTop: 'medium', spacingBottom: 'medium' },
+            content: {
+              variant: 'plain',
+              columns: 3,
+              items: [
+                createStat({ value: '9 מתוך 10', label: 'ממליצים', sub: 'מתוך מי שהתנסו בשבועיים הראשונים' }),
+                createStat({ value: '2 דקות', label: 'זמן הסתגלות', sub: 'עד שהיכולת הפכה להרגל' }),
+                createStat({ value: '1,200+', label: 'משתמשים פעילים', sub: 'כבר עברו לדרך החדשה' }),
+              ],
+            },
+          }),
+          createBlock('quote', {
+            settings: { width: 'full', background: 'gradientSoft', spacingTop: 'medium', spacingBottom: 'large' },
+            content: {
+              variant: 'emphasis',
+              text: 'הצוות שלי הפסיק לשאול אותי איפה הכפתור. עכשיו הם פשוט עובדים.',
+              author: 'ראש צוות',
+              role: 'תמיכת לקוחות',
+            },
+          }),
+          createBlock('richText', {
+            content: {
+              maxWidth: 'normal',
+              doc: richText(
+                heading(2, 'איך מתחילים'),
+                paragraph('אין מה להתכונן — היכולת כבר מחכה לך. שלושה צעדים קטנים והיא נכנסת לשגרה:'),
+                bulletList([
+                  'פתח את המסך שבו אתה עובד בדרך כלל — היכולת יושבת שם.',
+                  'נסה אותה פעם אחת על משימה אמיתית וקטנה.',
+                  'שים לב כמה צעדים חסכת, ותן לזה להפוך להרגל.',
+                ]),
+              ),
             },
           }),
         ],
@@ -305,6 +406,18 @@ function safetyExample(): TemplateResult {
                 heading(2, 'שלוש דקות שמצילות'),
                 paragraph('רוב התאונות קורות ברגעים שגרתיים, לא בחריגים. הכללים הבאים הם הרגלים קטנים שהופכים את המקום לבטוח יותר לכולם.'),
               ),
+            },
+          }),
+          createBlock('stats', {
+            settings: { width: 'wide', background: 'gradientSoft', spacingTop: 'large', spacingBottom: 'large' },
+            content: {
+              variant: 'plain',
+              columns: 3,
+              items: [
+                createStat({ value: '8 מתוך 10', label: 'תאונות נמנעות', sub: 'כשמדווחים על כמעט-תאונה בזמן' }),
+                createStat({ value: '3 דקות', label: 'זה כל מה שצריך', sub: 'לעבור על הכללים לפני המשמרת' }),
+                createStat({ value: '0', label: 'היעד שלנו', sub: 'אירועים שאפשר היה למנוע' }),
+              ],
             },
           }),
         ],
