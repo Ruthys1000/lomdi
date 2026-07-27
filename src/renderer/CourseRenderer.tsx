@@ -101,6 +101,17 @@ export function CourseRenderer({
         data-button-style={course.theme.shape.buttonStyle}
         data-card-style={course.theme.shape.cardStyle}
       >
+        {/*
+          קישור דילוג לתוכן — פריט נגישות בסיסי (WCAG 2.4.1). מוסתר עד שהוא
+          מקבל פוקוס, ואז מאפשר לדלג ישירות אל <main id="lc-main"> בלי לעבור
+          את סרגלי הניווט. אינו מוצג בקנבס העריכה.
+        */}
+        {!isEditing && (
+          <a href="#lc-main" className="lc-skip-link">
+            דלג לתוכן
+          </a>
+        )}
+
         {useChapterMode ? (
           <ChapterNavigation
             chapters={course.chapters}

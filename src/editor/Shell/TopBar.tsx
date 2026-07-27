@@ -20,6 +20,7 @@ import {
   forceCloseToWelcome,
   openProjectFile,
 } from '@/persistence/session';
+import { useBackupStore } from '@/state/backupStore';
 import { courseHistory, useCourseStore } from '@/state/courseStore';
 import { useEditorStore, type Viewport } from '@/state/editorStore';
 import { toast } from '@/state/toastStore';
@@ -79,6 +80,8 @@ export function TopBar() {
     setDownloading(true);
     try {
       await downloadProjectFile();
+      // הורדת קובץ פרויקט היא גיבוי נייד — מכאן אין מה להזכיר עד השינוי הבא
+      useBackupStore.getState().markBackedUp();
       toast('קובץ הפרויקט ירד למחשב', { tone: 'success' });
     } catch {
       toast('יצירת קובץ הפרויקט נכשלה', { tone: 'error' });

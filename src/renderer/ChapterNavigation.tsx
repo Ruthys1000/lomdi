@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import type { Chapter, NavigationSettings } from '@/model/types';
 import { navIcons } from './icons';
 import { useRenderContext } from './RenderContext';
@@ -28,6 +28,11 @@ export function ChapterNavigation({
   const { direction } = useRenderContext();
   const [isMenuOpen, setMenuOpen] = useState(false);
   const menuId = useId();
+  const menuRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLElement>(null);
+  // המעבר הראשון הוא הרינדור הראשוני; אין להזיז את הפוקוס אז — זה היה חוטף
+  // את הפוקוס מיד עם טעינת הלומדה
+  const isFirstRender = useRef(true);
 
   const isRtl = direction === 'rtl';
   const NextIcon = isRtl ? navIcons.ArrowLeft : navIcons.ArrowRight;
@@ -43,9 +48,15 @@ export function ChapterNavigation({
     setMenuOpen(false);
   };
 
-  // גלילה לראש הפרק בכל מעבר — בלעדיה הלומד נוחת באמצע הפרק הבא
+  // גלילה לראש הפרק בכל מעבר, והעברת פוקוס לגוף הפרק כדי שמשתמש מקלדת
+  // וקורא-מסך יֵדעו שהתוכן התחלף — בלי זה הפוקוס נשאר על הכפתור הישן
   useEffect(() => {
-    document.getElementById('lc-chapter-top')?.scrollIntoView({ block: 'start' });
+    document.getElementById('lc-chapter-top')?.scrollIntoView?.({ block: 'start' });
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    bodyRef.current?.focus();
   }, [activeIndex]);
 
   useEffect(() => {
@@ -53,9 +64,41 @@ export function ChapterNavigation({
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setMenuOpen(false);
     };
+    // סגירת התפריט בלחיצה מחוץ לו — התנהגות צפויה מכל תפריט נפתח
+    const onPointerDown = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('mousedown', onPointerDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('mousedown', onPointerDown);
+    };
+  }, [isMenuOpen]);
+
+  // ניווט בחצים בין פרקים. משתמשים בחצים אופקיים בלבד — הם אינם מתנגשים
+  // עם גלילה אנכית של פרק ארוך — ומדלגים כשהפוקוס בתוך שדה קלט או אלמנט
+  // אינטראקטיבי, כדי לא לחטוף חצים ששייכים לו
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+      if (event.altKey || event.ctrlKey || event.metaKey) return;
+
+      const target = event.target as HTMLElement | null;
+      if (target?.closest('input, textarea, select, [contenteditable="true"]')) return;
+
+      const forward = isRtl ? event.key === 'ArrowLeft' : event.key === 'ArrowRight';
+      const next = forward ? activeIndex + 1 : activeIndex - 1;
+      if (next < 0 || next >= total) return;
+      event.preventDefault();
+      goTo(next);
+    };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [isMenuOpen]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeIndex, total, isRtl]);
 
   if (!chapter) return null;
 
@@ -70,7 +113,7 @@ export function ChapterNavigation({
           )}
 
           {navigation.showChapterMenu && total > 1 && (
-            <div className="lc-chapter-menu">
+            <div className="lc-chapter-menu" ref={menuRef}>
               <button
                 type="button"
                 className="lc-button lc-button--ghost"
@@ -119,7 +162,20 @@ export function ChapterNavigation({
 
       <span id="lc-chapter-top" />
 
-      <main className="lc-chapter-body">{renderChapter(chapter, activeIndex)}</main>
+      {/*
+        tabIndex=-1 + focus במעבר: גוף הפרק מקבל פוקוס תכנותי בכל מעבר, כדי
+        שקורא-מסך יקריא את שם הפרק החדש. aria-label מתעדכן עם הפרק כך שההקראה
+        משמעותית.
+      */}
+      <main
+        ref={bodyRef}
+        className="lc-chapter-body"
+        id="lc-main"
+        tabIndex={-1}
+        aria-label={`${navigation.labels.chapter} ${activeIndex + 1}: ${chapter.title}`}
+      >
+        {renderChapter(chapter, activeIndex)}
+      </main>
 
       <nav className="lc-chapter-nav" aria-label="ניווט בין פרקים">
         <div className="lc-container lc-chapter-nav__inner">

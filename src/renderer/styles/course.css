@@ -361,7 +361,8 @@
 /* ─────────────────────── מצבים ─────────────────────── */
 
 .lc-empty-chapter,
-.lc-unknown-block {
+.lc-unknown-block,
+.lc-block-error {
   max-inline-size: var(--lc-content-max-width);
   margin: calc(var(--lc-space-unit) * 3) auto;
   padding: calc(var(--lc-space-unit) * 3);
@@ -372,11 +373,46 @@
   text-align: center;
 }
 
+/* גבול שגיאה מוצג רק בעורך — גוון אזהרה מבדיל אותו ממצב "בקרוב" */
+.lc-block-error {
+  border-style: solid;
+  border-color: #dc2626;
+  color: #b91c1c;
+  line-height: 1.7;
+}
+
+/* קישור דילוג לתוכן — מוסתר עד שהוא מקבל פוקוס, ואז קופץ לפינה העליונה */
+.lc-skip-link {
+  position: absolute;
+  inset-inline-start: 50%;
+  inset-block-start: calc(var(--lc-space-unit) * 2);
+  transform: translateX(-50%) translateY(-200%);
+  z-index: 100;
+  padding: calc(var(--lc-space-unit) * 1.5) calc(var(--lc-space-unit) * 3);
+  background: var(--lc-color-primary);
+  color: #fff;
+  border-radius: var(--lc-radius);
+  text-decoration: none;
+  font-weight: 600;
+  transition: transform 0.15s ease;
+}
+
+.lc-skip-link:focus {
+  transform: translateX(-50%) translateY(0);
+}
+
 /* מצב focus אחיד ונראה לעין — דרישת נגישות (סעיף 18) */
 .lc-course :focus-visible {
   outline: 3px solid var(--lc-color-accent);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* גוף הפרק מקבל פוקוס תכנותי במעבר פרק (להקראה בקורא-מסך), אך אינו יעד
+   ניווט מקלדת בעצמו — ולכן אין להקיף אותו במסגרת פוקוס */
+.lc-chapter-body:focus,
+.lc-scroll-mode:focus {
+  outline: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

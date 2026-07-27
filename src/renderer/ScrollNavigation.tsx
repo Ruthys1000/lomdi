@@ -13,7 +13,7 @@ interface ScrollNavigationProps {
  */
 export function ScrollNavigation({ chapters, renderChapter }: ScrollNavigationProps) {
   return (
-    <main className="lc-scroll-mode">
+    <main className="lc-scroll-mode" id="lc-main" tabIndex={-1}>
       {chapters.map((chapter, index) => renderChapter(chapter, index))}
     </main>
   );
