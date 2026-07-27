@@ -45,10 +45,19 @@ export function CourseRenderer({
 
   // חשיפה הדרגתית פעילה רק בתוצר ובתצוגה המקדימה — בקנבס העריכה התוכן
   // חייב להיות גלוי תמיד. revealKey מריץ מחדש כשמבנה התוכן משתנה.
-  const revealKey = useMemo(
-    () => course.chapters.map((chapter) => `${chapter.id}:${chapter.blocks.length}`).join('|'),
-    [course.chapters],
-  );
+  //
+  // במצב פרקים מרונדר רק הפרק הפעיל, ובלוקיו מתמונטים מחדש בכל מעבר. לכן
+  // המפתח חייב לכלול את אינדקס הפרק הפעיל — אחרת ה-IntersectionObserver
+  // של החשיפה נבנה פעם אחת על פרק 1 בלבד, ובלוקי פרק 2+ נשארים מוסתרים
+  // (opacity:0) ומציגים גוף ריק. במצב גלילה activeIndex נשאר 0, ולכן
+  // המפתח יציב ואין רינדור-יתר.
+  const revealKey = useMemo(() => {
+    const structure = course.chapters
+      .map((chapter) => `${chapter.id}:${chapter.blocks.length}`)
+      .join('|');
+    const inChapterMode = course.navigation.mode === 'chapters' && forcedChapterIndex === undefined;
+    return inChapterMode ? `${structure}::ch${activeIndex}` : structure;
+  }, [course.chapters, course.navigation.mode, forcedChapterIndex, activeIndex]);
   useScrollReveal(rootRef, !isEditing, revealKey);
 
   const ctx: RenderContextValue = useMemo(
