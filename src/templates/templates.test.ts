@@ -3,7 +3,7 @@ import { blockAssetIds } from '@/blocks/registry.shared';
 import { validateProjectFile } from '@/model/validate';
 import { buildProjectFile } from '@/persistence/projectFile';
 import { getCourseIcon } from '@/renderer/icons';
-import { courseTemplates } from './index';
+import { courseTemplates, getTemplate } from './index';
 
 /** אוסף כל שמות האייקונים (שדות icon לא-ריקים) בעומק אובייקט התוכן */
 function collectIconNames(value: unknown, acc: string[] = []): string[] {
@@ -71,4 +71,22 @@ describe('תבניות הפתיחה', () => {
       }
     },
   );
+
+  it('"הדרכה קצרה" מגיעה עם תוכן ועם האיור שלה, ולא עם בלוקים ריקים', () => {
+    const { course, assets } = getTemplate('shortTraining')!.create();
+
+    // האיור נארז עם התבנית
+    expect(assets.length).toBeGreaterThan(0);
+
+    // הכרטיסים אינם ברירת המחדל הריקה: אין כרטיס שנשאר "כותרת הכרטיס"
+    const cards = course.chapters
+      .flatMap((chapter) => chapter.blocks)
+      .filter((block) => block.type === 'cards');
+    expect(cards.length).toBeGreaterThan(0);
+    for (const card of cards) {
+      for (const item of (card.content as { items: { title: string }[] }).items) {
+        expect(item.title).not.toBe('כותרת הכרטיס');
+      }
+    }
+  });
 });

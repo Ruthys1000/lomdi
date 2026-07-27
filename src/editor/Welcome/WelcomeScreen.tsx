@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { BookOpen, FileUp, FolderOpen, Globe, Languages, Plus, Upload, WifiOff } from 'lucide-react';
+import { BookOpen, FileUp, FolderOpen, Plus, Upload } from 'lucide-react';
 import { openProjectFile } from '@/persistence/session';
 import { getTemplate } from '@/templates';
 import type { TemplateResult } from '@/templates';
@@ -16,12 +16,6 @@ interface WelcomeScreenProps {
   /** נקרא כשפרויקט קיים נטען ישירות ל-stores, בלי לעבור דרך onStart */
   onOpened: () => void;
 }
-
-const SELLING_POINTS = [
-  { icon: WifiOff, text: 'בלי שרת, בלי אינטרנט' },
-  { icon: Languages, text: 'עברית ו-RTL מהיסוד' },
-  { icon: Globe, text: 'מוכן ל-Moodle' },
-];
 
 /**
  * מסך הפתיחה — הדלת הראשית של הכלי.
@@ -90,11 +84,7 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
       <Header hasProjects={hasProjects} onOpenCourses={() => setCoursesOpen(true)} />
 
       {/* נחיתה אחת לכולם — מוצגת תמיד, גם אחרי שנבנו לומדות */}
-      <Hero
-        onBuild={() => startTemplate('blank')}
-        onSample={() => startTemplate('sample')}
-        onShort={() => startTemplate('shortTraining')}
-      />
+      <Hero onBuild={() => startTemplate('blank')} />
       <HowItWorks />
       <ExamplesGallery onStart={onStart} />
       <BuildingBlocks />
@@ -154,27 +144,16 @@ function Header({ hasProjects, onOpenCourses }: HeaderProps) {
           <p className="text-xs text-shell-muted">בונים לומדה, מקבלים אתר</p>
         </div>
 
-        <div className="ms-auto flex items-center gap-4">
-          <ul className="hidden gap-5 text-xs text-shell-muted lg:flex">
-            {SELLING_POINTS.map(({ icon: Icon, text }) => (
-              <li key={text} className="flex items-center gap-1.5">
-                <Icon className="size-3.5 text-shell-muted" aria-hidden />
-                {text}
-              </li>
-            ))}
-          </ul>
-
-          {hasProjects && (
-            <button
-              type="button"
-              onClick={onOpenCourses}
-              className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-shell-edge px-3.5 py-2 text-sm font-semibold text-shell-fg transition hover:border-volt-dim hover:text-volt"
-            >
-              <FolderOpen className="size-4" aria-hidden />
-              הלומדות שלי
-            </button>
-          )}
-        </div>
+        {hasProjects && (
+          <button
+            type="button"
+            onClick={onOpenCourses}
+            className="ms-auto inline-flex shrink-0 items-center gap-2 rounded-xl border border-shell-edge px-3.5 py-2 text-sm font-semibold text-shell-fg transition hover:border-volt-dim hover:text-volt"
+          >
+            <FolderOpen className="size-4" aria-hidden />
+            הלומדות שלי
+          </button>
+        )}
       </div>
     </header>
   );

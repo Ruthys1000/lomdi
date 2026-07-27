@@ -48,12 +48,11 @@ async function setup() {
 }
 
 describe('מסך הפתיחה', () => {
-  it('מציג פעולה ראשית "מתחילים לבנות" וקישור ללומדת דוגמה', async () => {
+  it('מציג פעולה ראשית "מתחילים לבנות"', async () => {
     await setup();
 
     // ה-CTA הראשי מופיע גם ב-Hero וגם בסוגר — לכן getAllByRole
     expect(screen.getAllByRole('button', { name: 'מתחילים לבנות' }).length).toBeGreaterThan(0);
-    expect(screen.getByRole('button', { name: 'רואים לומדה לדוגמה' })).toBeInTheDocument();
   });
 
   it('לחיצה על "מתחילים לבנות" מחזירה לומדה עם פרק, ולא רק שם תבנית', async () => {
@@ -63,26 +62,6 @@ describe('מסך הפתיחה', () => {
 
     expect(onStart).toHaveBeenCalledTimes(1);
     expect(onStart.mock.calls[0][0].course.chapters.length).toBeGreaterThan(0);
-  });
-
-  it('"מבנה מוכן" (מה-Hero) מגיע עם תוכן ועם האיור שלו, ולא עם בלוקים ריקים', async () => {
-    const { onStart } = await setup();
-
-    fireEvent.click(screen.getByRole('button', { name: /מבנה מוכן/ }));
-
-    const { course, assets } = onStart.mock.calls[0][0];
-    expect(assets.length).toBeGreaterThan(0);
-
-    // הבלוקים אינם ברירת המחדל הריקה: אין כרטיס שנשאר "כותרת הכרטיס"
-    const cards = course.chapters
-      .flatMap((chapter: { blocks: { type: string; content: unknown }[] }) => chapter.blocks)
-      .filter((block: { type: string }) => block.type === 'cards');
-    expect(cards.length).toBeGreaterThan(0);
-    for (const card of cards) {
-      for (const item of (card.content as { items: { title: string }[] }).items) {
-        expect(item.title).not.toBe('כותרת הכרטיס');
-      }
-    }
   });
 
   it('התבניות שטרם מומשו אינן מוצגות כלל', async () => {
