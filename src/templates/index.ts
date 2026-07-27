@@ -6,6 +6,7 @@ import { bulletList, heading, paragraph, richText } from '@/model/richText';
 import { getThemePreset } from '@/model/themes';
 import { learnerPathIllustration } from '@/sample/illustrations';
 import { createSampleCourse } from '@/sample/sampleCourse';
+import { exampleTemplates } from './examples';
 import type { TemplateResult } from './types';
 
 export type { TemplateResult } from './types';
@@ -23,6 +24,8 @@ export interface CourseTemplate {
   name: string;
   description: string;
   create: () => TemplateResult;
+  /** דוגמת דגל — מוצגת בגלריית דף הבית עם תצוגה חיה */
+  featured?: boolean;
 }
 
 /**
@@ -489,8 +492,13 @@ export const courseTemplates: CourseTemplate[] = [
     description: 'ארבעה פרקים עם תוכן מלא בעברית שמדגים את סוגי הבלוקים.',
     create: createSampleCourse,
   },
+  // דוגמאות הדגל — לומדות מוגמרות שמוצגות בגלריית דף הבית עם תצוגה חיה
+  ...exampleTemplates.map((example) => ({ ...example, featured: true })),
 ];
 
 export function getTemplate(id: string): CourseTemplate | undefined {
   return courseTemplates.find((template) => template.id === id);
 }
+
+/** דוגמאות הדגל בלבד — הבסיס לגלריית דף הבית */
+export const featuredTemplates = courseTemplates.filter((template) => template.featured);

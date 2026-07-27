@@ -34,6 +34,7 @@ export function TextImageRenderer({ block }: { block: BlockOf<TextImageContent> 
       className={[
         'lc-container',
         'lc-text-image',
+        `lc-text-image--v-${content.variant || 'standard'}`,
         `lc-text-image--${content.layout}`,
         `lc-text-image--ratio-${content.ratio}`,
         `lc-text-image--v-${content.verticalAlign}`,

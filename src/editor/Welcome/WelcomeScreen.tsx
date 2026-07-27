@@ -5,6 +5,7 @@ import { getTemplate } from '@/templates';
 import type { TemplateResult } from '@/templates';
 import { APP_NAME, APP_VERSION } from '@/version';
 import { BuildingBlocks } from './BuildingBlocks';
+import { ExamplesGallery } from './ExamplesGallery';
 import { Hero } from './Hero';
 import { HowItWorks } from './HowItWorks';
 import { MyCoursesDrawer } from './MyCoursesDrawer';
@@ -95,6 +96,7 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
         onShort={() => startTemplate('shortTraining')}
       />
       <HowItWorks />
+      <ExamplesGallery onStart={onStart} />
       <BuildingBlocks />
       <Closer onBuild={() => startTemplate('blank')} loading={loading} fileErrors={fileErrors} onPickFile={pickFile} />
 
