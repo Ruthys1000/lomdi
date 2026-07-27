@@ -13,21 +13,39 @@ import type { RichTextMark, RichTextNode } from '@/model/types';
  * מה שאפשר לכתוב ומה שאפשר להציג נשארים מסונכרנים.
  */
 
+/**
+ * אזהרת פיתוח כשתוכן נשמט בשקט מהתצוגה.
+ *
+ * הרשימה הלבנה למטה מוחקת בשקט כל node/mark/צבע/קישור שאינו מוכר — התנהגות
+ * נכונה בתוצר (הלומד לא צריך לראות רעש או שגיאות), אבל בפיתוח היא מסתירה באגים:
+ * תוכן שנוצר עם סוג לא-נתמך (למשל בעתיד ע"י יצירת AI) נעלם חלקית בלי שום עקבה,
+ * וזו מחלקת הבאגים הכי קשה לאיתור. מגודר ב-`import.meta.env.DEV`, שהוא שקר
+ * בחבילת ה-runtime המיוצאת ובפרודקשן — ולכן אפס רעש למה שהלומד מקבל.
+ */
+function warnDropped(kind: string, value: unknown): void {
+  if (import.meta.env.DEV) {
+    console.warn(`RichTextView: ${kind} נשמט מהתצוגה`, value);
+  }
+}
+
 /** רק סכמות שאינן מאפשרות הרצת קוד. javascript: ו-data: נחסמים. */
 const SAFE_LINK = /^(https?:|mailto:|tel:|#|\/|\.\/|\.\.\/)/i;
 
 function safeHref(value: unknown): string | undefined {
   if (typeof value !== 'string') return undefined;
   const trimmed = value.trim();
-  return SAFE_LINK.test(trimmed) ? trimmed : undefined;
+  if (SAFE_LINK.test(trimmed)) return trimmed;
+  warnDropped('קישור לא-בטוח', value);
+  return undefined;
 }
 
 /** צבע טקסט מוגבל לערכים מפורשים — לא מחרוזת CSS חופשית */
 function safeColor(value: unknown): string | undefined {
   if (typeof value !== 'string') return undefined;
-  return /^(#[0-9a-fA-F]{3,8}|var\(--lc-color-[a-z-]+\))$/.test(value.trim())
-    ? value.trim()
-    : undefined;
+  const trimmed = value.trim();
+  if (/^(#[0-9a-fA-F]{3,8}|var\(--lc-color-[a-z-]+\))$/.test(trimmed)) return trimmed;
+  warnDropped('צבע לא-מוכר', value);
+  return undefined;
 }
 
 function applyMarks(content: ReactNode, marks: RichTextMark[] | undefined, keyBase: string): ReactNode {
@@ -71,6 +89,7 @@ function applyMarks(content: ReactNode, marks: RichTextMark[] | undefined, keyBa
       }
       default:
         // mark שאינו מוכר מוותר על העיצוב אבל שומר על הטקסט
+        warnDropped('סימון לא-מוכר', mark.type);
         return wrapped;
     }
   }, content);
@@ -112,6 +131,7 @@ function renderNode(node: RichTextNode, key: string): ReactNode {
 
     default:
       // סוג לא מוכר: התוכן שבתוכו עדיין מוצג, כדי לא לאבד טקסט
+      warnDropped('סוג node לא-מוכר', node.type);
       return <Fragment key={key}>{children}</Fragment>;
   }
 }

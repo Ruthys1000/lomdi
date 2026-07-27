@@ -1,14 +1,15 @@
 import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createCourse } from '@/model/factory';
 import { useAssetStore } from '@/state/assetStore';
 import { useCourseStore } from '@/state/courseStore';
 import { useEditorStore } from '@/state/editorStore';
 import { useSaveStore } from '@/state/saveStore';
 import { cancelPendingSave } from './autosave';
-import { listProjects, resetDbConnection } from './db';
-import { closeToWelcome, forceCloseToWelcome } from './session';
+import { listProjects, resetDbConnection, saveProject } from './db';
+import { buildProjectFile } from './projectFile';
+import { closeToWelcome, forceCloseToWelcome, openStoredProject } from './session';
 
 /**
  * החזרה לדף הבית מתוך העורך (סעיף "חזרה הביתה").
@@ -70,5 +71,45 @@ describe('חזרה לדף הבית', () => {
 
     expect(useCourseStore.getState().course).toBeNull();
     expect(await listProjects()).toHaveLength(0);
+  });
+});
+
+/**
+ * שחזור לומדה שמורה מ-IndexedDB עובר אותו שער אימות כמו ייבוא קובץ — אבל
+ * best-effort: תקינות שבורה מזהירה ולא נועלת את המשתמשת מחוץ לעבודתה השמורה.
+ */
+describe('שחזור לומדה שמורה', () => {
+  it('לומדה תקינה נטענת רגיל, בלי אזהרה', async () => {
+    const course = createCourse({ title: 'תקין' });
+    await saveProject(buildProjectFile(course, []));
+
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const result = await openStoredProject(course.id);
+
+    expect(result.ok).toBe(true);
+    expect(useCourseStore.getState().course?.id).toBe(course.id);
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it('לומדה עם מזהה כפול נטענת best-effort עם אזהרה — לא נחסמת', async () => {
+    const course = createCourse({ title: 'מזהה כפול' });
+    // הפרק מקבל את מזהה הלומדה — כפילות ש-findDuplicateIds תופס והסכמה לא
+    course.chapters[0].id = course.id;
+    await saveProject(buildProjectFile(course, []));
+
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const result = await openStoredProject(course.id);
+
+    expect(result.ok).toBe(true);
+    // נטענה בכל זאת — עדיף לומדה עם בעיה על פני משתמשת שנעולה מעבודתה
+    expect(useCourseStore.getState().course?.id).toBe(course.id);
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it('פרויקט שאינו קיים מחזיר שגיאה', async () => {
+    const result = await openStoredProject('course-nonexistent');
+    expect(result.ok).toBe(false);
   });
 });

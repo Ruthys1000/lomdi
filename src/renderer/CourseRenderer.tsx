@@ -22,6 +22,12 @@ export interface CourseRendererProps {
   /** בעורך: הפרק שנערך כרגע גובר על הניווט הפנימי של הלומדה */
   forcedChapterIndex?: number;
   renderBlockWrapper?: BlockWrapper;
+  /**
+   * בעורך: מצב ריק אינטראקטיבי לפרק בלי בלוקים. מוזרק מבחוץ כמו
+   * renderBlockWrapper, כדי שהרנדרר לא יכיר את ספריית הבלוקים של העורך. בתצוגה
+   * ובתוצר לא נמסר — שם פרק ריק פשוט אינו מציג דבר.
+   */
+  renderEmptyChapter?: (chapterId: string) => ReactNode;
 }
 
 /**
@@ -39,16 +45,26 @@ export function CourseRenderer({
   isEditing = false,
   forcedChapterIndex,
   renderBlockWrapper,
+  renderEmptyChapter,
 }: CourseRendererProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
 
   // חשיפה הדרגתית פעילה רק בתוצר ובתצוגה המקדימה — בקנבס העריכה התוכן
   // חייב להיות גלוי תמיד. revealKey מריץ מחדש כשמבנה התוכן משתנה.
-  const revealKey = useMemo(
-    () => course.chapters.map((chapter) => `${chapter.id}:${chapter.blocks.length}`).join('|'),
-    [course.chapters],
-  );
+  //
+  // במצב פרקים מרונדר רק הפרק הפעיל, ובלוקיו מתמונטים מחדש בכל מעבר. לכן
+  // המפתח חייב לכלול את אינדקס הפרק הפעיל — אחרת ה-IntersectionObserver
+  // של החשיפה נבנה פעם אחת על פרק 1 בלבד, ובלוקי פרק 2+ נשארים מוסתרים
+  // (opacity:0) ומציגים גוף ריק. במצב גלילה activeIndex נשאר 0, ולכן
+  // המפתח יציב ואין רינדור-יתר.
+  const revealKey = useMemo(() => {
+    const structure = course.chapters
+      .map((chapter) => `${chapter.id}:${chapter.blocks.length}`)
+      .join('|');
+    const inChapterMode = course.navigation.mode === 'chapters' && forcedChapterIndex === undefined;
+    return inChapterMode ? `${structure}::ch${activeIndex}` : structure;
+  }, [course.chapters, course.navigation.mode, forcedChapterIndex, activeIndex]);
   useScrollReveal(rootRef, !isEditing, revealKey);
 
   const ctx: RenderContextValue = useMemo(
@@ -114,7 +130,11 @@ export function CourseRenderer({
         })}
 
         {chapter.blocks.length === 0 && isEditing && (
-          <p className="lc-empty-chapter">הפרק ריק. הוסיפו בלוק כדי להתחיל.</p>
+          renderEmptyChapter ? (
+            renderEmptyChapter(chapter.id)
+          ) : (
+            <p className="lc-empty-chapter">הפרק ריק. הוסיפו בלוק כדי להתחיל.</p>
+          )
         )}
       </section>
     );

@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { RichTextNode } from '@/model/types';
 import { RichTextView } from './RichTextView';
 
@@ -118,5 +118,33 @@ describe('RichTextView — גבול האבטחה', () => {
 
     expect(out).toContain('טקסט');
     expect(out).not.toContain('alert');
+  });
+});
+
+/**
+ * ה-drops השקטים של הרשימה הלבנה הם מחלקת הבאגים הכי קשה לאיתור בתוכן שנוצר
+ * דינמית: תוכן נעלם חלקית בלי עקבה. אזהרת פיתוח הופכת אותם לנצפים — ורק בפיתוח,
+ * כדי שהתוצר שהלומד מקבל יישאר שקט.
+ */
+describe('RichTextView — נראות ה-drops בפיתוח', () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it('מזהיר בפיתוח כשסוג node לא-מוכר נשמט', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    html(doc({ type: 'table', content: [text('תא')] } as RichTextNode));
+    expect(warn).toHaveBeenCalled();
+  });
+
+  it('מזהיר בפיתוח כש-mark לא-מוכר וצבע לא-תקין נשמטים', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    html(doc(para(text('טקסט', [{ type: 'code' }]))));
+    html(doc(para(text('צבע', [{ type: 'textStyle', attrs: { color: 'rgb(1,2,3)' } }]))));
+    expect(warn).toHaveBeenCalledTimes(2);
+  });
+
+  it('תוכן תקין אינו מפעיל אזהרה', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    html(doc(para(text('רגיל', [{ type: 'bold' }]))));
+    expect(warn).not.toHaveBeenCalled();
   });
 });

@@ -1,6 +1,7 @@
 import { openCourse } from './persistence/session';
 import type { TemplateResult } from './templates';
 import { PreviewOverlay } from './editor/Preview/PreviewOverlay';
+import { AppErrorBoundary } from './editor/Shell/AppErrorBoundary';
 import { EditorLayout } from './editor/Shell/EditorLayout';
 import { ToastHost } from './editor/ui/ToastHost';
 import { WelcomeScreen } from './editor/Welcome/WelcomeScreen';
@@ -27,8 +28,14 @@ export function App() {
 
   return (
     <>
-      <EditorLayout />
-      <PreviewOverlay />
+      {/*
+        ToastHost נשאר מחוץ לגבול השגיאה: אם שלד העורך קורס, ה-fallback עדיין צריך
+        להציג טוסטים (למשל כשל בהורדת הגיבוי), ולכן הוא לא יכול לשבת בתוך העץ שנפל.
+      */}
+      <AppErrorBoundary>
+        <EditorLayout />
+        <PreviewOverlay />
+      </AppErrorBoundary>
       <ToastHost />
     </>
   );

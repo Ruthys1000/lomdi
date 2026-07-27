@@ -75,6 +75,56 @@ describe('CourseRenderer', () => {
     expect(screen.queryByText('פרק 1')).toBeNull();
   });
 
+  it('לומדה בלי פרקים אינה קורסת — בשני מצבי הניווט', () => {
+    // סכמת הקורס אינה דורשת מינימום פרק אחד, ולכן תוכן שנוצר דינמית (בעתיד
+    // ע"י AI) עלול להגיע ריק. הרנדרר המשותף — שרץ גם בתוצר ה-offline בלי
+    // dev-tools — חייב להציג ריק בשקט ולא מסך לבן.
+    const empty: Course = { ...course, chapters: [] };
+
+    const scroll = render(<CourseRenderer course={empty} resolveAssetUrl={() => undefined} />);
+    expect(scroll.container.querySelector('.lc-course')).toBeInTheDocument();
+    scroll.unmount();
+
+    const chapters = render(
+      <CourseRenderer
+        course={{ ...empty, navigation: { ...defaultNavigation, mode: 'chapters' } }}
+        resolveAssetUrl={() => undefined}
+      />,
+    );
+    expect(chapters.container.querySelector('.lc-course')).toBeInTheDocument();
+  });
+
+  it('בעורך משתמש ב-renderEmptyChapter לפרק ריק, ומעביר את מזהה הפרק', () => {
+    const emptyChapter: Course = {
+      ...course,
+      chapters: [{ id: 'chapter-9', title: 'ריק', description: '', blocks: [] }],
+    };
+
+    render(
+      <CourseRenderer
+        course={emptyChapter}
+        resolveAssetUrl={() => undefined}
+        isEditing
+        renderEmptyChapter={(chapterId) => <button type="button">הוסיפו ל-{chapterId}</button>}
+      />,
+    );
+
+    // ה-CTA האינטראקטיבי מחליף את הטקסט הפסיבי, ומקבל את מזהה הפרק הנכון
+    expect(screen.getByRole('button', { name: 'הוסיפו ל-chapter-9' })).toBeInTheDocument();
+    expect(screen.queryByText('הפרק ריק. הוסיפו בלוק כדי להתחיל.')).toBeNull();
+  });
+
+  it('בלי renderEmptyChapter, פרק ריק בעורך מציג את הטקסט הפסיבי', () => {
+    const emptyChapter: Course = {
+      ...course,
+      chapters: [{ id: 'chapter-9', title: 'ריק', description: '', blocks: [] }],
+    };
+
+    render(<CourseRenderer course={emptyChapter} resolveAssetUrl={() => undefined} isEditing />);
+
+    expect(screen.getByText('הפרק ריק. הוסיפו בלוק כדי להתחיל.')).toBeInTheDocument();
+  });
+
   it('מדלג בשקט על בלוק מסוג לא מוכר בתוצר, ומסמן אותו בעורך', () => {
     const withUnknown: Course = {
       ...course,
