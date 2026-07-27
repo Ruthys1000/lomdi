@@ -75,7 +75,12 @@ export function CourseRenderer({
   const showChapterEyebrow = nav.showChapterNumber && !inChapterBarMode;
 
   const renderChapter = (chapter: Chapter, index: number) => {
-    const hasHeader = Boolean(chapter.title) || Boolean(chapter.description) || showChapterEyebrow;
+    // כשפרק פותח ב-hero, ה-hero הוא הפתיח החזותי שלו — כותרת פרק מעליו רק
+    // מתחרה בו, ולכן מדלגים עליה ונותנים ל-hero להיות הכותרת
+    const firstBlockIsHero = chapter.blocks[0]?.type === 'hero';
+    const hasHeader =
+      !firstBlockIsHero &&
+      (Boolean(chapter.title) || Boolean(chapter.description) || showChapterEyebrow);
 
     return (
       <section
