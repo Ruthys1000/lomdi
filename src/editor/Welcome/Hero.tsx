@@ -20,13 +20,9 @@ const PROOF = ['בלי התקנה', 'נשמר אצלך בדפדפן', 'מוכן 
 interface HeroProps {
   /** בונה לומדה ריקה (תבנית blank) */
   onBuild: () => void;
-  /** פותח את לומדת הדוגמה (תבנית sample) */
-  onSample: () => void;
-  /** מתחיל ממבנה מוכן (תבנית shortTraining) */
-  onShort: () => void;
 }
 
-export function Hero({ onBuild, onSample, onShort }: HeroProps) {
+export function Hero({ onBuild }: HeroProps) {
   return (
     <section className="relative z-[2] overflow-hidden bg-shell text-shell-fg shadow-[0_22px_40px_-26px_rgba(9,11,15,0.55)]">
       {/* זוהר הדגש מאחורי הוויזואל */}
@@ -58,26 +54,7 @@ export function Hero({ onBuild, onSample, onShort }: HeroProps) {
               <Plus className="size-4.5" aria-hidden />
               מתחילים לבנות
             </button>
-
-            <button
-              type="button"
-              onClick={onSample}
-              className="inline-flex items-center gap-2 rounded-xl border border-shell-edge px-5 py-3 font-semibold text-shell-fg transition hover:border-volt-dim hover:text-volt"
-            >
-              רואים לומדה לדוגמה
-            </button>
           </div>
-
-          <p className="mt-3 text-sm text-shell-muted">
-            או{' '}
-            <button
-              type="button"
-              onClick={onShort}
-              className="font-semibold text-volt underline underline-offset-2 transition hover:text-volt-bright"
-            >
-              מתחילים ממבנה מוכן
-            </button>
-          </p>
 
           <ul className="mt-6 flex flex-wrap gap-2.5">
             {PROOF.map((text) => (
