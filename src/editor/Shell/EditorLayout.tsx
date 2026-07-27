@@ -8,6 +8,7 @@ import { InspectorPanel } from '../Inspector/InspectorPanel';
 import { OutlinePanel } from '../Outline/OutlinePanel';
 import { useKeyboardShortcuts } from '../shortcuts/useKeyboardShortcuts';
 import { TopBar } from './TopBar';
+import { useBackupReminder } from './useBackupReminder';
 
 /**
  * מבנה שלושת האזורים (סעיף 4).
@@ -26,6 +27,9 @@ export function EditorLayout() {
   // השמירה האוטומטית נרשמת ברמת הפריסה ולא ב-App: היא צריכה לרוץ רק כשיש
   // לומדה פתוחה, ומסך הפתיחה אינו מרנדר את הרכיב הזה
   useEffect(() => startAutosave(), []);
+
+  // תזכורת גיבוי לקובץ — פעילה רק בזמן עריכת לומדה, מאותה סיבה
+  useBackupReminder();
 
   useKeyboardShortcuts({
     // Ctrl+S שומר מיד לדפדפן. הורדת קובץ פרויקט היא פעולה נפרדת בסרגל,

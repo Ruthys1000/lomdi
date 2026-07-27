@@ -4,6 +4,7 @@ import { summarizeExport } from '@/export/checks';
 import { exportCourseZip } from '@/export/exportCourse';
 import { exportFileName, exportFolderName } from '@/export/exportZip';
 import { formatBytes } from '@/persistence/assetNaming';
+import { useBackupStore } from '@/state/backupStore';
 import { useAssetStore } from '@/state/assetStore';
 import { useCourseStore } from '@/state/courseStore';
 import { toast } from '@/state/toastStore';
@@ -54,6 +55,8 @@ export function ExportDialog({ open, onClose }: { open: boolean; onClose: () => 
 
     try {
       const result = await exportCourseZip();
+      // ייצוא לומדה מוציא את התוכן מהדפדפן — נחשב גיבוי לעניין התזכורת
+      useBackupStore.getState().markBackedUp();
       toast(`הלומדה יוצאה — ${result.fileName}`, { tone: 'success' });
       if (result.missingAssetCount > 0) {
         toast(`${result.missingAssetCount} נכסים לא נארזו כי הקובץ שלהם לא היה זמין`, {

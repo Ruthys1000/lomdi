@@ -1,6 +1,7 @@
 import type { Block } from '@/model/types';
 import { blockLabel, blockLabels } from '@/blocks/labels';
 import { getRenderer } from '@/blocks/registry.runtime';
+import { BlockErrorBoundary } from './BlockErrorBoundary';
 import { blockClassName } from './blockClasses';
 
 /**
@@ -31,7 +32,14 @@ export function BlockRenderer({ block, isEditing }: { block: Block; isEditing: b
 
   return (
     <div className={blockClassName(block.settings)} data-block-type={block.type}>
-      <Component block={block} />
+      {/*
+        key={block.id}: אם בלוק מסוים נכשל, גבול השגיאה שלו נשאר במצב שגיאה
+        עד שהמפתח משתנה. מפתח לפי מזהה הבלוק נותן לכל בלוק גבול משלו ומאפשר
+        התאוששות כשהתוכן מתחלף.
+      */}
+      <BlockErrorBoundary key={block.id} blockType={block.type} isEditing={isEditing}>
+        <Component block={block} />
+      </BlockErrorBoundary>
     </div>
   );
 }
