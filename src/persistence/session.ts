@@ -1,13 +1,16 @@
 import { downloadBlob } from '@/lib/download';
 import type { TemplateAsset } from '@/sample/illustrations';
 import type { Course } from '@/model/types';
+import { validateProjectFile } from '@/model/validate';
+import { APP_NAME, APP_VERSION } from '@/version';
 import { useAssetStore } from '@/state/assetStore';
 import { useCourseStore } from '@/state/courseStore';
 import { useEditorStore } from '@/state/editorStore';
 import { useSaveStore } from '@/state/saveStore';
+import { toast } from '@/state/toastStore';
 import { collectAssetBlobs } from './assetBlobs';
 import { cancelPendingSave, saveNow } from './autosave';
-import { loadProject, loadProjectAssets, putAsset, setLastProjectId } from './db';
+import { loadProject, loadProjectAssets, putAsset, setLastProjectId, type StoredProject } from './db';
 import {
   buildProjectFile,
   projectFileName,
@@ -83,17 +86,47 @@ export async function openCourse(course: Course, assets: TemplateAsset[] = []): 
 
 export type OpenResult = { ok: true } | { ok: false; errors: string[] };
 
+/**
+ * שחזור לומדה שמורה עובר את אותו שער האימות של ייבוא קובץ — אבל best-effort.
+ *
+ * שמירה אוטומטית כותבת עריכות שוטפות ל-IndexedDB בלי לאמת, ולכן לומדה שמורה
+ * עלולה לשאת סחף סכמה או מזהה כפול (ששובר בחירה, גרירה ומפתחות React). הרצת
+ * `validateProjectFile` כאן תופסת את זה — וגם מריצה את נתיב המיגרציה, כך שכשהסכמה
+ * תתפתח לומדות ישנות ישודרגו בטעינה במקום להישבר.
+ *
+ * ההבדל מייבוא קובץ *זר*: זו העבודה השמורה של המשתמשת עצמה, ולכן כשל תקינות אינו
+ * נועל אותה החוצה. במקום דחייה — אזהרה גלויה (קונסול לאבחון + טוסט להמלצה על גיבוי)
+ * והלומדה נטענת כפי שהיא. עדיף לומדה עם בעיה על פני משתמשת שאינה יכולה לפתוח את עבודתה.
+ */
+function validateStoredCourse(stored: StoredProject): Course {
+  const candidate = {
+    version: stored.version,
+    generator: { name: APP_NAME, version: APP_VERSION },
+    savedAt: stored.savedAt,
+    course: stored.course,
+    assets: stored.assets,
+  };
+
+  const validation = validateProjectFile(candidate);
+  if (validation.ok) return validation.project.course;
+
+  console.warn('הלומדה השמורה נטענה עם בעיות תקינות:', validation.errors);
+  toast('הלומדה נטענה, אך נמצאו בה בעיות תקינות. מומלץ לשמור קובץ גיבוי.', { tone: 'error' });
+  return stored.course;
+}
+
 /** המשך עבודה על פרויקט ששמור ב-IndexedDB */
 export async function openStoredProject(projectId: string): Promise<OpenResult> {
   const stored = await loadProject(projectId);
   if (!stored) return { ok: false, errors: ['הפרויקט לא נמצא באחסון המקומי.'] };
 
   const assets = await loadProjectAssets(projectId);
+  const course = validateStoredCourse(stored);
 
   resetSession();
   useAssetStore.getState().loadAssets(assets.map(({ meta, blob }) => ({ meta, blob })));
-  useCourseStore.getState().loadCourse(stored.course);
-  useEditorStore.getState().selectChapter(stored.course.chapters[0]?.id ?? null);
+  useCourseStore.getState().loadCourse(course);
+  useEditorStore.getState().selectChapter(course.chapters[0]?.id ?? null);
   await setLastProjectId(projectId);
 
   return { ok: true };

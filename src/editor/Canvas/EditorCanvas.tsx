@@ -187,6 +187,17 @@ export function EditorCanvas() {
               isEditing
               forcedChapterIndex={chapterIndex}
               renderBlockWrapper={renderBlockWrapper}
+              renderEmptyChapter={() => (
+                <button
+                  type="button"
+                  onClick={() => setLibraryIndex(0)}
+                  className="mx-auto my-10 flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-edge-strong px-8 py-12 text-center text-fg-soft transition hover:border-volt-dim hover:text-volt-ink"
+                >
+                  <Plus className="size-7" aria-hidden />
+                  <span className="text-base font-semibold">הפרק ריק — הוסיפו את הבלוק הראשון</span>
+                  <span className="text-sm text-fg-muted">בחרו בלוק מהספרייה כדי להתחיל לבנות</span>
+                </button>
+              )}
             />
           </SortableContext>
         </DndContext>

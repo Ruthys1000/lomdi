@@ -99,6 +99,12 @@ export function TextImageSettings({
           value={content.alt}
           onChange={(alt) => update({ alt })}
         />
+        {content.imageAssetId && !content.alt.trim() && (
+          <FieldNote tone="warning">
+            בלי טקסט חלופי, לומד שמשתמש בקורא מסך לא יקבל שום מידע מהתמונה. אם התמונה דקורטיבית
+            בלבד — אפשר להשאיר ריק במכוון.
+          </FieldNote>
+        )}
         <TextField
           label="כיתוב"
           value={content.caption}

@@ -22,6 +22,12 @@ export interface CourseRendererProps {
   /** בעורך: הפרק שנערך כרגע גובר על הניווט הפנימי של הלומדה */
   forcedChapterIndex?: number;
   renderBlockWrapper?: BlockWrapper;
+  /**
+   * בעורך: מצב ריק אינטראקטיבי לפרק בלי בלוקים. מוזרק מבחוץ כמו
+   * renderBlockWrapper, כדי שהרנדרר לא יכיר את ספריית הבלוקים של העורך. בתצוגה
+   * ובתוצר לא נמסר — שם פרק ריק פשוט אינו מציג דבר.
+   */
+  renderEmptyChapter?: (chapterId: string) => ReactNode;
 }
 
 /**
@@ -39,6 +45,7 @@ export function CourseRenderer({
   isEditing = false,
   forcedChapterIndex,
   renderBlockWrapper,
+  renderEmptyChapter,
 }: CourseRendererProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -123,7 +130,11 @@ export function CourseRenderer({
         })}
 
         {chapter.blocks.length === 0 && isEditing && (
-          <p className="lc-empty-chapter">הפרק ריק. הוסיפו בלוק כדי להתחיל.</p>
+          renderEmptyChapter ? (
+            renderEmptyChapter(chapter.id)
+          ) : (
+            <p className="lc-empty-chapter">הפרק ריק. הוסיפו בלוק כדי להתחיל.</p>
+          )
         )}
       </section>
     );
