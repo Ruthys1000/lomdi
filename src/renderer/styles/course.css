@@ -25,7 +25,11 @@
   --lc-color-on-primary: #ffffff;
   --lc-color-on-accent: #111827;
 
-  --lc-font-family: system-ui, -apple-system, 'Segoe UI', 'Noto Sans Hebrew', Arial, sans-serif;
+  /* ברירת המחדל היא גופן מעוצב (Heebo) ולא גופן מערכת — כדי שגם לומדה
+     בלי ערכה מפורשת לא תיפול למראה ברירת-המחדל של הדפדפן */
+  --lc-font-family: 'Heebo Variable', Heebo, system-ui, -apple-system, 'Segoe UI',
+    'Noto Sans Hebrew', Arial, sans-serif;
+  --lc-heading-family: var(--lc-font-family);
   --lc-font-size-base: 17px;
   --lc-line-height: 1.75;
   --lc-heading-weight: 700;
@@ -36,6 +40,29 @@
 
   --lc-content-max-width: 780px;
   --lc-space-unit: 8px;
+
+  /* ─── טוקנים נגזרים: חומרי הגלם ל"וו" ─────────────────────────────
+     כולם נגזרים ממשתני הצבע שלמעלה, ולכן כל ערכה — כולל ערכה מותאמת —
+     מקבלת גרדיאנטים, משטחים ועומק בלי להגדיר אותם בעצמה. */
+
+  /* גרדיאנט מותג מ-primary ל-accent, בזווית עקבית עם ה-hero */
+  --lc-gradient-brand: linear-gradient(135deg, var(--lc-color-primary), var(--lc-color-accent));
+  /* גרסה עדינה על רקע הלומדה — לרצועות סקשן שטקסט רגיל יושב עליהן */
+  --lc-gradient-soft: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--lc-color-primary) 12%, var(--lc-color-background)),
+    color-mix(in srgb, var(--lc-color-accent) 12%, var(--lc-color-background))
+  );
+
+  /* משטחים מגוונים גם בלי לשנות את רקע הלומדה */
+  --lc-surface-primary: color-mix(in srgb, var(--lc-color-primary) 7%, var(--lc-color-background));
+  --lc-surface-accent: color-mix(in srgb, var(--lc-color-accent) 9%, var(--lc-color-background));
+
+  /* סקאלת עומק — הצל היחיד היה שטוח מדי; הרמות האלה נותנות לוריאציות עומק */
+  --lc-shadow-lg: 0 10px 24px rgb(15 23 42 / 0.1), 0 28px 64px rgb(15 23 42 / 0.14);
+
+  /* טבעת הדגשה עדינה סביב אלמנטים אינטראקטיביים */
+  --lc-ring: color-mix(in srgb, var(--lc-color-primary) 22%, transparent);
 
   margin: 0;
   padding: 0;
@@ -71,6 +98,7 @@
 .lc-course h2,
 .lc-course h3,
 .lc-course h4 {
+  font-family: var(--lc-heading-family);
   font-weight: var(--lc-heading-weight);
   line-height: 1.25;
   letter-spacing: -0.01em;
@@ -141,12 +169,23 @@
   background: var(--lc-color-accent);
   color: var(--lc-color-on-accent);
 }
+/* רצועת גרדיאנט מלאה — רקע מותג עז, טקסט לבן/כהה נבחר לפי ה-primary */
+.lc-block--bg-gradient {
+  background: var(--lc-gradient-brand);
+  color: var(--lc-color-on-primary);
+}
+/* רצועת גרדיאנט עדינה — טקסט הלומדה הרגיל נשאר קריא מעליה */
+.lc-block--bg-gradientSoft {
+  background: var(--lc-gradient-soft);
+}
 
 /* בלוק עם רקע צבעוני חייב מרווח פנימי, אחרת הצבע נצמד לטקסט */
 .lc-block--bg-surface,
 .lc-block--bg-muted,
 .lc-block--bg-primary,
-.lc-block--bg-accent {
+.lc-block--bg-accent,
+.lc-block--bg-gradient,
+.lc-block--bg-gradientSoft {
   padding-inline: calc(var(--lc-space-unit) * 3);
   border-radius: var(--lc-radius);
 }
@@ -1406,4 +1445,110 @@
   .lc-accordion__panel {
     padding-inline-start: calc(var(--lc-space-unit) * 2.5);
   }
+}
+
+/* ═══════════════════ וריאציות Hero ═══════════════════
+   הוריאציה נבחרת מגלריה בעת הוספת הבלוק ומוחלפת בפאנל ההגדרות. כל וריאציה
+   היא קלאס .lc-hero--v-* שמוגדר כאן — בלי לוגיקה ברנדרר, בדיוק כמו data-card-style.
+   'centered' היא ברירת המחדל ומשתמשת בסגנון הבסיס שלמעלה. */
+
+/* Spotlight — זוהר רדיאלי מאחורי התוכן, כותרת גדולה ותווית-שבב */
+.lc-hero--v-spotlight::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(
+    120% 90% at 50% 0%,
+    rgb(255 255 255 / 0.22),
+    transparent 60%
+  );
+  pointer-events: none;
+}
+.lc-hero--v-spotlight .lc-hero__title {
+  font-size: clamp(2.4em, 6vw, 4em);
+}
+.lc-hero--v-spotlight .lc-hero__intro {
+  display: inline-flex;
+  align-items: center;
+  padding: calc(var(--lc-space-unit) * 0.5) calc(var(--lc-space-unit) * 1.75);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.18);
+  opacity: 1;
+}
+
+/* Panel — פס גרדיאנט עליון ומסגרת עדינה, מראה "כרטיס פתיחה" */
+.lc-hero--v-panel {
+  border: 1px solid rgb(255 255 255 / 0.16);
+  border-radius: calc(var(--lc-radius) * 1.2);
+}
+.lc-hero--v-panel::before {
+  content: '';
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  block-size: 5px;
+  background: var(--lc-gradient-brand);
+  z-index: 1;
+}
+
+/* Minimal — נמוך ורגוע, עם קו הדגשה מתחת לכותרת */
+.lc-hero--v-minimal .lc-hero__inner {
+  padding-block: calc(var(--lc-space-unit) * 4);
+}
+.lc-hero--v-minimal .lc-hero__title {
+  font-size: clamp(1.8em, 4vw, 2.6em);
+}
+.lc-hero--v-minimal .lc-hero__title::after {
+  content: '';
+  display: block;
+  inline-size: 3em;
+  block-size: 3px;
+  margin-block-start: calc(var(--lc-space-unit) * 1.5);
+  background: var(--lc-color-accent);
+  border-radius: 999px;
+}
+
+/* ═══════════════════ וריאציות כרטיסים ═══════════════════ */
+
+/* Numbered — תג מספר רץ (CSS counter) במקום האייקון */
+.lc-cards--v-numbered {
+  counter-reset: lc-card;
+}
+.lc-cards--v-numbered .lc-card {
+  counter-increment: lc-card;
+}
+.lc-cards--v-numbered .lc-card__icon {
+  display: none;
+}
+.lc-cards--v-numbered .lc-card::before {
+  content: counter(lc-card);
+  display: grid;
+  place-items: center;
+  inline-size: 2.6em;
+  block-size: 2.6em;
+  border-radius: 999px;
+  background: var(--lc-gradient-brand);
+  color: var(--lc-color-on-primary);
+  font-weight: 800;
+  font-size: 1.1em;
+}
+
+/* Gradient — אריחי אייקון בגרדיאנט המותג וכרטיסים מורמים */
+.lc-course .lc-cards--v-gradient .lc-card {
+  background: var(--lc-color-background);
+  border: 0;
+  box-shadow: var(--lc-shadow-lg);
+}
+.lc-cards--v-gradient .lc-card__icon {
+  background: var(--lc-gradient-brand);
+  color: var(--lc-color-on-primary);
+}
+
+/* Outline — רקע שקוף עם פס הדגשה עליון */
+.lc-course .lc-cards--v-outline .lc-card {
+  background: transparent;
+  border: 1px solid var(--lc-color-border);
+  border-block-start: 3px solid var(--lc-color-primary);
+  box-shadow: none;
 }

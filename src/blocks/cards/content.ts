@@ -13,7 +13,17 @@ export const cardSchema = z.object({
 });
 export type CardItem = z.infer<typeof cardSchema>;
 
+/**
+ * וריאציית עיצוב של הכרטיסים. `.default` שומר על תאימות אחורה: קובץ ישן
+ * בלי השדה נטען כ-'plain'.
+ */
+export const cardsVariantSchema = z
+  .enum(['plain', 'numbered', 'gradient', 'outline'])
+  .default('plain');
+export type CardsVariant = z.infer<typeof cardsVariantSchema>;
+
 export const cardsContentSchema = z.object({
+  variant: cardsVariantSchema,
   items: z.array(cardSchema),
   columns: z.union([z.literal(2), z.literal(3), z.literal(4)]),
   media: z.enum(['icon', 'image', 'none']),
@@ -34,6 +44,7 @@ export const createCard = (overrides: Partial<CardItem> = {}): CardItem => ({
 });
 
 export const createCardsContent = (overrides: Partial<CardsContent> = {}): CardsContent => ({
+  variant: 'plain',
   items: [createCard(), createCard(), createCard()],
   columns: 3,
   media: 'icon',

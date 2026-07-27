@@ -1,4 +1,4 @@
-import type { ZodType } from 'zod';
+import type { ZodType, ZodTypeDef } from 'zod';
 import type { BlockSettings } from '@/model/types';
 import { blockLabels } from './labels';
 import { heroContentSchema, createHeroContent, heroAssetIds } from './hero/content';
@@ -31,7 +31,11 @@ export interface SharedBlockDefinition<C = unknown> {
   label: string;
   description: string;
   category: BlockCategory;
-  schema: ZodType<C>;
+  /**
+   * הקלט הוא unknown ולא C: בלוק שמשתמש ב-`.default()` (כמו שדה variant)
+   * מקבל קלט אופציונלי אך פולט C מלא, ולכן טיפוס הקלט חייב להיות רחב יותר.
+   */
+  schema: ZodType<C, ZodTypeDef, unknown>;
   createContent: () => C;
   usedAssetIds: (content: C) => string[];
   /**

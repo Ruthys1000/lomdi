@@ -1,7 +1,17 @@
 import { z } from 'zod';
 import { assetRefSchema, buttonSchema, collectAssetIds, createButton } from '../shared';
 
+/**
+ * וריאציית עיצוב של ה-hero. `.default` דואג שקובץ פרויקט ישן בלי השדה
+ * ייטען כ-'centered' ולא ייכשל באימות — מיגרציה בלי קוד מיגרציה.
+ */
+export const heroVariantSchema = z
+  .enum(['centered', 'spotlight', 'panel', 'minimal'])
+  .default('centered');
+export type HeroVariant = z.infer<typeof heroVariantSchema>;
+
 export const heroContentSchema = z.object({
+  variant: heroVariantSchema,
   title: z.string(),
   subtitle: z.string(),
   intro: z.string(),
@@ -21,6 +31,7 @@ export const heroContentSchema = z.object({
 export type HeroContent = z.infer<typeof heroContentSchema>;
 
 export const createHeroContent = (overrides: Partial<HeroContent> = {}): HeroContent => ({
+  variant: 'centered',
   title: 'כותרת הלומדה',
   subtitle: 'כותרת משנה קצרה שמסבירה על מה הלומדה',
   intro: '',

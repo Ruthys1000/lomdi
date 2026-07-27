@@ -57,7 +57,14 @@ export type BlockOf<C> = Omit<Block, 'content'> & { content: C };
 
 export type BlockWidth = 'narrow' | 'normal' | 'wide' | 'full';
 export type BlockAlignment = 'start' | 'center' | 'end';
-export type BlockBackground = 'transparent' | 'surface' | 'primary' | 'accent' | 'muted';
+export type BlockBackground =
+  | 'transparent'
+  | 'surface'
+  | 'primary'
+  | 'accent'
+  | 'muted'
+  | 'gradient'
+  | 'gradientSoft';
 export type Spacing = 'none' | 'small' | 'medium' | 'large';
 
 export interface BlockSettings {
@@ -77,7 +84,9 @@ export type ThemePresetId =
   | 'vivid'
   | 'warmSand'
   | 'forest'
-  | 'highContrast';
+  | 'highContrast'
+  | 'sunset'
+  | 'midnight';
 export type FontFamilyId = 'system' | 'heebo' | 'assistant' | 'rubik';
 export type ShadowLevel = 'none' | 'soft' | 'medium';
 export type ButtonStyle = 'solid' | 'soft' | 'outline';
@@ -101,6 +110,11 @@ export interface Theme {
   colors: ThemeColors;
   typography: {
     fontFamily: FontFamilyId;
+    /**
+     * גופן נפרד לכותרות — יוצר ניגודיות טיפוגרפית בין כותרת לגוף. ריק/חסר
+     * = הכותרות משתמשות ב-fontFamily של הגוף, ולכן ההוספה תואמת אחורה.
+     */
+    headingFamily?: FontFamilyId;
     baseSize: number;
     headingWeight: 600 | 700 | 800;
     headingStyle: HeadingStyle;

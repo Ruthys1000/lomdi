@@ -90,6 +90,7 @@ function openingChapter() {
 
       createBlock('cards', {
         content: {
+          variant: 'numbered',
           columns: 3,
           media: 'icon',
           roundness: 'medium',
@@ -293,6 +294,7 @@ function summaryChapter() {
 
       createBlock('cards', {
         content: {
+          variant: 'outline',
           columns: 2,
           media: 'icon',
           roundness: 'medium',

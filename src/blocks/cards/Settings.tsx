@@ -26,6 +26,13 @@ const mediaOptions: Option<CardsContent['media']>[] = [
   { value: 'none', label: 'ללא' },
 ];
 
+const variantOptions: Option<CardsContent['variant']>[] = [
+  { value: 'plain', label: 'רגיל' },
+  { value: 'numbered', label: 'ממוספר' },
+  { value: 'gradient', label: 'גרדיאנט' },
+  { value: 'outline', label: 'מסגרת' },
+];
+
 export function CardsSettings({
   block,
   onChange,
@@ -39,6 +46,12 @@ export function CardsSettings({
   return (
     <>
       <FieldGroup title="תצוגה">
+        <SelectField
+          label="וריאציה"
+          value={content.variant}
+          options={variantOptions}
+          onChange={(variant) => update({ variant })}
+        />
         <SegmentedField
           label="כרטיסים בשורה"
           value={String(content.columns) as '2' | '3' | '4'}
