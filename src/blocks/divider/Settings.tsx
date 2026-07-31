@@ -1,6 +1,6 @@
 import type { BlockOf } from '@/model/types';
 import { FieldGroup, SegmentedField, SelectField, type Option } from '@/editor/controls/Field';
-import { courseIconNames } from '@/renderer/icons';
+import { IconPickerField } from '@/editor/controls/IconPickerField';
 import type { DividerContent } from './content';
 
 const styleOptions: Option<DividerContent['style']>[] = [
@@ -57,12 +57,7 @@ export function DividerSettings({
       )}
 
       {content.style === 'icon' && (
-        <SelectField
-          label="אייקון"
-          value={content.icon}
-          options={courseIconNames.map((name) => ({ value: name, label: name }))}
-          onChange={(icon) => update({ icon })}
-        />
+        <IconPickerField label="אייקון" value={content.icon} onChange={(icon) => update({ icon })} />
       )}
     </FieldGroup>
   );

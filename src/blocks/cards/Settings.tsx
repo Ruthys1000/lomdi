@@ -1,6 +1,5 @@
 import { createId } from '@/model/ids';
 import type { BlockOf } from '@/model/types';
-import { courseIconNames } from '@/renderer/icons';
 import {
   FieldGroup,
   FieldNote,
@@ -10,6 +9,8 @@ import {
   TextField,
   type Option,
 } from '@/editor/controls/Field';
+import { IconPickerField } from '@/editor/controls/IconPickerField';
+import { Schematic, VariantField, type VariantOption } from '@/editor/controls/VariantField';
 import { AssetField } from '@/editor/Assets/AssetField';
 import { SubItemList } from '@/editor/controls/SubItemList';
 import { createCard, type CardItem, type CardsContent } from './content';
@@ -26,11 +27,49 @@ const mediaOptions: Option<CardsContent['media']>[] = [
   { value: 'none', label: 'ללא' },
 ];
 
-const variantOptions: Option<CardsContent['variant']>[] = [
-  { value: 'plain', label: 'רגיל' },
-  { value: 'numbered', label: 'ממוספר' },
-  { value: 'gradient', label: 'גרדיאנט' },
-  { value: 'outline', label: 'מסגרת' },
+const variantOptions: VariantOption<CardsContent['variant']>[] = [
+  {
+    value: 'plain',
+    label: 'רגיל',
+    preview: (
+      <Schematic>
+        <rect x="4" y="6" width="18" height="16" rx="2" fill="currentColor" opacity={0.25} />
+        <rect x="26" y="6" width="18" height="16" rx="2" fill="currentColor" opacity={0.25} />
+      </Schematic>
+    ),
+  },
+  {
+    value: 'numbered',
+    label: 'ממוספר',
+    preview: (
+      <Schematic>
+        <rect x="4" y="6" width="18" height="16" rx="2" fill="currentColor" opacity={0.2} />
+        <rect x="26" y="6" width="18" height="16" rx="2" fill="currentColor" opacity={0.2} />
+        <circle cx="9" cy="11" r="2.5" fill="currentColor" />
+        <circle cx="31" cy="11" r="2.5" fill="currentColor" />
+      </Schematic>
+    ),
+  },
+  {
+    value: 'gradient',
+    label: 'גרדיאנט',
+    preview: (
+      <Schematic>
+        <rect x="4" y="6" width="18" height="16" rx="2" fill="currentColor" opacity={0.5} />
+        <rect x="26" y="6" width="18" height="16" rx="2" fill="currentColor" opacity={0.5} />
+      </Schematic>
+    ),
+  },
+  {
+    value: 'outline',
+    label: 'מסגרת',
+    preview: (
+      <Schematic>
+        <rect x="4" y="6" width="18" height="16" rx="2" fill="none" stroke="currentColor" strokeWidth={1.5} opacity={0.6} />
+        <rect x="26" y="6" width="18" height="16" rx="2" fill="none" stroke="currentColor" strokeWidth={1.5} opacity={0.6} />
+      </Schematic>
+    ),
+  },
 ];
 
 export function CardsSettings({
@@ -46,7 +85,7 @@ export function CardsSettings({
   return (
     <>
       <FieldGroup title="תצוגה">
-        <SelectField
+        <VariantField
           label="וריאציה"
           value={content.variant}
           options={variantOptions}
@@ -135,12 +174,7 @@ function CardFields({
       />
 
       {media === 'icon' && (
-        <SelectField
-          label="אייקון"
-          value={item.icon}
-          options={courseIconNames.map((name) => ({ value: name, label: name }))}
-          onChange={(icon) => onPatch({ icon })}
-        />
+        <IconPickerField label="אייקון" value={item.icon} onChange={(icon) => onPatch({ icon })} />
       )}
 
       {media === 'image' && (

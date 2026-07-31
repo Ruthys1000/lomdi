@@ -10,6 +10,7 @@ import {
   TextField,
   type Option,
 } from '@/editor/controls/Field';
+import { Schematic, VariantField, type VariantOption } from '@/editor/controls/VariantField';
 import { AssetField } from '@/editor/Assets/AssetField';
 import { contrastRatio } from '@/renderer/theme/themeToCssVars';
 import type { HeroContent } from './content';
@@ -19,11 +20,55 @@ interface SettingsProps {
   onChange: (content: HeroContent) => void;
 }
 
-const variantOptions: Option<HeroContent['variant']>[] = [
-  { value: 'centered', label: 'ממורכז' },
-  { value: 'spotlight', label: 'זרקור' },
-  { value: 'panel', label: 'פאנל' },
-  { value: 'minimal', label: 'מינימלי' },
+/** שתי שורות ממורכזות — הגוף המשותף לרוב וריאנטי ההירו */
+const centeredLines = (
+  <>
+    <rect x={12} y={10} width={24} height={3.5} rx={1} fill="currentColor" opacity={0.45} />
+    <rect x={16} y={16} width={16} height={2.5} rx={1} fill="currentColor" opacity={0.3} />
+  </>
+);
+
+const variantOptions: VariantOption<HeroContent['variant']>[] = [
+  { value: 'centered', label: 'ממורכז', preview: <Schematic>{centeredLines}</Schematic> },
+  {
+    value: 'spotlight',
+    label: 'זרקור',
+    preview: (
+      <Schematic>
+        <circle cx={24} cy={13} r={11} fill="currentColor" opacity={0.12} />
+        {centeredLines}
+      </Schematic>
+    ),
+  },
+  {
+    value: 'panel',
+    label: 'פאנל',
+    preview: (
+      <Schematic>
+        <rect
+          x={4}
+          y={4}
+          width={40}
+          height={20}
+          rx={3}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.5}
+          opacity={0.4}
+        />
+        {centeredLines}
+      </Schematic>
+    ),
+  },
+  {
+    value: 'minimal',
+    label: 'מינימלי',
+    preview: (
+      <Schematic>
+        <rect x={8} y={12} width={26} height={3.5} rx={1} fill="currentColor" opacity={0.4} />
+      </Schematic>
+    ),
+  },
 ];
 
 const heightOptions: Option<HeroContent['height']>[] = [
@@ -58,7 +103,7 @@ export function HeroSettings({ block, onChange }: SettingsProps) {
   return (
     <>
       <FieldGroup title="סגנון">
-        <SelectField
+        <VariantField
           label="וריאציה"
           value={content.variant}
           options={variantOptions}
