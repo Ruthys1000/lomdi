@@ -22,8 +22,16 @@ export interface ExportSummary {
   /** נכסים שייארזו — כלומר אלה שבלוק כלשהו מפנה אליהם */
   assetCount: number;
   assetBytes: number;
+  /** אומדן גס למשקל ההורדה: מדיה + חבילת ריצה דחוסה + גופן (אם נארז) */
+  estimatedBytes: number;
   warnings: string[];
 }
+
+// אומדנים גסים למשקל הרכיבים הקבועים בארכיון הדחוס. app.js+styles מתכווצים
+// חזק ב-DEFLATE (gzip ~79KB), וקובצי ה-woff2 כבר דחוסים ולכן נשארים כמות
+// שהם. המספרים נועדו לתת סדר-גודל למשתמש, לא דיוק לבייט.
+const RUNTIME_COMPRESSED_BYTES = 80_000;
+const FONT_COMPRESSED_BYTES = 50_000;
 
 /** רשימה קריאה בעברית, עם קיצור אחרי שלושה פריטים */
 function joinNames(names: string[], limit = 3): string {
@@ -114,11 +122,17 @@ export function summarizeExport(course: Course, assets: AssetMeta[]): ExportSumm
     );
   }
 
+  const assetBytes = packed.reduce((sum, asset) => sum + asset.size, 0);
+  // הגופן נארז רק כשהערכה אינה משתמשת בגופן המערכת
+  const fontBytes =
+    course.theme.typography.fontFamily === 'system' ? 0 : FONT_COMPRESSED_BYTES;
+
   return {
     chapterCount: course.chapters.length,
     blockCount,
     assetCount: packed.length,
-    assetBytes: packed.reduce((sum, asset) => sum + asset.size, 0),
+    assetBytes,
+    estimatedBytes: assetBytes + RUNTIME_COMPRESSED_BYTES + fontBytes,
     warnings,
   };
 }

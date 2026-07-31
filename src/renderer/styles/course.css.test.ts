@@ -60,6 +60,33 @@ describe('course.css אינו נשען על ברירות מחדל של הסבי�
   });
 });
 
+describe('course.css מכין את הלומדה להדפסה', () => {
+  /** גוף כלל ה-@media print, בלי הערות */
+  const printBlock = (() => {
+    const match = cssWithoutComments.match(/@media\s+print\s*\{([\s\S]*)\}\s*$/);
+    return match ? match[1] : '';
+  })();
+
+  it('כולל כלל @media print', () => {
+    expect(printBlock).not.toBe('');
+  });
+
+  it('מסתיר את סרגלי הניווט ופסי ההתקדמות בהדפסה', () => {
+    for (const selector of ['.lc-chapter-nav', '.lc-progress', '.lc-skip-link']) {
+      expect(printBlock).toContain(selector);
+    }
+    expect(printBlock).toMatch(/display:\s*none/);
+  });
+
+  it('חושף את הבלוקים שהחשיפה ההדרגתית הסתירה', () => {
+    expect(printBlock).toMatch(/opacity:\s*1/);
+  });
+
+  it('מונע שבירת בלוק בין עמודים', () => {
+    expect(printBlock).toMatch(/break-inside:\s*avoid/);
+  });
+});
+
 describe('course.css מתאים גם ל-RTL וגם ל-LTR', () => {
   it('אינו משתמש במאפייני מיקום פיזיים שאינם מתהפכים', () => {
     // margin-left/right ו-padding-left/right לא מתהפכים לפי dir, ולכן

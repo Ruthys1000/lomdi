@@ -23,6 +23,8 @@ interface EditorState {
   collapsedChapterIds: string[];
   viewport: Viewport;
   isPreviewOpen: boolean;
+  /** גיליון קיצורי המקלדת. נפתח מכפתור העזרה בסרגל או ממקש `?` */
+  isHelpOpen: boolean;
   /**
    * האם הפאנלים הצדדיים פתוחים.
    *
@@ -48,6 +50,7 @@ interface EditorState {
   setChapterCollapsed: (chapterId: string, collapsed: boolean) => void;
   setViewport: (viewport: Viewport) => void;
   setPreviewOpen: (open: boolean) => void;
+  setHelpOpen: (open: boolean) => void;
   setOutlineOpen: (open: boolean) => void;
   setInspectorOpen: (open: boolean) => void;
   requestBlockDelete: (blockId: string) => void;
@@ -61,6 +64,7 @@ const initial = {
   collapsedChapterIds: [] as string[],
   viewport: 'desktop' as Viewport,
   isPreviewOpen: false,
+  isHelpOpen: false,
   isOutlineOpen: false,
   isInspectorOpen: false,
   blockPendingDelete: null as string | null,
@@ -97,6 +101,7 @@ export const useEditorStore = create<EditorState>((set) => ({
 
   setViewport: (viewport) => set({ viewport }),
   setPreviewOpen: (isPreviewOpen) => set({ isPreviewOpen }),
+  setHelpOpen: (isHelpOpen) => set({ isHelpOpen }),
 
   // פתיחת מגירה אחת סוגרת את השנייה: מתחת ל-lg שתיהן מכסות את הקנבס,
   // ושתיים פתוחות בו-זמנית משאירות את המשתמש בלי שום תצוגה של הלומדה

@@ -4,6 +4,7 @@ import {
   Download,
   Eye,
   FolderOpen,
+  HelpCircle,
   Images,
   Monitor,
   PanelLeft,
@@ -31,6 +32,7 @@ import { useHistoryState } from '../shortcuts/useHistoryState';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { IconButton } from '../ui/IconButton';
 import { SaveIndicator } from './SaveIndicator';
+import { ShortcutsHelp } from './ShortcutsHelp';
 
 const viewports: { id: Viewport; label: string; icon: typeof Monitor }[] = [
   { id: 'desktop', label: 'מחשב', icon: Monitor },
@@ -52,6 +54,8 @@ export function TopBar() {
   const viewport = useEditorStore((state) => state.viewport);
   const setViewport = useEditorStore((state) => state.setViewport);
   const setPreviewOpen = useEditorStore((state) => state.setPreviewOpen);
+  const isHelpOpen = useEditorStore((state) => state.isHelpOpen);
+  const setHelpOpen = useEditorStore((state) => state.setHelpOpen);
   const isOutlineOpen = useEditorStore((state) => state.isOutlineOpen);
   const isInspectorOpen = useEditorStore((state) => state.isInspectorOpen);
   const setOutlineOpen = useEditorStore((state) => state.setOutlineOpen);
@@ -210,6 +214,12 @@ export function TopBar() {
           label="ייצוא לומדה עצמאית (ZIP)"
           onClick={() => setExportOpen(true)}
         />
+        <IconButton
+          icon={HelpCircle}
+          label="קיצורי מקלדת ועזרה"
+          active={isHelpOpen}
+          onClick={() => setHelpOpen(true)}
+        />
       </div>
 
       <input
@@ -226,6 +236,7 @@ export function TopBar() {
 
       <AssetLibraryModal open={assetsOpen} onClose={() => setAssetsOpen(false)} />
       <ExportDialog open={exportOpen} onClose={() => setExportOpen(false)} />
+      <ShortcutsHelp open={isHelpOpen} onClose={() => setHelpOpen(false)} />
 
       <ConfirmDialog
         open={confirmLeave}

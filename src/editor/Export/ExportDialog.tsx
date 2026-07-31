@@ -141,6 +141,11 @@ export function ExportDialog({ open, onClose }: { open: boolean; onClose: () => 
    └─ README.txt`}
         </pre>
 
+        <p className="mt-2 text-xs text-fg-muted">
+          משקל משוער של ההורדה: <span dir="ltr">~{formatBytes(summary.estimatedBytes)}</span>{' '}
+          (כולל חבילת הריצה והגופן).
+        </p>
+
         {summary.warnings.length > 0 && (
           <ul className="mt-4 space-y-2 rounded-xl bg-warn-soft px-4 py-3 text-xs leading-relaxed text-warn">
             {summary.warnings.map((warning) => (
