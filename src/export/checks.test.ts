@@ -39,6 +39,8 @@ describe('סיכום הייצוא', () => {
     // asset-b אינו בשימוש ולכן אינו נספר במשקל התוצר
     expect(summary.assetCount).toBe(1);
     expect(summary.assetBytes).toBe(2048);
+    // האומדן כולל את מדיה + חבילת הריצה (+ גופן אם נארז), ולכן גדול מהמדיה לבדה
+    expect(summary.estimatedBytes).toBeGreaterThan(summary.assetBytes);
   });
 
   it('לומדה תקינה אינה מייצרת אזהרות', () => {

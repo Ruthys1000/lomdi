@@ -1,11 +1,51 @@
 import type { BlockOf } from '@/model/types';
-import { FieldGroup, SelectField, TextField, type Option } from '@/editor/controls/Field';
+import { FieldGroup, TextField } from '@/editor/controls/Field';
+import { Schematic, VariantField, type VariantOption } from '@/editor/controls/VariantField';
 import type { QuoteContent } from './content';
 
-const variantOptions: Option<QuoteContent['variant']>[] = [
-  { value: 'plain', label: 'פשוט' },
-  { value: 'emphasis', label: 'מודגש' },
-  { value: 'band', label: 'רצועה' },
+const quoteLines = (
+  <>
+    <rect x={12} y={11} width={28} height={2.5} rx={1} fill="currentColor" opacity={0.35} />
+    <rect x={12} y={16} width={20} height={2.5} rx={1} fill="currentColor" opacity={0.35} />
+  </>
+);
+
+const variantOptions: VariantOption<QuoteContent['variant']>[] = [
+  {
+    value: 'plain',
+    label: 'פשוט',
+    preview: (
+      <Schematic>
+        <text x={5} y={16} fontSize={12} fill="currentColor" opacity={0.4}>
+          &ldquo;
+        </text>
+        {quoteLines}
+      </Schematic>
+    ),
+  },
+  {
+    value: 'emphasis',
+    label: 'מודגש',
+    preview: (
+      <Schematic>
+        <text x={3} y={18} fontSize={18} fontWeight="bold" fill="currentColor" opacity={0.55}>
+          &ldquo;
+        </text>
+        {quoteLines}
+      </Schematic>
+    ),
+  },
+  {
+    value: 'band',
+    label: 'רצועה',
+    preview: (
+      <Schematic>
+        <rect x={2} y={6} width={44} height={16} rx={3} fill="currentColor" opacity={0.14} />
+        <rect x={42} y={6} width={2.5} height={16} fill="currentColor" opacity={0.5} />
+        {quoteLines}
+      </Schematic>
+    ),
+  },
 ];
 
 export function QuoteSettings({
@@ -20,10 +60,11 @@ export function QuoteSettings({
 
   return (
     <FieldGroup title="ציטוט">
-      <SelectField
+      <VariantField
         label="וריאציה"
         value={content.variant}
         options={variantOptions}
+        columns={3}
         onChange={(variant) => update({ variant })}
       />
       <TextField

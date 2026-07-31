@@ -80,6 +80,9 @@ export const navigationSchema = z.object({
   showProgress: z.boolean(),
   showChapterMenu: z.boolean(),
   showChapterNumber: z.boolean(),
+  // default(true) ממלא את השדה בלומדות שנשמרו לפני שהתווסף — כך אימות של
+  // קובץ ישן עובר בלי צורך במיגרציה, ולומדות חדשות נבנות עם המעקב דלוק
+  trackProgress: z.boolean().default(true),
   labels: z.object({
     next: z.string(),
     prev: z.string(),

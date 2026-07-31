@@ -70,6 +70,14 @@ export function CoursePanel({ course }: { course: Course }) {
             updateCourse({ navigation: { ...course.navigation, showChapterNumber } })
           }
         />
+        <SwitchField
+          label="מעקב התקדמות"
+          hint="חידוש המיקום האחרון, זכירת תשובות ומסך סיום — בתוצר ובתצוגה המקדימה."
+          checked={course.navigation.trackProgress}
+          onChange={(trackProgress) =>
+            updateCourse({ navigation: { ...course.navigation, trackProgress } })
+          }
+        />
         <p className="text-[11px] leading-relaxed text-fg-muted">
           מצב הניווט משפיע על התוצר ועל התצוגה המקדימה. בקנבס תמיד מוצג פרק אחד, לנוחות העריכה.
         </p>

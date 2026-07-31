@@ -30,9 +30,19 @@ export function useKeyboardShortcuts({ onSave, onDeleteBlock }: ShortcutHandlers
       const editing = isEditingText(event.target);
 
       if (event.key === 'Escape') {
-        const { isPreviewOpen, setPreviewOpen, clearSelection } = useEditorStore.getState();
-        if (isPreviewOpen) setPreviewOpen(false);
+        const { isPreviewOpen, setPreviewOpen, isHelpOpen, setHelpOpen, clearSelection } =
+          useEditorStore.getState();
+        if (isHelpOpen) setHelpOpen(false);
+        else if (isPreviewOpen) setPreviewOpen(false);
         else clearSelection();
+        return;
+      }
+
+      // `?` פותח את גיליון הקיצורים. מדלגים כשהפוקוס בתוך טקסט, כדי לא לחטוף
+      // תו שהמשתמש מקליד; `?` דורש Shift ולכן אין התנגשות עם מקש בודד.
+      if (event.key === '?' && !editing) {
+        event.preventDefault();
+        useEditorStore.getState().setHelpOpen(true);
         return;
       }
 

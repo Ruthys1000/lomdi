@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import type { Chapter, NavigationSettings } from '@/model/types';
-import { navIcons } from './icons';
+import { courseIcons, navIcons } from './icons';
 import { useRenderContext } from './RenderContext';
 
 interface ChapterNavigationProps {
@@ -9,6 +9,11 @@ interface ChapterNavigationProps {
   activeIndex: number;
   onNavigate: (index: number) => void;
   renderChapter: (chapter: Chapter, index: number) => React.ReactNode;
+  /**
+   * כשמסופק, הכפתור בפרק האחרון הופך ל"סיום" ומסמן את הלומדה כהושלמה
+   * (מעקב התקדמות פעיל). בלעדיו הכפתור מושבת בפרק האחרון כברירת המחדל.
+   */
+  onFinish?: () => void;
 }
 
 /**
@@ -24,6 +29,7 @@ export function ChapterNavigation({
   activeIndex,
   onNavigate,
   renderChapter,
+  onFinish,
 }: ChapterNavigationProps) {
   const { direction } = useRenderContext();
   const [isMenuOpen, setMenuOpen] = useState(false);
@@ -189,15 +195,22 @@ export function ChapterNavigation({
             {navigation.labels.prev}
           </button>
 
-          <button
-            type="button"
-            className="lc-button lc-button--primary"
-            onClick={() => goTo(activeIndex + 1)}
-            disabled={activeIndex >= total - 1}
-          >
-            {navigation.labels.next}
-            <NextIcon className="lc-icon" aria-hidden />
-          </button>
+          {activeIndex >= total - 1 && onFinish ? (
+            <button type="button" className="lc-button lc-button--primary" onClick={onFinish}>
+              סיום
+              <courseIcons.CircleCheck className="lc-icon" aria-hidden />
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="lc-button lc-button--primary"
+              onClick={() => goTo(activeIndex + 1)}
+              disabled={activeIndex >= total - 1}
+            >
+              {navigation.labels.next}
+              <NextIcon className="lc-icon" aria-hidden />
+            </button>
+          )}
         </div>
       </nav>
     </div>

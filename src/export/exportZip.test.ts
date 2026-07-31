@@ -186,14 +186,23 @@ describe('שם הקובץ ושם התיקייה', () => {
   const day = new Date('2026-07-25T09:00:00.000Z');
 
   it('הם ASCII ונגזרים מאותה נוסחה של קובץ הפרויקט', () => {
-    expect(exportFileName('לומדת בטיחות', day)).toBe('lomdi-2026-07-25.zip');
-    expect(exportFolderName('לומדת בטיחות', day)).toBe('lomdi-2026-07-25');
+    // כותרת עברית-בלבד מקבלת מבדיל hash קצר (ASCII) במקום slug ריק
+    expect(exportFileName('לומדת בטיחות', day)).toMatch(/^lomdi-[0-9a-z]{4}-2026-07-25\.zip$/);
+    expect(exportFolderName('לומדת בטיחות', day)).toMatch(/^lomdi-[0-9a-z]{4}-2026-07-25$/);
     expect(exportFileName('Safety 101 — מבוא', day)).toBe('lomdi-Safety-101-2026-07-25.zip');
+  });
+
+  it('כותרות עבריות שונות אינן דורסות זו את זו, ואותה כותרת יציבה', () => {
+    expect(exportFileName('לומדת בטיחות', day)).not.toBe(exportFileName('לומדת קליטה', day));
+    expect(exportFileName('לומדת בטיחות', day)).toBe(exportFileName('לומדת בטיחות', day));
   });
 
   it('שם התיקייה הוא שם הקובץ בלי הסיומת', () => {
     const title = 'Safety 101';
     expect(`${exportFolderName(title, day)}.zip`).toBe(exportFileName(title, day));
+    // גם לכותרת עברית-בלבד — ה-hash זהה בשני השמות
+    const hebrew = 'לומדת בטיחות';
+    expect(`${exportFolderName(hebrew, day)}.zip`).toBe(exportFileName(hebrew, day));
   });
 });
 

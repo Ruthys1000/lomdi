@@ -29,10 +29,31 @@ export function asciiSlug(title: string): string {
   );
 }
 
+/**
+ * טביעה קצרה ויציבה של הכותרת המלאה, ב-ASCII.
+ *
+ * כותרת עברית-בלבד מתרוקנת ב-`asciiSlug`, ואז שתי לומדות שונות שיוצאו
+ * באותו יום מקבלות את אותו שם בדיוק ודורסות זו את זו בתיקיית ההורדות.
+ * ה-hash הזה (variant של djb2) מבדיל ביניהן, ונשאר קבוע לאותה כותרת כדי
+ * שהורדה חוזרת לא תיצור שם חדש בכל פעם.
+ */
+export function titleHash(title: string): string {
+  let hash = 5381;
+  for (let i = 0; i < title.length; i++) {
+    hash = ((hash << 5) + hash + title.charCodeAt(i)) >>> 0;
+  }
+  return hash.toString(36).slice(0, 4).padStart(4, '0');
+}
+
 /** `lomdi-Safety-101-2026-07-25.zip` — הסיומת נמסרת שלמה, כולל הנקודה */
 export function datedFileName(title: string, extension: string, date = new Date()): string {
   const slug = asciiSlug(title);
   const day = date.toISOString().slice(0, 10);
+  const trimmed = title.trim();
+  // שלושה מצבים: slug תקין מבדיל בעצמו; כותרת עברית-בלבד (slug ריק אך יש
+  // תוכן) מקבלת hash כמבדיל, כדי ששתי לומדות לא ידרסו זו את זו; כותרת ריקה
+  // לגמרי נשארת תאריך-בלבד כברירת המחדל של "לומדה ללא שם".
+  const middle = slug ? `${slug}-` : trimmed ? `${titleHash(trimmed)}-` : '';
 
-  return `${PREFIX}-${slug ? `${slug}-` : ''}${day}${extension}`;
+  return `${PREFIX}-${middle}${day}${extension}`;
 }

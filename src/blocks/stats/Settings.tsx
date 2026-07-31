@@ -4,17 +4,51 @@ import {
   FieldGroup,
   FieldNote,
   SegmentedField,
-  SelectField,
   TextField,
   type Option,
 } from '@/editor/controls/Field';
+import { Schematic, VariantField, type VariantOption } from '@/editor/controls/VariantField';
 import { SubItemList } from '@/editor/controls/SubItemList';
 import { createStat, type StatItem, type StatsContent } from './content';
 
-const variantOptions: Option<StatsContent['variant']>[] = [
-  { value: 'plain', label: 'רגיל' },
-  { value: 'gradient', label: 'רצועת גרדיאנט' },
-  { value: 'cards', label: 'כרטיסים' },
+const variantOptions: VariantOption<StatsContent['variant']>[] = [
+  {
+    value: 'plain',
+    label: 'רגיל',
+    preview: (
+      <Schematic>
+        {[4, 19, 34].map((x) => (
+          <g key={x}>
+            <rect x={x} y={9} width={10} height={5} rx={1} fill="currentColor" opacity={0.45} />
+            <rect x={x + 2} y={16} width={6} height={2} rx={1} fill="currentColor" opacity={0.25} />
+          </g>
+        ))}
+      </Schematic>
+    ),
+  },
+  {
+    value: 'gradient',
+    label: 'רצועת גרדיאנט',
+    preview: (
+      <Schematic>
+        <rect x={2} y={6} width={44} height={16} rx={3} fill="currentColor" opacity={0.15} />
+        {[6, 21, 36].map((x) => (
+          <rect key={x} x={x} y={11} width={6} height={5} rx={1} fill="currentColor" opacity={0.5} />
+        ))}
+      </Schematic>
+    ),
+  },
+  {
+    value: 'cards',
+    label: 'כרטיסים',
+    preview: (
+      <Schematic>
+        {[3, 18, 33].map((x) => (
+          <rect key={x} x={x} y={7} width={12} height={14} rx={2} fill="currentColor" opacity={0.22} />
+        ))}
+      </Schematic>
+    ),
+  },
 ];
 
 const columnOptions: Option<'2' | '3' | '4'>[] = [
@@ -36,10 +70,11 @@ export function StatsSettings({
   return (
     <>
       <FieldGroup title="תצוגה">
-        <SelectField
+        <VariantField
           label="וריאציה"
           value={content.variant}
           options={variantOptions}
+          columns={3}
           onChange={(variant) => update({ variant })}
         />
         <SegmentedField

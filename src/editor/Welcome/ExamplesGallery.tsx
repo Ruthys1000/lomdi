@@ -71,14 +71,23 @@ function LivePreview({ result }: { result: TemplateResult }) {
   const boxRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.32);
 
-  // אובייקט-URL לכל נכס של הדוגמה, בלי לכתוב ל-IndexedDB. משוחררים ב-unmount.
-  const urls = useMemo(() => {
+  // אובייקט-URL לכל נכס של הדוגמה, בלי לכתוב ל-IndexedDB.
+  //
+  // היצירה והשחרור חיים באותו useEffect בכוונה: ב-StrictMode (פיתוח) React
+  // ממנטב פעמיים, וכשה-URLs נבנו ב-useMemo הריצה הכפולה שחררה אותם בעוד
+  // ה-memo כבר לא בונה אותם מחדש — מה שהותיר src ל-blob משוחרר ו-404
+  // בקונסולה. יצירה ב-effect עם state בונה מחדש בכל mount ונקייה משחרור כפול.
+  const [urls, setUrls] = useState<Map<string, string>>(() => new Map());
+
+  useEffect(() => {
     const map = new Map<string, string>();
     for (const asset of result.assets) map.set(asset.meta.id, URL.createObjectURL(asset.blob));
-    return map;
+    setUrls(map);
+    return () => {
+      map.forEach((url) => URL.revokeObjectURL(url));
+      setUrls(new Map());
+    };
   }, [result]);
-
-  useEffect(() => () => urls.forEach((url) => URL.revokeObjectURL(url)), [urls]);
 
   useLayoutEffect(() => {
     const box = boxRef.current;

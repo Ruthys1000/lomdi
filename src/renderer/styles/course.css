@@ -1722,3 +1722,74 @@
     grid-template-columns: 5fr 7fr;
   }
 }
+
+/* ═══════════════════════════ מסך סיום ═══════════════════════════
+   מופיע כשהלומד מסיים את הלומדה — במצב פרקים כמסך מלא, במצב גלילה כרצועה
+   בתחתית. הצבעים נגזרים ממשתני הערכה כמו שאר הבלוקים. */
+.lc-completion {
+  padding-block: calc(var(--lc-space-unit) * 8);
+  text-align: center;
+}
+.lc-completion__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 64px;
+  block-size: 64px;
+  border-radius: 999px;
+  background: var(--lc-gradient-soft);
+  color: var(--lc-color-primary);
+  margin-block-end: calc(var(--lc-space-unit) * 2);
+}
+.lc-completion__icon {
+  inline-size: 32px;
+  block-size: 32px;
+}
+.lc-completion__title {
+  font-size: 1.5em;
+  margin: 0 0 calc(var(--lc-space-unit) * 1.5);
+}
+.lc-completion__score {
+  color: var(--lc-color-text-muted);
+  margin: 0 0 calc(var(--lc-space-unit) * 3);
+}
+/* רצועת סיום במצב גלילה — קו הפרדה עדין מעל, כדי להיבדל מהפרק האחרון */
+.lc-scroll-mode .lc-completion {
+  margin-block-start: calc(var(--lc-space-unit) * 4);
+  border-block-start: 1px solid var(--lc-color-border);
+}
+
+/* ═══════════════════════════ הדפסה ═══════════════════════════
+   לומדה שמדפיסים היא מסמך, לא אפליקציה: הסרגלים הדביקים, פסי ההתקדמות
+   וקישור הדילוג אינם שייכים לנייר, והחשיפה ההדרגתית (opacity:0 עד גלילה)
+   הייתה מדפיסה עמודים ריקים. הכלל הזה הופך את התוצר לקריא בהדפסה ובשמירה
+   ל-PDF — בלי מאפיינים פיזיים, כדי לשמור על היפוך ה-RTL/LTR. */
+@media print {
+  .lc-skip-link,
+  .lc-chapter-bar,
+  .lc-chapter-nav,
+  .lc-progress,
+  .lc-reading-progress {
+    display: none !important;
+  }
+
+  /* כל בלוק נחשף — אחרת בלוקים שלא נגללו אליהם מודפסים ריקים */
+  .lc-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* מצב פרקים מרנדר פרק אחד בכל רגע; אין מה "לבטל דביקות" מעבר לכך */
+  .lc-chapter-body,
+  .lc-scroll-mode {
+    display: block;
+  }
+
+  /* לא לשבור בלוק, כרטיס או שאלה באמצע בין שני עמודים */
+  .lc-block-slot,
+  .lc-card,
+  .lc-quiz,
+  .lc-accordion__item {
+    break-inside: avoid;
+  }
+}

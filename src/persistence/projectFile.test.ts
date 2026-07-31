@@ -186,7 +186,8 @@ describe('שם קובץ ההורדה', () => {
   it('הוא ASCII בלבד — Chromium מוריד קובץ בשם download בלי סיומת אחרת', () => {
     const name = projectFileName('לומדת בטיחות', day);
 
-    expect(name).toBe('lomdi-2026-07-25.course.zip');
+    // כותרת עברית-בלבד מקבלת מבדיל hash קצר (ASCII) כדי שלא תדרוס קובץ אחר
+    expect(name).toMatch(/^lomdi-[0-9a-z]{4}-2026-07-25\.course\.zip$/);
     // הבדיקה המהותית: הסיומת שורדת, ולכן אפשר לפתוח את הקובץ בחזרה
     expect(name).toMatch(/^[ -~]+$/);
     expect(name.endsWith('.course.zip')).toBe(true);
