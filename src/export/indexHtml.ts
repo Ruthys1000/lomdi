@@ -87,12 +87,24 @@ body { min-block-size: 100vh; background: ${colors.background}; color: ${colors.
 }`;
 }
 
-export function buildIndexHtml(data: EmbeddedCourseData): string {
+export interface IndexHtmlOptions {
+  /**
+   * נתיבים לסקריפטים קלאסיים שנטענים **לפני** חבילת הריצה. משמש להזרקת
+   * מתאם ה-SCORM, שחייב לרשום את מאזין `lc:progress` לפני שהלומדה עולה
+   * ומתחילה לשדר. ריק בייצוא הרגיל — כך התוצר העצמאי נשאר בדיוק כפי שהיה.
+   */
+  preRuntimeScripts?: string[];
+}
+
+export function buildIndexHtml(data: EmbeddedCourseData, options: IndexHtmlOptions = {}): string {
   const { course } = data;
   const description = course.description || course.subtitle || '';
   // הגופן נטען לפני גיליון הלומדה: כך ה-@font-face מוכר כשהכללים שמשתמשים
   // בו נקראים, ואין רגע של טקסט בגופן ברירת המחדל שקופץ אחר כך
   const fontCss = fontCssPath(course.theme);
+  const preRuntime = (options.preRuntimeScripts ?? [])
+    .map((src) => `    <script src="${src}"></script>\n`)
+    .join('');
 
   return `<!doctype html>
 <html lang="${escapeHtml(course.language)}" dir="${course.direction}">
@@ -117,7 +129,7 @@ ${themeToCssVars(course.theme)}
     <script type="application/json" id="${COURSE_DATA_ELEMENT_ID}">${embedJson(data)}</script>
     <div id="lc-root"><p class="lc-loading">טוען את הלומדה…</p></div>
     <noscript>כדי לצפות בלומדה יש להפעיל JavaScript בדפדפן.</noscript>
-    <!-- סקריפט קלאסי ולא מודול: מודול לא ירוץ בפתיחה ישירה מ-file:// -->
+${preRuntime}    <!-- סקריפט קלאסי ולא מודול: מודול לא ירוץ בפתיחה ישירה מ-file:// -->
     <script src="${RUNTIME_SCRIPT}"></script>
   </body>
 </html>

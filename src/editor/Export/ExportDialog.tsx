@@ -3,11 +3,15 @@ import { AlertCircle, Download, FileArchive, X } from 'lucide-react';
 import { summarizeExport } from '@/export/checks';
 import { exportCourseZip } from '@/export/exportCourse';
 import { exportFileName, exportFolderName } from '@/export/exportZip';
+import { exportScormZip, scormFileName } from '@/export/scorm/exportScorm';
 import { formatBytes } from '@/persistence/assetNaming';
 import { useBackupStore } from '@/state/backupStore';
 import { useAssetStore } from '@/state/assetStore';
 import { useCourseStore } from '@/state/courseStore';
 import { toast } from '@/state/toastStore';
+import { SegmentedField } from '../controls/Field';
+
+type ExportFormat = 'standalone' | 'scorm';
 
 /**
  * חלון הייצוא (שלב 7).
@@ -30,6 +34,7 @@ export function ExportDialog({ open, onClose }: { open: boolean; onClose: () => 
 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [format, setFormat] = useState<ExportFormat>('standalone');
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -54,7 +59,7 @@ export function ExportDialog({ open, onClose }: { open: boolean; onClose: () => 
     setError(null);
 
     try {
-      const result = await exportCourseZip();
+      const result = format === 'scorm' ? await exportScormZip() : await exportCourseZip();
       // ייצוא לומדה מוציא את התוכן מהדפדפן — נחשב גיבוי לעניין התזכורת
       useBackupStore.getState().markBackedUp();
       toast(`הלומדה יוצאה — ${result.fileName}`, { tone: 'success' });
@@ -96,7 +101,9 @@ export function ExportDialog({ open, onClose }: { open: boolean; onClose: () => 
           <FileArchive className="size-4" aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
-          <h2 className="text-sm font-bold text-fg">ייצוא לומדה עצמאית</h2>
+          <h2 className="text-sm font-bold text-fg">
+            {format === 'scorm' ? 'ייצוא חבילת SCORM' : 'ייצוא לומדה עצמאית'}
+          </h2>
           <p className="truncate text-xs text-fg-muted">{course.title}</p>
         </div>
         <button
@@ -110,6 +117,18 @@ export function ExportDialog({ open, onClose }: { open: boolean; onClose: () => 
       </div>
 
       <div className="max-h-[70vh] overflow-y-auto px-5 py-4">
+        <div className="mb-4">
+          <SegmentedField
+            label="פורמט"
+            value={format}
+            options={[
+              { value: 'standalone', label: 'לומדה עצמאית' },
+              { value: 'scorm', label: 'חבילת SCORM' },
+            ]}
+            onChange={setFormat}
+          />
+        </div>
+
         <dl className="grid grid-cols-4 gap-2">
           {stats.map((stat) => (
             <div key={stat.label} className="rounded-xl bg-app px-3 py-2 text-center">
@@ -121,17 +140,40 @@ export function ExportDialog({ open, onClose }: { open: boolean; onClose: () => 
           ))}
         </dl>
 
-        <p className="mt-4 text-xs leading-relaxed text-fg-soft">
-          הארכיון מכיל תיקייה אחת עם <code dir="ltr">index.html</code>, חבילת הלומדה והנכסים.
-          פותחים את <code dir="ltr">index.html</code> בדאבל-קליק — בלי שרת, בלי התקנה ובלי חיבור
-          לאינטרנט.
-        </p>
+        {format === 'scorm' ? (
+          <>
+            <p className="mt-4 text-xs leading-relaxed text-fg-soft">
+              חבילת SCORM 1.2 להעלאה כפעילות <bdi dir="ltr">SCORM</bdi> ב-Moodle. הלומדה מדווחת
+              ל-LMS סטטוס השלמה וציון שאלות. אותה לומדה בדיוק — גם נפתחת לבד בדאבל-קליק בלי LMS.
+            </p>
 
-        <pre
-          dir="ltr"
-          className="mt-3 overflow-x-auto rounded-xl bg-app px-4 py-3 text-left text-[11px] leading-relaxed text-fg-muted"
-        >
-          {`${exportFileName(course.title)}
+            <pre
+              dir="ltr"
+              className="mt-3 overflow-x-auto rounded-xl bg-app px-4 py-3 text-left text-[11px] leading-relaxed text-fg-muted"
+            >
+              {`${scormFileName(course.title)}
+├─ imsmanifest.xml
+├─ index.html
+├─ scorm-adapter.js
+├─ runtime/app.js
+├─ runtime/styles.css
+├─ assets/…
+└─ content.json`}
+            </pre>
+          </>
+        ) : (
+          <>
+            <p className="mt-4 text-xs leading-relaxed text-fg-soft">
+              הארכיון מכיל תיקייה אחת עם <code dir="ltr">index.html</code>, חבילת הלומדה והנכסים.
+              פותחים את <code dir="ltr">index.html</code> בדאבל-קליק — בלי שרת, בלי התקנה ובלי חיבור
+              לאינטרנט.
+            </p>
+
+            <pre
+              dir="ltr"
+              className="mt-3 overflow-x-auto rounded-xl bg-app px-4 py-3 text-left text-[11px] leading-relaxed text-fg-muted"
+            >
+              {`${exportFileName(course.title)}
 └─ ${exportFolderName(course.title)}/
    ├─ index.html
    ├─ content.json
@@ -139,7 +181,9 @@ export function ExportDialog({ open, onClose }: { open: boolean; onClose: () => 
    ├─ runtime/styles.css
    ├─ assets/…
    └─ README.txt`}
-        </pre>
+            </pre>
+          </>
+        )}
 
         <p className="mt-2 text-xs text-fg-muted">
           משקל משוער של ההורדה: <span dir="ltr">~{formatBytes(summary.estimatedBytes)}</span>{' '}
