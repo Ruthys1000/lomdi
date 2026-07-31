@@ -1,7 +1,10 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, type ReactNode } from 'react';
 import type { Block, Chapter, Course } from '@/model/types';
 import { BlockRenderer } from './BlockRenderer';
 import { ChapterNavigation } from './ChapterNavigation';
+import { CompletionSummary } from './CompletionSummary';
+import { ProgressContext } from './progress/ProgressContext';
+import { useCourseProgress } from './progress/useCourseProgress';
 import { RenderContext, type RenderContextValue } from './RenderContext';
 import { ScrollNavigation } from './ScrollNavigation';
 import { useScrollReveal } from './scrollEffects';
@@ -47,8 +50,23 @@ export function CourseRenderer({
   renderBlockWrapper,
   renderEmptyChapter,
 }: CourseRendererProps) {
-  const [activeIndex, setActiveIndex] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
+
+  // מעקב התקדמות פעיל רק בתוצר ובתצוגה המקדימה (לא בקנבס העריכה) וכשהמחבר
+  // השאיר אותו דלוק. בעורך הוא כבוי, ולכן חידוש המיקום ומסך הסיום אינם
+  // מפריעים לעריכה.
+  const trackingEnabled = !isEditing && course.navigation.trackProgress;
+  const totalQuizzes = useMemo(
+    () =>
+      course.chapters.reduce(
+        (sum, chapter) => sum + chapter.blocks.filter((block) => block.type === 'quiz').length,
+        0,
+      ),
+    [course.chapters],
+  );
+  const progress = useCourseProgress(course.id, { enabled: trackingEnabled, totalQuizzes });
+  const activeIndex = progress.chapterIndex;
+  const setActiveIndex = progress.setChapterIndex;
 
   // חשיפה הדרגתית פעילה רק בתוצר ובתצוגה המקדימה — בקנבס העריכה התוכן
   // חייב להיות גלוי תמיד. revealKey מריץ מחדש כשמבנה התוכן משתנה.
@@ -82,7 +100,7 @@ export function CourseRenderer({
     if (activeIndex >= course.chapters.length) {
       setActiveIndex(Math.max(0, course.chapters.length - 1));
     }
-  }, [activeIndex, course.chapters.length]);
+  }, [activeIndex, course.chapters.length, setActiveIndex]);
 
   const nav = course.navigation;
   // המונה של מצב פרקים כבר בסרגל, ולכן ה-eyebrow "פרק N" בכותרת מיותר שם;
@@ -142,9 +160,15 @@ export function CourseRenderer({
 
   const chapterIndex = forcedChapterIndex ?? activeIndex;
   const useChapterMode = course.navigation.mode === 'chapters' && forcedChapterIndex === undefined;
+  const progressValue = useMemo(() => ({ reportQuiz: progress.reportQuiz }), [progress.reportQuiz]);
+
+  // במצב פרקים הסיום הוא מסך מלא שמחליף את סרגלי הניווט; במצב גלילה הוא
+  // רצועה בתחתית והלומדה נשארת גלויה מעליה
+  const showCompletionScreen = useChapterMode && trackingEnabled && progress.completed;
 
   return (
     <RenderContext value={ctx}>
+      <ProgressContext value={progressValue}>
       {/*
         בחירות עיצוב שאינן ניתנות לביטוי כערך יחיד של משתנה CSS — סגנון
         כותרות, כפתורים וכרטיסים — עוברות כמאפייני data ונתפסות ב-course.css
@@ -172,13 +196,25 @@ export function CourseRenderer({
           </a>
         )}
 
-        {useChapterMode ? (
+        {showCompletionScreen ? (
+          <main className="lc-chapter-body" id="lc-main" tabIndex={-1}>
+            <CompletionSummary
+              correctCount={progress.correctCount}
+              totalQuizzes={totalQuizzes}
+              onReview={() => {
+                progress.setCompleted(false);
+                setActiveIndex(0);
+              }}
+            />
+          </main>
+        ) : useChapterMode ? (
           <ChapterNavigation
             chapters={course.chapters}
             navigation={course.navigation}
             activeIndex={Math.min(activeIndex, Math.max(0, course.chapters.length - 1))}
             onNavigate={setActiveIndex}
             renderChapter={renderChapter}
+            onFinish={trackingEnabled ? () => progress.setCompleted(true) : undefined}
           />
         ) : forcedChapterIndex === undefined ? (
           <ScrollNavigation
@@ -186,6 +222,12 @@ export function CourseRenderer({
             renderChapter={renderChapter}
             showProgress={course.navigation.showProgress}
             rootRef={rootRef}
+            completion={
+              trackingEnabled ? (
+                <CompletionSummary correctCount={progress.correctCount} totalQuizzes={totalQuizzes} />
+              ) : undefined
+            }
+            onReachedEnd={trackingEnabled ? () => progress.setCompleted(true) : undefined}
           />
         ) : (
           <main className="lc-scroll-mode">
@@ -195,6 +237,7 @@ export function CourseRenderer({
           </main>
         )}
       </div>
+      </ProgressContext>
     </RenderContext>
   );
 }

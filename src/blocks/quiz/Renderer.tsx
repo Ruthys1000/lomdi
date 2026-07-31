@@ -1,6 +1,7 @@
 import { useId, useState } from 'react';
 import type { BlockOf } from '@/model/types';
 import { courseIcons } from '@/renderer/icons';
+import { useQuizReporter } from '@/renderer/progress/ProgressContext';
 import { useRenderContext } from '@/renderer/RenderContext';
 import type { QuizContent, QuizOption } from './content';
 
@@ -22,6 +23,7 @@ import type { QuizContent, QuizOption } from './content';
 export function QuizRenderer({ block }: { block: BlockOf<QuizContent> }) {
   const { content } = block;
   const { isEditing } = useRenderContext();
+  const reportQuiz = useQuizReporter();
   const groupId = useId();
 
   const [options] = useState(() =>
@@ -42,6 +44,13 @@ export function QuizRenderer({ block }: { block: BlockOf<QuizContent> }) {
     setSubmitted(false);
     setSelectedId(null);
     setSolutionShown(false);
+  };
+
+  // הגשה מדווחת את התוצאה למנגנון ההתקדמות (בתוצר בלבד). ריצה חוזרת אחרי
+  // retry מדווחת מחדש, כך שהציון משקף את הניסיון האחרון.
+  const submit = () => {
+    setSubmitted(true);
+    if (!isEditing) reportQuiz(block.id, isCorrect);
   };
 
   return (
@@ -91,7 +100,7 @@ export function QuizRenderer({ block }: { block: BlockOf<QuizContent> }) {
               type="button"
               className="lc-button lc-button--primary"
               disabled={!selectedId}
-              onClick={() => setSubmitted(true)}
+              onClick={submit}
             >
               {content.labels.submit}
             </button>

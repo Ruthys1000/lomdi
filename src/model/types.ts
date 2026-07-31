@@ -140,6 +140,11 @@ export interface NavigationSettings {
   showProgress: boolean;
   showChapterMenu: boolean;
   showChapterNumber: boolean;
+  /**
+   * מעקב התקדמות בצד הלומד: חידוש המיקום האחרון, זכירת תשובות ומסך סיום.
+   * נשמר ב-localStorage של הדפדפן, ולכן פעיל רק בתוצר ובתצוגה המקדימה.
+   */
+  trackProgress: boolean;
   labels: {
     next: string;
     prev: string;

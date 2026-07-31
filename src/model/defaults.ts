@@ -13,6 +13,7 @@ export const defaultNavigation: NavigationSettings = {
   showProgress: true,
   showChapterMenu: true,
   showChapterNumber: true,
+  trackProgress: true,
   labels: {
     next: 'הבא',
     prev: 'הקודם',

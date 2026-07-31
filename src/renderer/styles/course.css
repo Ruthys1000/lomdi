@@ -1723,6 +1723,42 @@
   }
 }
 
+/* ═══════════════════════════ מסך סיום ═══════════════════════════
+   מופיע כשהלומד מסיים את הלומדה — במצב פרקים כמסך מלא, במצב גלילה כרצועה
+   בתחתית. הצבעים נגזרים ממשתני הערכה כמו שאר הבלוקים. */
+.lc-completion {
+  padding-block: calc(var(--lc-space-unit) * 8);
+  text-align: center;
+}
+.lc-completion__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 64px;
+  block-size: 64px;
+  border-radius: 999px;
+  background: var(--lc-gradient-soft);
+  color: var(--lc-color-primary);
+  margin-block-end: calc(var(--lc-space-unit) * 2);
+}
+.lc-completion__icon {
+  inline-size: 32px;
+  block-size: 32px;
+}
+.lc-completion__title {
+  font-size: 1.5em;
+  margin: 0 0 calc(var(--lc-space-unit) * 1.5);
+}
+.lc-completion__score {
+  color: var(--lc-color-text-muted);
+  margin: 0 0 calc(var(--lc-space-unit) * 3);
+}
+/* רצועת סיום במצב גלילה — קו הפרדה עדין מעל, כדי להיבדל מהפרק האחרון */
+.lc-scroll-mode .lc-completion {
+  margin-block-start: calc(var(--lc-space-unit) * 4);
+  border-block-start: 1px solid var(--lc-color-border);
+}
+
 /* ═══════════════════════════ הדפסה ═══════════════════════════
    לומדה שמדפיסים היא מסמך, לא אפליקציה: הסרגלים הדביקים, פסי ההתקדמות
    וקישור הדילוג אינם שייכים לנייר, והחשיפה ההדרגתית (opacity:0 עד גלילה)
