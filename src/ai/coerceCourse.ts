@@ -1,6 +1,9 @@
 import type { ZodType, ZodTypeDef } from 'zod';
 import { getSharedBlockDefinition } from '@/blocks/registry.shared';
+import { createAccordionItem, type AccordionItem } from '@/blocks/accordion/content';
+import { createCard, type CardItem } from '@/blocks/cards/content';
 import type { QuizOption } from '@/blocks/quiz/content';
+import { createStat, type StatItem } from '@/blocks/stats/content';
 import { createBlockSettings, defaultNavigation } from '@/model/defaults';
 import { createChapter, createCourse } from '@/model/factory';
 import { createId } from '@/model/ids';
@@ -115,6 +118,54 @@ function repairQuiz(content: Record<string, unknown>, ctx: Ctx): void {
   content.options = options;
 }
 
+/**
+ * משחזר מערכי `items` בבלוקים cards/stats/accordion.
+ *
+ * הפריטים האלה נושאים שדות חובה שהמודל מושמט לפי הוראת הפרומפט (`id`, וגם
+ * `button`/`imageAssetId` בכרטיס). בלי תיקון, כשל אימות על פריט אחד גורם
+ * ל-`coerceAgainstSchema` לאפס את *כל* המערך לברירת מחדל — וכל התוכן שהמודל
+ * מילא נעלם. לכן, בדיוק כמו `repairQuiz`, בונים כאן כל פריט מחדש על גבי מפעל
+ * הפריט הקיים: השדות החסרים מתמלאים (עם id טרי וייחודי), והתוכן שהמודל נתן
+ * נשמר. רק שדות ידועים נשלפים מהפריט הגולמי כדי לא להזריק זבל.
+ */
+function repairItemArrays(type: string, content: Record<string, unknown>, ctx: Ctx): void {
+  if (!Array.isArray(content.items)) return;
+  const raw = content.items;
+
+  if (type === 'cards') {
+    content.items = raw.map((item): CardItem => {
+      const record = isRecord(item) ? item : {};
+      const overrides: Partial<CardItem> = {};
+      if (typeof record.icon === 'string') overrides.icon = record.icon;
+      if (typeof record.title === 'string') overrides.title = record.title;
+      if (typeof record.text === 'string') overrides.text = record.text;
+      if (typeof record.imageAssetId === 'string') overrides.imageAssetId = record.imageAssetId;
+      return createCard(overrides);
+    });
+  } else if (type === 'stats') {
+    content.items = raw.map((item): StatItem => {
+      const record = isRecord(item) ? item : {};
+      const overrides: Partial<StatItem> = {};
+      if (typeof record.value === 'string') overrides.value = record.value;
+      if (typeof record.label === 'string') overrides.label = record.label;
+      if (typeof record.sub === 'string') overrides.sub = record.sub;
+      return createStat(overrides);
+    });
+  } else if (type === 'accordion') {
+    content.items = raw.map((item): AccordionItem => {
+      const record = isRecord(item) ? item : {};
+      const overrides: Partial<AccordionItem> = {};
+      if (typeof record.title === 'string') overrides.title = record.title;
+      if (record.doc !== undefined) {
+        const { doc, changed } = sanitizeRichText(record.doc);
+        overrides.doc = doc;
+        if (changed) ctx.warnings.push('חלק מהעיצוב בפריט אקורדיון הושמט.');
+      }
+      return createAccordionItem(overrides);
+    });
+  }
+}
+
 const IMAGE_FIELD_BY_TYPE: Record<string, ImageField> = {
   image: 'assetId',
   textImage: 'imageAssetId',
@@ -175,6 +226,7 @@ function coerceBlock(raw: unknown, ctx: Ctx): Block | null {
   }
 
   if (type === 'quiz') repairQuiz(provided, ctx);
+  repairItemArrays(type, provided, ctx);
   extractImageIntent(id, type, provided, ctx);
 
   const { content, repaired } = coerceAgainstSchema(definition.schema, base, provided);

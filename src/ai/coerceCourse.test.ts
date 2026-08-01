@@ -177,6 +177,100 @@ describe('coerceGeneratedCourse', () => {
     expectValid(course);
   });
 
+  it('שומרת תוכן כרטיסים מה-AI גם בלי id/button', () => {
+    const { course } = coerceGeneratedCourse({
+      chapters: [
+        {
+          blocks: [
+            {
+              type: 'cards',
+              content: {
+                columns: 2,
+                items: [
+                  { icon: 'ShieldCheck', title: 'דיווח', text: 'מדווחים על מפגע.' },
+                  { icon: 'Flame', title: 'כיבוי אש', text: 'מכירים את המטפים.' },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    const content = course.chapters[0].blocks[0].content as {
+      items: { id: string; title: string; text: string; icon: string; button: unknown }[];
+    };
+    expect(content.items).toHaveLength(2);
+    expect(content.items.map((i) => i.title)).toEqual(['דיווח', 'כיבוי אש']);
+    expect(content.items[0].text).toBe('מדווחים על מפגע.');
+    expect(content.items[0].icon).toBe('ShieldCheck');
+    expect(content.items.every((i) => i.id && i.button)).toBe(true);
+    expect(new Set(content.items.map((i) => i.id)).size).toBe(2);
+    expectValid(course);
+  });
+
+  it('שומרת ערכי stats מה-AI גם בלי id', () => {
+    const { course } = coerceGeneratedCourse({
+      chapters: [
+        {
+          blocks: [
+            {
+              type: 'stats',
+              content: {
+                items: [
+                  { value: '+40%', label: 'שיפור', sub: 'בשנה האחרונה' },
+                  { value: '24/7', label: 'זמינות', sub: 'לאורך כל השבוע' },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    const content = course.chapters[0].blocks[0].content as {
+      items: { id: string; value: string; label: string }[];
+    };
+    expect(content.items.map((i) => i.value)).toEqual(['+40%', '24/7']);
+    expect(content.items.map((i) => i.label)).toEqual(['שיפור', 'זמינות']);
+    expect(content.items.every((i) => i.id)).toBe(true);
+    expectValid(course);
+  });
+
+  it('שומרת פריטי accordion מה-AI כולל ה-doc', () => {
+    const { course } = coerceGeneratedCourse({
+      chapters: [
+        {
+          blocks: [
+            {
+              type: 'accordion',
+              content: {
+                items: [
+                  {
+                    title: 'מה עושים?',
+                    doc: {
+                      type: 'doc',
+                      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'פונים לממונה.' }] }],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    const content = course.chapters[0].blocks[0].content as {
+      items: { id: string; title: string; doc: never }[];
+    };
+    expect(content.items).toHaveLength(1);
+    expect(content.items[0].title).toBe('מה עושים?');
+    expect(content.items[0].id).toBeTruthy();
+    expect(richTextToPlainText(content.items[0].doc)).toBe('פונים לממונה.');
+    expectValid(course);
+  });
+
   it('שולפת כוונת תמונה ומאפסת את הפניית הנכס', () => {
     const { course, imageIntents } = coerceGeneratedCourse({
       chapters: [{ blocks: [{ type: 'image', content: { query: 'משרד מודרני', alt: 'משרד' } }] }],
