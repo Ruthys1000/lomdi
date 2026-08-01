@@ -6,7 +6,6 @@ import type { TemplateResult } from '@/templates';
 import { APP_NAME, APP_VERSION } from '@/version';
 import { BuildingBlocks } from './BuildingBlocks';
 import { ExamplesGallery } from './ExamplesGallery';
-import { GeneratePanel } from './GeneratePanel';
 import { Hero } from './Hero';
 import { HowItWorks } from './HowItWorks';
 import { MyCoursesDrawer } from './MyCoursesDrawer';
@@ -86,7 +85,6 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
 
       {/* נחיתה אחת לכולם — מוצגת תמיד, גם אחרי שנבנו לומדות */}
       <Hero onBuild={() => startTemplate('blank')} />
-      <GeneratePanel />
       <HowItWorks />
       <ExamplesGallery onStart={onStart} />
       <BuildingBlocks />
@@ -143,7 +141,7 @@ function Header({ hasProjects, onOpenCourses }: HeaderProps) {
         </span>
         <div className="min-w-0">
           <h1 className="text-base font-bold tracking-tight text-shell-fg">{APP_NAME}</h1>
-          <p className="text-xs text-shell-muted">בונים לומדה, מקבלים אתר</p>
+          <p className="text-xs text-shell-muted">מטקסט ללומדה, עם AI</p>
         </div>
 
         {hasProjects && (
@@ -175,7 +173,7 @@ function Closer({ onBuild, loading, fileErrors, onPickFile }: CloserProps) {
       {/* CTA שקט אחד — לא רצועה גדולה; ניטרלי, כי הדף זהה לכל מבקר */}
       <div className="flex flex-wrap items-center justify-center gap-4 text-center">
         <p className="text-lg font-extrabold text-balance text-fg md:text-xl">
-          מוכנים? הלומדה שלכם במרחק בלוק אחד.
+          מוכנים? הלומדה שלכם במרחק הדבקה אחת.
         </p>
         <button
           type="button"
@@ -242,7 +240,7 @@ function ImportRow({
 function Footer() {
   return (
     <p className="mt-8 text-center text-xs text-fg-muted">
-      {APP_NAME} {APP_VERSION} · נשמר אצלכם בדפדפן. לא עולה לשום שרת.
+      {APP_NAME} {APP_VERSION} · העריכה נשמרת אצלכם בדפדפן.
     </p>
   );
 }
