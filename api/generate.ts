@@ -15,7 +15,11 @@ import Anthropic from '@anthropic-ai/sdk';
  * לעדכן גם כאן. הפלט ממילא עובר ריפוי סלחני (`importGeneratedCourse`) בצד הלקוח.
  */
 
-export const config = { maxDuration: 60 };
+// חלון ריצה מקסימלי. ב-60 שניות חטפנו FUNCTION_INVOCATION_TIMEOUT על לומדות
+// גדולות. בתוכנית בתשלום עם Fluid compute מותר עד 800 שניות — מגדירים את
+// התקרה המלאה כדי שטיימאוט לא יהיה תרחיש כישלון. מחייבים רק על זמן ריצה בפועל,
+// כך שתקרה גבוהה לא מייקרת בקשות שמסתיימות מהר.
+export const config = { maxDuration: 800 };
 
 const MAX_INPUT_CHARS = 20_000;
 
@@ -50,6 +54,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       model: 'claude-opus-5',
       max_tokens: 32_000,
       thinking: { type: 'adaptive' },
+      // effort high לאיכות מקסימלית. הזמן הארוך (maxDuration 800) מכסה את החשיבה
+      // הנוספת, כך שאין חשש טיימאוט.
+      output_config: { effort: 'high' },
       system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: `צור לומדה מהתוכן הבא:\n\n${text}` }],
     });
