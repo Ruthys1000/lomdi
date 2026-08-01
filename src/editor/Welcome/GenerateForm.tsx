@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Loader2, Sparkles } from 'lucide-react';
+import { ImageIcon, Loader2, Palette, Sparkles } from 'lucide-react';
 import { generateCourseFromText } from '@/ai/generateCourse';
 import { resolveImageIntents } from '@/ai/images';
-import { endpointImageResolver } from '@/ai/imageResolver';
+import { createGeneratedImageResolver, endpointImageResolver } from '@/ai/imageResolver';
 import { cn } from '@/lib/cn';
 import { openCourse } from '@/persistence/session';
 import { toast } from '@/state/toastStore';
@@ -12,9 +12,14 @@ import { useWakeLock } from './useWakeLock';
  * טופס היצירה מ‑AI — הדבקת תוכן → לומדה שלמה שנפתחת בעורך.
  *
  * הלוגיקה מנצלת את כל שכבת ה‑AI: הפונקציה המאובטחת מחזירה JSON גולמי,
- * `generateCourseFromText` מריצה אותו דרך הריפוי והליטוש, כוונות התמונה נופלות
- * בינתיים לאיורי מציב‑מקום (ה‑AI לתמונות יתחבר בהמשך), ו‑`openCourse` טוען
- * הכול לעורך — שינוי ה‑course ב‑store הוא שמחליף את מסך הפתיחה בעורך.
+ * `generateCourseFromText` מריצה אותו דרך הריפוי והליטוש, ואז כוונות התמונה
+ * נפתרות — או לצילומי סטוק (Pexels) או לאיורים שנוצרים ב‑AI לפי ה‑`visualStyle`
+ * של הלומדה — ו‑`openCourse` טוען הכול לעורך. שינוי ה‑course ב‑store הוא
+ * שמחליף את מסך הפתיחה בעורך.
+ *
+ * מקור התמונות הוא בחירה של המשתמש: "איורים ב‑AI" (ברירת מחדל) מייצר סט
+ * קוהרנטי ללומדה; "צילומי סטוק" חוזר ל‑Pexels. שני המסלולים נצרבים כ‑Blob,
+ * ולכן הלומדה המיוצאת נשארת אופליין בשני המקרים.
  *
  * `tone` קובע רק סגנון: `dark` לשילוב בתוך ה‑Hero הכהה, `light` לרקע בהיר.
  */
@@ -22,9 +27,14 @@ interface GenerateFormProps {
   tone?: 'dark' | 'light';
 }
 
+type ImageSource = 'ai' | 'stock';
+type Phase = 'writing' | 'illustrating';
+
 export function GenerateForm({ tone = 'light' }: GenerateFormProps) {
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [phase, setPhase] = useState<Phase>('writing');
+  const [imageSource, setImageSource] = useState<ImageSource>('ai');
   const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const dark = tone === 'dark';
@@ -46,18 +56,25 @@ export function GenerateForm({ tone = 'light' }: GenerateFormProps) {
     if (!trimmed || loading) return;
 
     setLoading(true);
+    setPhase('writing');
     setError(null);
 
     try {
-      const { course, imageIntents, warnings } = await generateCourseFromText(trimmed);
+      const { course, imageIntents, visualStyle, warnings } = await generateCourseFromText(trimmed);
 
-      // כל פתירת התמונות עוברת דרך /api/image (Pexels); משמיטים כתובות שהמודל
-      // אולי נתן כדי שלא נפנה לרשת חיצונית ישירות. כשל → איור מציב‑מקום.
+      // התמונות נפתרות אחרי שהטקסט מוכן — מסמנים שלב כדי שהחיווי יסביר את
+      // ההמתנה (יצירת איורים ב‑AI אורכת יותר מחיפוש סטוק).
+      setPhase('illustrating');
+
+      // משמיטים כתובות שהמודל אולי נתן כדי שלא נפנה לרשת חיצונית ישירות; כל
+      // תמונה נפתרת דרך ה‑endpoint שנבחר. כשל → איור מציב‑מקום.
       const intents = imageIntents.map((intent) => ({ ...intent, url: undefined }));
+      const resolver =
+        imageSource === 'ai' ? createGeneratedImageResolver(visualStyle) : endpointImageResolver;
       const { course: withImages, assets, providerError } = await resolveImageIntents(
         course,
         intents,
-        { resolver: endpointImageResolver },
+        { resolver },
       );
 
       // openCourse מחליף את מסך הפתיחה בעורך — הרכיב הזה יתפרק, ולכן אין setState אחריו
@@ -111,6 +128,56 @@ export function GenerateForm({ tone = 'light' }: GenerateFormProps) {
         )}
       />
 
+      <div className="mt-4">
+        <span
+          id="image-source-label"
+          className={cn('mb-2 block text-xs font-semibold', dark ? 'text-shell-muted' : 'text-fg-muted')}
+        >
+          מקור התמונות
+        </span>
+        <div
+          role="radiogroup"
+          aria-labelledby="image-source-label"
+          className={cn(
+            'inline-flex gap-1 rounded-xl border p-1',
+            dark ? 'border-shell-edge bg-shell' : 'border-edge-strong bg-app',
+          )}
+        >
+          {([
+            { id: 'ai', label: 'איורים ב‑AI', Icon: Palette },
+            { id: 'stock', label: 'צילומי סטוק', Icon: ImageIcon },
+          ] as const).map(({ id, label, Icon }) => {
+            const active = imageSource === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                role="radio"
+                aria-checked={active}
+                onClick={() => setImageSource(id)}
+                disabled={loading}
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition disabled:opacity-60',
+                  active
+                    ? 'bg-volt text-on-volt'
+                    : dark
+                      ? 'text-shell-muted hover:text-shell-fg'
+                      : 'text-fg-muted hover:text-fg',
+                )}
+              >
+                <Icon className="size-4" aria-hidden />
+                {label}
+              </button>
+            );
+          })}
+        </div>
+        <p className={cn('mt-1.5 text-xs', dark ? 'text-shell-muted' : 'text-fg-muted')}>
+          {imageSource === 'ai'
+            ? 'סט איורים ייחודי שנוצר ללומדה — קוהרנטי ותואם לערכה. איטי יותר מסטוק.'
+            : 'צילומי מלאי אמיתיים מ‑Pexels — מהיר יותר.'}
+        </p>
+      </div>
+
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <button
           type="button"
@@ -135,7 +202,8 @@ export function GenerateForm({ tone = 'light' }: GenerateFormProps) {
             aria-live="polite"
           >
             <Loader2 className="size-4 animate-spin" aria-hidden />
-            ה‑AI כותב את הלומדה — {elapsed > 0 ? `כבר ${elapsed} שניות…` : 'רגע…'}
+            {phase === 'writing' ? 'ה‑AI כותב את הלומדה' : 'ה‑AI מאייר את הלומדה'} —{' '}
+            {elapsed > 0 ? `כבר ${elapsed} שניות…` : 'רגע…'}
           </p>
         )}
       </div>

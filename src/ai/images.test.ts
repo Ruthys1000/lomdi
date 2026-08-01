@@ -86,6 +86,37 @@ describe('resolveImageIntents', () => {
     expect(result.warnings).toHaveLength(1);
   });
 
+  it('פותרת כמה כוונות במקביל ומצמידה כל תמונה לבלוק הנכון', async () => {
+    const course = coerceGeneratedCourse({
+      chapters: [
+        {
+          blocks: [
+            { type: 'image', content: { query: 'a' } },
+            { type: 'image', content: { query: 'b' } },
+            { type: 'image', content: { query: 'c' } },
+          ],
+        },
+      ],
+    });
+    const resolver = { resolve: vi.fn(async (q: string) => `/api/generate-image?prompt=${q}`) };
+    const importFromUrl = vi.fn(async (url: string) =>
+      ({ ok: true as const, meta: fakeMeta(`asset-${url.slice(-1)}`), blob: new Blob() }),
+    );
+
+    const result = await resolveImageIntents(course.course, course.imageIntents, {
+      resolver,
+      importFromUrl,
+      concurrency: 3,
+    });
+
+    expect(resolver.resolve).toHaveBeenCalledTimes(3);
+    const ids = result.course.chapters[0].blocks.map(
+      (b) => (b.content as { assetId: string }).assetId,
+    );
+    expect(ids).toEqual(['asset-a', 'asset-b', 'asset-c']);
+    expect(result.assets).toHaveLength(3);
+  });
+
   it('כשל אקציוני (500/502) מגדיר providerError', async () => {
     const { course, imageIntents } = courseWith({ query: 'משהו' });
     const importFromUrl = vi.fn(async () => ({

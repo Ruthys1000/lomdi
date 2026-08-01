@@ -24,7 +24,10 @@ export type { GenerateCourseOptions } from './generateCourse';
 export { readImageHint } from './imageIntent';
 export type { ImageField, ImageHint, ImageIntent } from './imageIntent';
 
-export { endpointImageResolver } from './imageResolver';
+export { endpointImageResolver, createGeneratedImageResolver } from './imageResolver';
+
+export { buildImagePrompt, coerceVisualStyle, defaultVisualStyle } from './visualStyle';
+export type { VisualStyle } from './visualStyle';
 
 export { resolveImageIntents, placeholderIllustration } from './images';
 export type {

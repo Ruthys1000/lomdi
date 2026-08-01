@@ -5,6 +5,7 @@ import { APP_NAME, APP_VERSION } from '@/version';
 import { coerceGeneratedCourse } from './coerceCourse';
 import type { ImageIntent } from './imageIntent';
 import { refineCourse } from './refineCourse';
+import type { VisualStyle } from './visualStyle';
 
 /**
  * הצינור המלא: JSON גולמי מ-AI → לומדה תקינה, ערוכה ומאומתת.
@@ -18,6 +19,8 @@ import { refineCourse } from './refineCourse';
 export interface GeneratedCourse {
   course: Course;
   imageIntents: ImageIntent[];
+  /** ה-art direction ללומדה — מוזרק ל-resolver כדי לייצר סט תמונות קוהרנטי */
+  visualStyle: VisualStyle;
   warnings: string[];
 }
 
@@ -51,5 +54,5 @@ export function importGeneratedCourse(
     warnings.push(`אימות סופי מצא בעיה בלתי צפויה: ${validation.errors[0]}`);
   }
 
-  return { course, imageIntents: coerced.imageIntents, warnings };
+  return { course, imageIntents: coerced.imageIntents, visualStyle: coerced.visualStyle, warnings };
 }

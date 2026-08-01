@@ -32,6 +32,12 @@ export interface ResolveImageIntentsOptions {
    * העברת `null` מכבה את הנפילה-חזרה ומשאירה את הבלוק בלי תמונה.
    */
   fallback?: ((intent: ImageIntent, theme: Theme) => ResolvedAsset | null) | null;
+  /**
+   * כמה תמונות לפתור במקביל. Pexels מהיר וסדרתי הספיק לו, אבל *יצירת* תמונה
+   * ב-AI אורכת שניות — סדרתי על כמה תמונות היה מצטבר לדקה+. מקבילות חוסמת
+   * מקצרת את ההמתנה בלי להציף את הספק. ברירת מחדל: 4.
+   */
+  concurrency?: number;
 }
 
 export interface ResolveImageIntentsResult {
@@ -87,6 +93,14 @@ export function placeholderIllustration(_intent: ImageIntent, theme: Theme): Res
   };
 }
 
+/** תוצאת פתירה של כוונה בודדת — נאספת במקביל ומורכבת בסדר לאחר מכן */
+interface IntentOutcome {
+  resolved: ResolvedAsset | null;
+  warnings: string[];
+  /** כשל אקציוני (מפתח/מכסה/ספק/רשת), להבדיל מ-404 השפיר */
+  providerError?: string;
+}
+
 export async function resolveImageIntents(
   course: Course,
   intents: ImageIntent[],
@@ -94,37 +108,61 @@ export async function resolveImageIntents(
 ): Promise<ResolveImageIntentsResult> {
   const importFromUrl = options.importFromUrl ?? importAssetFromUrl;
   const fallback = options.fallback === undefined ? placeholderIllustration : options.fallback;
+  const concurrency = Math.max(1, options.concurrency ?? 4);
 
   const next = structuredClone(course);
-  const assets: ResolvedAsset[] = [];
-  const warnings: string[] = [];
-  let providerError: string | undefined;
 
-  for (const intent of intents) {
-    const block = findBlock(next, intent.blockId);
-    if (!block) continue;
+  // רק כוונות שהבלוק שלהן קיים — כדי לא לפתור (ולא לשלם על יצירה) לחינם.
+  const pending = intents.filter((intent) => findBlock(next, intent.blockId));
 
-    let resolved: ResolvedAsset | null = null;
+  /** פותר כוונה אחת ללא תופעות לוואי — ההצמדה לבלוק נעשית אחר כך, בסדר. */
+  const resolveOne = async (intent: ImageIntent): Promise<IntentOutcome> => {
+    const outcome: IntentOutcome = { resolved: null, warnings: [] };
 
     const url =
       intent.url ?? (intent.query && options.resolver ? await options.resolver.resolve(intent.query) : null);
 
     if (url) {
       const result = await importFromUrl(url, intent.alt);
-      if (result.ok) resolved = { meta: result.meta, blob: result.blob };
+      if (result.ok) outcome.resolved = { meta: result.meta, blob: result.blob };
       else {
-        warnings.push(`תמונה לא נטענה: ${result.error}`);
+        outcome.warnings.push(`תמונה לא נטענה: ${result.error}`);
         // 404 = "לא נמצאה תמונה מתאימה" — שפיר, ה-placeholder מטפל בו בשקט.
         // כל כשל אחר (מפתח/מכסה/ספק/רשת) הוא אקציוני ומדווח בבירור למשתמש.
-        if (result.status !== 404 && !providerError) providerError = result.error;
+        if (result.status !== 404) outcome.providerError = result.error;
       }
     }
 
-    if (!resolved && fallback) resolved = fallback(intent, next.theme);
+    if (!outcome.resolved && fallback) outcome.resolved = fallback(intent, next.theme);
+    return outcome;
+  };
 
-    if (resolved) {
-      applyAsset(block, intent, resolved.meta);
-      assets.push(resolved);
+  // מקבילות חוסמת: עד `concurrency` פותרים רצים יחד, שולפים מתור משותף.
+  const outcomes: IntentOutcome[] = new Array(pending.length);
+  let cursor = 0;
+  const worker = async (): Promise<void> => {
+    for (let i = cursor++; i < pending.length; i = cursor++) {
+      outcomes[i] = await resolveOne(pending[i]);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(concurrency, pending.length) }, worker));
+
+  // הרכבה בסדר הכוונות — כך הפלט (אזהרות, providerError הראשון) דטרמיניסטי
+  // ובלתי תלוי בסדר סיום הקריאות המקביליות.
+  const assets: ResolvedAsset[] = [];
+  const warnings: string[] = [];
+  let providerError: string | undefined;
+
+  for (let i = 0; i < pending.length; i += 1) {
+    const outcome = outcomes[i];
+    warnings.push(...outcome.warnings);
+    if (!providerError && outcome.providerError) providerError = outcome.providerError;
+    if (outcome.resolved) {
+      const block = findBlock(next, pending[i].blockId);
+      if (block) {
+        applyAsset(block, pending[i], outcome.resolved.meta);
+        assets.push(outcome.resolved);
+      }
     }
   }
 

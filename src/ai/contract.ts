@@ -47,13 +47,20 @@ const GUIDE = `הנחיות ליצירת לומדה:
 - בלוק שאלה (quiz) חייב תשובה נכונה אחת בדיוק.
 - בחרו ערכת עיצוב לפי המזהה שלה בשדה "theme" (מחרוזת), למשל "clean" או "vivid".
 - תמונות: אל תמציאו assetId. בבלוקי image/textImage/hero כתבו בשדה "query" תיאור
-  קצר *באנגלית* לחיפוש תמונת סטוק (למשל "modern office team"), ו-"alt" בעברית
-  לנגישות — המערכת תפתור את ה-query לתמונה אמיתית.`;
+  קצר *באנגלית* לתמונה (למשל "modern office team"), ו-"alt" בעברית לנגישות —
+  המערכת תפתור את ה-query לתמונה אמיתית.
+- visualStyle (אובייקט עליון, אופציונלי): art direction אחד לכל הלומדה, כדי
+  שכל התמונות ייראו כסט מעוצב אחד. { artStyle (תיאור סגנון באנגלית), palette
+  (מערך צבעי hex), motif (מוטיב חוזר, אופציונלי) }.`;
 
 const EXAMPLE = {
   title: 'בטיחות במשרד',
   subtitle: 'לומדת מבוא קצרה',
   theme: 'clean',
+  visualStyle: {
+    artStyle: 'clean flat vector illustration, soft rounded shapes, no text',
+    palette: ['#2563eb', '#0ea5e9'],
+  },
   chapters: [
     {
       title: 'פתיחה',
