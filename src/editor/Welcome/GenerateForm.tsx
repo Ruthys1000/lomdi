@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import { generateCourseFromText } from '@/ai/generateCourse';
 import { resolveImageIntents } from '@/ai/images';
+import { endpointImageResolver } from '@/ai/imageResolver';
 import { cn } from '@/lib/cn';
 import { openCourse } from '@/persistence/session';
 import { toast } from '@/state/toastStore';
@@ -36,9 +37,12 @@ export function GenerateForm({ tone = 'light' }: GenerateFormProps) {
     try {
       const { course, imageIntents, warnings } = await generateCourseFromText(trimmed);
 
-      // בפרוסה הזו התמונות הן איורי מציב‑מקום; משמיטים כתובות כדי לא לפנות לרשת
+      // כל פתירת התמונות עוברת דרך /api/image (Pexels); משמיטים כתובות שהמודל
+      // אולי נתן כדי שלא נפנה לרשת חיצונית ישירות. כשל → איור מציב‑מקום.
       const intents = imageIntents.map((intent) => ({ ...intent, url: undefined }));
-      const { course: withImages, assets } = await resolveImageIntents(course, intents);
+      const { course: withImages, assets } = await resolveImageIntents(course, intents, {
+        resolver: endpointImageResolver,
+      });
 
       // openCourse מחליף את מסך הפתיחה בעורך — הרכיב הזה יתפרק, ולכן אין setState אחריו
       await openCourse(withImages, assets);

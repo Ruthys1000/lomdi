@@ -24,6 +24,8 @@ export type { GenerateCourseOptions } from './generateCourse';
 export { readImageHint } from './imageIntent';
 export type { ImageField, ImageHint, ImageIntent } from './imageIntent';
 
+export { endpointImageResolver } from './imageResolver';
+
 export { resolveImageIntents, placeholderIllustration } from './images';
 export type {
   ImageResolver,

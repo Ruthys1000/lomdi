@@ -227,12 +227,16 @@ lomdi-safety-2026-07-25.zip
   `importGeneratedCourse` (ריפוי + ליטוש + אימות), פותר כוונות תמונה לאיורי
   מציב‑מקום, ומעביר ל‑`openCourse`. שכבת ה‑AI כולה יושבת בצד העורך ולא נכנסת
   לחבילת ה‑runtime.
-- **`ANTHROPIC_API_KEY`** — נקבע ב‑Vercel → Project → Settings → Environment
-  Variables (Production + Preview), לעולם לא בריפו. לפיתוח מקומי: `.env`
-  (ב‑gitignore, ראה `.env.example`) והרצה עם `vercel dev`.
-- **תמונות** — Claude מייצר טקסט ולא תמונות. כרגע כוונות התמונה נופלות לאיורי
-  מציב‑מקום; חיבור ספק תמונות (ייתכן AI אחר) הוא צעד המשך שמתחבר ל‑
-  `ImageResolver` ב‑`src/ai/images.ts`.
+- **תמונות** (`api/image.ts`) — Claude מייצר תיאור תמונה (`query`), לא תמונה.
+  ה‑endpoint מחפש ב‑**Pexels**, מושך את בייטי התמונה בצד השרת, ומחזיר אותם
+  מאותו origin — כך `importAssetFromUrl` מטמיע אותם כ‑Blob ללא CORS, והלומדה
+  עובדת אופליין. הבחירה בספק חיה מאחורי ה‑`ImageResolver` (`src/ai/imageResolver.ts`);
+  החלפה ל‑AI‑generated בעתיד היא שינוי ב‑endpoint בלבד. בכל כשל (אין מפתח, אין
+  תוצאה) נופלים חזרה לאיורי מציב‑מקום.
+- **משתני סביבה** — `ANTHROPIC_API_KEY` (יצירה) ו‑`PEXELS_API_KEY` (תמונות)
+  נקבעים ב‑Vercel → Project → Settings → Environment Variables (Production +
+  Preview), לעולם לא בריפו. לפיתוח מקומי: `.env` (ב‑gitignore, ראה
+  `.env.example`) והרצה עם `vercel dev`.
 
 > **IndexedDB הוא לפי origin.** פרויקט שנשמר אוטומטית ב-`localhost` לא יופיע
 > בכתובת הפרוסה, ומכיוון שלכל preview deployment יש כתובת משלו — גם לא יעבור
@@ -271,8 +275,9 @@ src/
 - [ ] **שלב 9** — חיבור AI: יצירת לומדה מטקסט
   - [x] תשתית `src/ai/`: חוזה יצירה, שכבת ריפוי, ליטוש, תפר תמונות
   - [x] פרוסה אנכית: פונקציית `api/generate` מאובטחת + פאנל יצירה במסך הפתיחה
-  - [ ] דף בית AI-first (הפיכת היצירה ל-CTA הראשי) + קופי שיווקי
-  - [ ] ספק תמונות (AI/סטוק) שמתחבר ל-`ImageResolver`
+  - [x] דף בית AI-first (היצירה כ-CTA הראשי ב-Hero) + קופי שיווקי
+  - [x] ספק תמונות: Pexels דרך `ImageResolver` + `api/image`
+  - [ ] אופציה ל-AI-generated images (מאחורי אותו endpoint)
 
 ### איך שלב מתנהל
 
