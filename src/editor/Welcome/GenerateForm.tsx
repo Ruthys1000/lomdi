@@ -66,7 +66,9 @@ export function GenerateForm({ tone = 'light' }: GenerateFormProps) {
       // Pexels שגוי) כדי שהמשתמש יידע מה לתקן.
       if (imageWarnings.length) {
         const more = imageWarnings.length > 1 ? ` (ועוד ${imageWarnings.length - 1})` : '';
-        toast(`הלומדה נוצרה. ${imageWarnings[0]}${more}`, { tone: 'error' });
+        // durable: אחרי המתנה ארוכה קל לפספס טוסט של 4 שניות — כשל תמונות
+        // נשאר על המסך עד שהמשתמש סוגר, כדי שהסיבה לא תיעלם.
+        toast(`הלומדה נוצרה. ${imageWarnings[0]}${more}`, { tone: 'error', durable: true });
       } else {
         toast(
           warnings.length

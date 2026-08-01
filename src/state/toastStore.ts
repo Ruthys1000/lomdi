@@ -15,11 +15,16 @@ export interface Toast {
   tone: ToastTone;
   /** פעולת ביטול אופציונלית, למשל אחרי מחיקה */
   action?: { label: string; run: () => void };
+  /** true = נשאר עד סגירה ידנית. לכשלים שאסור שיתפספסו בזמן המתנה ארוכה */
+  durable?: boolean;
 }
 
 interface ToastState {
   toasts: Toast[];
-  show: (message: string, options?: { tone?: ToastTone; action?: Toast['action'] }) => void;
+  show: (
+    message: string,
+    options?: { tone?: ToastTone; action?: Toast['action']; durable?: boolean },
+  ) => void;
   dismiss: (id: number) => void;
 }
 
@@ -31,10 +36,17 @@ export const useToastStore = create<ToastState>((set, get) => ({
 
   show: (message, options = {}) => {
     const id = nextId++;
-    const toast: Toast = { id, message, tone: options.tone ?? 'info', action: options.action };
+    const toast: Toast = {
+      id,
+      message,
+      tone: options.tone ?? 'info',
+      action: options.action,
+      durable: options.durable,
+    };
 
     set((state) => ({ toasts: [...state.toasts, toast] }));
-    setTimeout(() => get().dismiss(id), DURATION);
+    // טוסט "עמיד" נשאר עד סגירה ידנית — לא מפעילים עליו טיימר.
+    if (!options.durable) setTimeout(() => get().dismiss(id), DURATION);
   },
 
   dismiss: (id) => set((state) => ({ toasts: state.toasts.filter((toast) => toast.id !== id) })),

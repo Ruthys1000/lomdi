@@ -283,6 +283,33 @@ describe('coerceGeneratedCourse', () => {
     expect((course.chapters[0].blocks[0].content as { alt: string }).alt).toBe('משרד');
   });
 
+  it('נופלת ל-alt כשאילתה כשהמודל השמיט query', () => {
+    const { imageIntents } = coerceGeneratedCourse({
+      chapters: [{ blocks: [{ type: 'image', content: { alt: 'משרד מודרני ומסודר' } }] }],
+    });
+
+    expect(imageIntents).toHaveLength(1);
+    expect(imageIntents[0].query).toBe('משרד מודרני ומסודר');
+    expect(imageIntents[0].alt).toBe('משרד מודרני ומסודר');
+  });
+
+  it('מעדיפה query מפורש על פני ה-alt', () => {
+    const { imageIntents } = coerceGeneratedCourse({
+      chapters: [{ blocks: [{ type: 'image', content: { query: 'modern office', alt: 'משרד' } }] }],
+    });
+
+    expect(imageIntents[0].query).toBe('modern office');
+  });
+
+  it('נופלת ל-caption כשאין query ואין alt', () => {
+    const { imageIntents } = coerceGeneratedCourse({
+      chapters: [{ blocks: [{ type: 'image', content: { caption: 'צוות עובד יחד' } }] }],
+    });
+
+    expect(imageIntents).toHaveLength(1);
+    expect(imageIntents[0].query).toBe('צוות עובד יחד');
+  });
+
   it('שולפת כוונת תמונה מ-hero רק כשהרקע תמונה', () => {
     const withImage = coerceGeneratedCourse({
       chapters: [{ blocks: [{ type: 'hero', content: { backgroundType: 'image', query: 'רקע' } }] }],
