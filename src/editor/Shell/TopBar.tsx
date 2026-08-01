@@ -126,13 +126,13 @@ export function TopBar() {
 
       {/* פותחי המגירות. מוסתרים מ-lg ומעלה, שם שני הפאנלים בגריד ממילא */}
       <div className="flex items-center gap-1 lg:hidden">
-        <IconButton
+        <IconButton tone="shell"
           icon={PanelRight}
           label="מבנה הלומדה"
           active={isOutlineOpen}
           onClick={() => setOutlineOpen(!isOutlineOpen)}
         />
-        <IconButton
+        <IconButton tone="shell"
           icon={PanelLeft}
           label="הגדרות"
           active={isInspectorOpen}
@@ -148,14 +148,14 @@ export function TopBar() {
           value={course.title}
           onChange={(event) => updateCourse({ title: event.target.value })}
           placeholder="שם הלומדה"
-          className="w-full min-w-24 max-w-xs truncate rounded-lg border border-transparent px-2 py-1.5 text-sm font-semibold hover:border-edge focus:border-volt-dim focus:bg-panel focus:outline-none"
+          className="w-full min-w-24 max-w-xs truncate rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-sm font-semibold text-shell-fg placeholder:text-shell-muted hover:border-shell-edge focus:border-volt focus:bg-shell-2 focus:outline-none"
         />
       </label>
 
       <SaveIndicator />
 
       <div className="flex items-center gap-1">
-        <IconButton
+        <IconButton tone="shell"
           icon={Undo2}
           label="ביטול (Ctrl+Z)"
           disabled={!canUndo}
@@ -164,7 +164,7 @@ export function TopBar() {
             toast('הפעולה בוטלה');
           }}
         />
-        <IconButton
+        <IconButton tone="shell"
           icon={Redo2}
           label="ביצוע מחדש (Ctrl+Shift+Z)"
           disabled={!canRedo}
@@ -183,7 +183,7 @@ export function TopBar() {
         aria-label="תצוגה לפי מכשיר"
       >
         {viewports.map(({ id, label, icon }) => (
-          <IconButton
+          <IconButton tone="shell"
             key={id}
             icon={icon}
             label={label}
@@ -196,25 +196,25 @@ export function TopBar() {
       <div className="mx-1 h-6 w-px bg-shell-edge" />
 
       <div className="flex items-center gap-1">
-        <IconButton icon={Images} label="ספריית הנכסים" onClick={() => setAssetsOpen(true)} />
-        <IconButton icon={Eye} label="תצוגה מקדימה" onClick={() => setPreviewOpen(true)} />
-        <IconButton
+        <IconButton tone="shell" icon={Images} label="ספריית הנכסים" onClick={() => setAssetsOpen(true)} />
+        <IconButton tone="shell" icon={Eye} label="תצוגה מקדימה" onClick={() => setPreviewOpen(true)} />
+        <IconButton tone="shell"
           icon={Save}
           label="שמירת קובץ פרויקט (‎.course.zip‎)"
           disabled={downloading}
           onClick={() => void handleDownload()}
         />
-        <IconButton
+        <IconButton tone="shell"
           icon={FolderOpen}
           label="פתיחת קובץ פרויקט"
           onClick={() => fileInputRef.current?.click()}
         />
-        <IconButton
+        <IconButton tone="shell"
           icon={Download}
           label="ייצוא לומדה עצמאית (ZIP)"
           onClick={() => setExportOpen(true)}
         />
-        <IconButton
+        <IconButton tone="shell"
           icon={HelpCircle}
           label="קיצורי מקלדת ועזרה"
           active={isHelpOpen}

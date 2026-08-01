@@ -6,6 +6,7 @@ import { toast } from '@/state/toastStore';
 import { EditorCanvas } from '../Canvas/EditorCanvas';
 import { InspectorPanel } from '../Inspector/InspectorPanel';
 import { OutlinePanel } from '../Outline/OutlinePanel';
+import { useBackClose } from '../shortcuts/useBackClose';
 import { useKeyboardShortcuts } from '../shortcuts/useKeyboardShortcuts';
 import { TopBar } from './TopBar';
 import { useBackupReminder } from './useBackupReminder';
@@ -84,6 +85,10 @@ function Drawer({
   onClose: () => void;
   children: ReactNode;
 }) {
+  // מתחת ל-lg הפאנל הוא מגירה מעל הקנבס — "חזרה" סוגר אותה במקום לצאת מהאתר.
+  // מעל lg הוא בגריד ו-open תמיד false, כך שהאפקט לא מופעל.
+  useBackClose(open, onClose);
+
   return (
     <>
       {open && (

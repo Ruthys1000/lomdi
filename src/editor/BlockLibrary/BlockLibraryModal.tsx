@@ -3,6 +3,7 @@ import { Search, X } from 'lucide-react';
 import { editorBlockList, type EditorBlockDefinition } from '@/blocks/registry.editor';
 import type { BlockCategory } from '@/blocks/registry.shared';
 import { cn } from '@/lib/cn';
+import { useBackClose } from '../shortcuts/useBackClose';
 
 interface BlockLibraryModalProps {
   open: boolean;
@@ -31,6 +32,9 @@ const isAvailable = (definition: EditorBlockDefinition) =>
 export function BlockLibraryModal({ open, onClose, onPick }: BlockLibraryModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [query, setQuery] = useState('');
+
+  // "חזרה" של הדפדפן סוגר את הספרייה במקום לצאת מהאתר
+  useBackClose(open, onClose);
   const [category, setCategory] = useState<BlockCategory | 'all'>('all');
 
   useEffect(() => {

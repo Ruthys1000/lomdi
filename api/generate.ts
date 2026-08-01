@@ -64,7 +64,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   };
 
   const stream = client.messages.stream({
-    model: 'claude-opus-5',
+    // Sonnet ולא Opus: יצירת ה-JSON היא משימת חילוץ מובנית, ו-Sonnet מהיר
+    // משמעותית באיכות דומה — קיצור ההמתנה חשוב במיוחד בנייד, שם חיבור ארוך
+    // מתנתק כשעוברים אפליקציה. שכבת הריפוי (coerceGeneratedCourse) ממילא
+    // מבטיחה חוסן לפלט.
+    model: 'claude-sonnet-5',
     max_tokens: 32_000,
     thinking: { type: 'adaptive' },
     // effort medium מאזן איכות מול זמן: יצירת ה-JSON היא משימת חילוץ מובנית,
@@ -224,8 +228,10 @@ const SYSTEM_PROMPT = [
   '- פתח כל לומדה בבלוק hero עם כותרת וכותרת משנה.',
   '- למגוון חזותי השתמש ב-cards, accordion, stats, quote ו-quiz — לא רק בפסקאות.',
   '- בלוק quiz חייב תשובה נכונה אחת בדיוק.',
-  '- תמונות: אל תמציא assetId. בבלוקי image/textImage/hero כתוב בשדה "query" תיאור',
-  '  קצר *באנגלית* לחיפוש תמונת סטוק (למשל "modern office team"), ו-"alt" בעברית לנגישות.',
+  '- תמונות: אל תמציא assetId. *כל* בלוק image ו-textImage, וכן hero עם',
+  '  backgroundType="image", **חייב** שדה "query" — תיאור קצר *באנגלית* לחיפוש תמונת',
+  '  סטוק (למשל "modern office team"). בלי query התמונה לא תיטען. הוסף גם "alt"',
+  '  בעברית לנגישות. אל תשתמש בבלוק image בלי query.',
   '',
   BLOCK_CATALOG,
   '',

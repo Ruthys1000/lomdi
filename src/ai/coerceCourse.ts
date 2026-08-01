@@ -189,8 +189,17 @@ function extractImageIntent(
   content[field] = '';
   if (typeof content.alt === 'string' && hint?.alt) content.alt = hint.alt;
 
-  if (hint && (hint.url || hint.query)) {
-    ctx.intents.push({ blockId, field, ...hint });
+  // fallback לשאילתה: אם המודל השמיט query (וגם אין url), משתמשים בטקסט המתאר
+  // שכן קיים — alt או caption — כדי שבלוק תמונה לא יישאר אילם רק בגלל השמטה.
+  const caption = typeof content.caption === 'string' ? content.caption.trim() : '';
+  const query = hint?.query ?? hint?.alt ?? (caption || undefined);
+
+  if (hint?.url || query) {
+    const intent: ImageIntent = { blockId, field };
+    if (hint?.url) intent.url = hint.url;
+    if (query) intent.query = query;
+    if (hint?.alt) intent.alt = hint.alt;
+    ctx.intents.push(intent);
   }
 }
 

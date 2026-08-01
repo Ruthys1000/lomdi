@@ -6,6 +6,7 @@ import { endpointImageResolver } from '@/ai/imageResolver';
 import { cn } from '@/lib/cn';
 import { openCourse } from '@/persistence/session';
 import { toast } from '@/state/toastStore';
+import { useWakeLock } from './useWakeLock';
 
 /**
  * טופס היצירה מ‑AI — הדבקת תוכן → לומדה שלמה שנפתחת בעורך.
@@ -27,6 +28,9 @@ export function GenerateForm({ tone = 'light' }: GenerateFormProps) {
   const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const dark = tone === 'dark';
+
+  // משאיר את המסך דולק בזמן היצירה — נעילת מסך בנייד מנתקת את ה-stream.
+  useWakeLock(loading);
 
   // מונה שניות חי בזמן היצירה — כדי שההמתנה הארוכה תיראה פעילה, לא תקועה.
   useEffect(() => {
@@ -66,7 +70,9 @@ export function GenerateForm({ tone = 'light' }: GenerateFormProps) {
       // Pexels שגוי) כדי שהמשתמש יידע מה לתקן.
       if (imageWarnings.length) {
         const more = imageWarnings.length > 1 ? ` (ועוד ${imageWarnings.length - 1})` : '';
-        toast(`הלומדה נוצרה. ${imageWarnings[0]}${more}`, { tone: 'error' });
+        // durable: אחרי המתנה ארוכה קל לפספס טוסט של 4 שניות — כשל תמונות
+        // נשאר על המסך עד שהמשתמש סוגר, כדי שהסיבה לא תיעלם.
+        toast(`הלומדה נוצרה. ${imageWarnings[0]}${more}`, { tone: 'error', durable: true });
       } else {
         toast(
           warnings.length
@@ -135,6 +141,15 @@ export function GenerateForm({ tone = 'light' }: GenerateFormProps) {
           </p>
         )}
       </div>
+
+      {loading && (
+        <p
+          className={cn('mt-3 text-xs', dark ? 'text-shell-muted' : 'text-fg-muted')}
+          role="note"
+        >
+          היצירה עשויה להימשך עד כדקה. כדאי להשאיר את המסך פתוח — יציאה מהמסך עלולה לנתק.
+        </p>
+      )}
 
       {error && (
         <p className="mt-4 rounded-xl bg-warn-soft px-4 py-3 text-sm leading-relaxed text-warn" role="alert">

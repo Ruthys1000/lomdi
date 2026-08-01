@@ -10,6 +10,7 @@ import { useAssetStore } from '@/state/assetStore';
 import { useCourseStore } from '@/state/courseStore';
 import { toast } from '@/state/toastStore';
 import { SegmentedField } from '../controls/Field';
+import { useBackClose } from '../shortcuts/useBackClose';
 
 type ExportFormat = 'standalone' | 'scorm';
 
@@ -28,6 +29,9 @@ type ExportFormat = 'standalone' | 'scorm';
  */
 export function ExportDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+
+  // "חזרה" של הדפדפן סוגר את החלון במקום לצאת מהאתר
+  useBackClose(open, onClose);
 
   const course = useCourseStore((state) => state.course);
   const assets = useAssetStore((state) => state.assets);

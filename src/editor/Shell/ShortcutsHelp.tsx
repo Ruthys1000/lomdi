@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useBackClose } from '../shortcuts/useBackClose';
 
 /**
  * גיליון קיצורי המקלדת.
@@ -24,6 +25,9 @@ const shortcuts: { keys: string; action: string }[] = [
 
 export function ShortcutsHelp({ open, onClose }: ShortcutsHelpProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+
+  // "חזרה" של הדפדפן סוגר את החלון במקום לצאת מהאתר
+  useBackClose(open, onClose);
 
   useEffect(() => {
     const dialog = dialogRef.current;
