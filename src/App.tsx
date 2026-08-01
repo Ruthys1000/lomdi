@@ -1,8 +1,9 @@
-import { openCourse } from './persistence/session';
+import { closeToWelcome, openCourse } from './persistence/session';
 import type { TemplateResult } from './templates';
 import { PreviewOverlay } from './editor/Preview/PreviewOverlay';
 import { AppErrorBoundary } from './editor/Shell/AppErrorBoundary';
 import { EditorLayout } from './editor/Shell/EditorLayout';
+import { useBackClose } from './editor/shortcuts/useBackClose';
 import { ToastHost } from './editor/ui/ToastHost';
 import { WelcomeScreen } from './editor/Welcome/WelcomeScreen';
 
@@ -16,6 +17,11 @@ import { useCourseStore } from './state/courseStore';
  */
 export function App() {
   const course = useCourseStore((state) => state.course);
+
+  // "חזרה" של הדפדפן מהעורך חוזרת לדף הבית (שומרת קודם), במקום לצאת מהאתר.
+  // כשמודאל/תצוגה מקדימה פתוחים הם דחפו רשומה משלהם, ולכן "חזרה" סוגרת אותם
+  // קודם (LIFO) ורק אז את העורך.
+  useBackClose(Boolean(course), () => void closeToWelcome());
 
   const handleStart = ({ course: newCourse, assets }: TemplateResult) =>
     void openCourse(newCourse, assets);

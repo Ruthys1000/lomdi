@@ -9,6 +9,7 @@ import { importAssetFile } from '@/persistence/importAsset';
 import { useAssetStore } from '@/state/assetStore';
 import { useCourseStore } from '@/state/courseStore';
 import { toast } from '@/state/toastStore';
+import { useBackClose } from '../shortcuts/useBackClose';
 
 interface AssetLibraryModalProps {
   open: boolean;
@@ -43,6 +44,9 @@ const acceptFor = (kind?: AssetKind) =>
  */
 export function AssetLibraryModal({ open, onClose, onPick, kind }: AssetLibraryModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+
+  // "חזרה" של הדפדפן סוגר את הספרייה במקום לצאת מהאתר
+  useBackClose(open, onClose);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const course = useCourseStore((state) => state.course);

@@ -4,6 +4,7 @@ import { CourseRenderer } from '@/renderer/CourseRenderer';
 import { useCourseStore } from '@/state/courseStore';
 import { useEditorStore, viewportWidths, type Viewport } from '@/state/editorStore';
 import { useAssetUrlResolver } from '../Assets/useAssetUrlResolver';
+import { useBackClose } from '../shortcuts/useBackClose';
 import { IconButton } from '../ui/IconButton';
 
 const devices: { id: Viewport; label: string; icon: typeof Monitor }[] = [
@@ -27,6 +28,9 @@ export function PreviewOverlay() {
   const setViewport = useEditorStore((state) => state.setViewport);
 
   const resolveAssetUrl = useAssetUrlResolver();
+
+  // "חזרה" של הדפדפן סוגר את התצוגה המקדימה במקום לצאת מהאתר
+  useBackClose(isOpen, () => setPreviewOpen(false));
 
   useEffect(() => {
     if (!isOpen) return;
@@ -69,7 +73,12 @@ export function PreviewOverlay() {
           ))}
         </div>
 
-        <IconButton icon={X} label="סגירת התצוגה המקדימה" onClick={() => setPreviewOpen(false)}>
+        <IconButton
+          tone="shell"
+          icon={X}
+          label="סגירת התצוגה המקדימה"
+          onClick={() => setPreviewOpen(false)}
+        >
           סגירה
         </IconButton>
       </div>
