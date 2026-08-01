@@ -11,3 +11,9 @@ coverage
 # תוצרי build — נבנים מהמקור, לא נשמרים בגיט
 public/runtime/
 public/fonts/
+
+# סודות — מפתח ה-AI לפיתוח מקומי. בפרודקשן נקבע במשתני הסביבה של Vercel
+.env
+.env.*
+!.env.example
+.vercel

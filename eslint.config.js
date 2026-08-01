@@ -81,6 +81,12 @@ export default tseslint.config(
     languageOptions: { globals: globals.node },
   },
 
+  // פונקציות ה-serverless של Vercel רצות ב-Node, לא בדפדפן
+  {
+    files: ['api/**/*.ts'],
+    languageOptions: { globals: globals.node },
+  },
+
   // בדיקות
   {
     files: ['src/**/*.test.{ts,tsx}', 'src/test/**/*.{ts,tsx}'],

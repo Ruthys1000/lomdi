@@ -6,6 +6,7 @@ import type { TemplateResult } from '@/templates';
 import { APP_NAME, APP_VERSION } from '@/version';
 import { BuildingBlocks } from './BuildingBlocks';
 import { ExamplesGallery } from './ExamplesGallery';
+import { GeneratePanel } from './GeneratePanel';
 import { Hero } from './Hero';
 import { HowItWorks } from './HowItWorks';
 import { MyCoursesDrawer } from './MyCoursesDrawer';
@@ -85,6 +86,7 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
 
       {/* נחיתה אחת לכולם — מוצגת תמיד, גם אחרי שנבנו לומדות */}
       <Hero onBuild={() => startTemplate('blank')} />
+      <GeneratePanel />
       <HowItWorks />
       <ExamplesGallery onStart={onStart} />
       <BuildingBlocks />

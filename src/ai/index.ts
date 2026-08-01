@@ -18,6 +18,9 @@ export type { RefineResult } from './refineCourse';
 export { importGeneratedCourse } from './importGenerated';
 export type { GeneratedCourse, ImportGeneratedOptions } from './importGenerated';
 
+export { generateCourseFromText } from './generateCourse';
+export type { GenerateCourseOptions } from './generateCourse';
+
 export { readImageHint } from './imageIntent';
 export type { ImageField, ImageHint, ImageIntent } from './imageIntent';
 
