@@ -70,4 +70,33 @@ describe('resolveImageIntents', () => {
 
     expect(result.warnings.some((w) => w.includes('404'))).toBe(true);
   });
+
+  it('כשל 404 שפיר אינו מגדיר providerError (רק אזהרה)', async () => {
+    const { course, imageIntents } = courseWith({ query: 'משהו' });
+    const importFromUrl = vi.fn(async () => ({
+      ok: false as const,
+      error: 'לא נמצאה תמונה מתאימה.',
+      status: 404,
+    }));
+    const resolver = { resolve: vi.fn(async () => '/api/image?q=x') };
+
+    const result = await resolveImageIntents(course, imageIntents, { importFromUrl, resolver });
+
+    expect(result.providerError).toBeUndefined();
+    expect(result.warnings).toHaveLength(1);
+  });
+
+  it('כשל אקציוני (500/502) מגדיר providerError', async () => {
+    const { course, imageIntents } = courseWith({ query: 'משהו' });
+    const importFromUrl = vi.fn(async () => ({
+      ok: false as const,
+      error: 'ספק התמונות לא הוגדר בשרת.',
+      status: 500,
+    }));
+    const resolver = { resolve: vi.fn(async () => '/api/image?q=x') };
+
+    const result = await resolveImageIntents(course, imageIntents, { importFromUrl, resolver });
+
+    expect(result.providerError).toBe('ספק התמונות לא הוגדר בשרת.');
+  });
 });
