@@ -50,18 +50,31 @@ export function GenerateForm({ tone = 'light' }: GenerateFormProps) {
       // כל פתירת התמונות עוברת דרך /api/image (Pexels); משמיטים כתובות שהמודל
       // אולי נתן כדי שלא נפנה לרשת חיצונית ישירות. כשל → איור מציב‑מקום.
       const intents = imageIntents.map((intent) => ({ ...intent, url: undefined }));
-      const { course: withImages, assets } = await resolveImageIntents(course, intents, {
+      const {
+        course: withImages,
+        assets,
+        warnings: imageWarnings,
+      } = await resolveImageIntents(course, intents, {
         resolver: endpointImageResolver,
       });
 
       // openCourse מחליף את מסך הפתיחה בעורך — הרכיב הזה יתפרק, ולכן אין setState אחריו
       await openCourse(withImages, assets);
-      toast(
-        warnings.length
-          ? `הלומדה נוצרה, עם ${warnings.length} התאמות אוטומטיות.`
-          : 'הלומדה נוצרה.',
-        { tone: 'success' },
-      );
+
+      // כשלי תמונות לא נשארים שקטים: הם בדיוק הסיבה ש"נוצרה לומדה בלי תמונות"
+      // נראה כתעלומה. מציגים כמה תמונות לא נטענו ואת הסיבה הראשונה (למשל מפתח
+      // Pexels שגוי) כדי שהמשתמש יידע מה לתקן.
+      if (imageWarnings.length) {
+        const more = imageWarnings.length > 1 ? ` (ועוד ${imageWarnings.length - 1})` : '';
+        toast(`הלומדה נוצרה. ${imageWarnings[0]}${more}`, { tone: 'error' });
+      } else {
+        toast(
+          warnings.length
+            ? `הלומדה נוצרה, עם ${warnings.length} התאמות אוטומטיות.`
+            : 'הלומדה נוצרה.',
+          { tone: 'success' },
+        );
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'יצירת הלומדה נכשלה.');
       setLoading(false);
