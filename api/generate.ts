@@ -148,7 +148,9 @@ const BLOCK_CATALOG = `סוגי הבלוקים (type + השדות המרכזיי
 - stats — מספרים גדולים. variant, columns, items:[{value, label, sub}].
 - quote — ציטוט. variant, text, author, role.
 - video — וידאו. source(youtube|vimeo|upload), url.
-- divider — מפריד. style(space|line|icon|gradient), icon, height.`;
+- divider — מפריד. style(space|line|icon|gradient), icon, height.
+
+settings (אופציונלי, פר-בלוק, ליצירת מקצב): { background: transparent|surface|muted|primary|accent|gradient|gradientSoft }. עטוף בו סקשן בולט אחד או שניים, לא את כל הבלוקים.`;
 
 const RICH_TEXT = `doc הוא מסמך ProseMirror: { "type":"doc", "content":[ ... ] }.
 nodes מותרים: doc, paragraph, text, heading(attrs.level 2–4), bulletList, orderedList, listItem, blockquote, hardBreak.
@@ -160,14 +162,24 @@ const THEMES = 'ערכות עיצוב (בחר id בשדה theme של הלומד�
 const EXAMPLE = {
   title: 'בטיחות במשרד',
   subtitle: 'לומדת מבוא קצרה',
-  theme: 'clean',
+  theme: 'forest',
   chapters: [
     {
       title: 'פתיחה',
       blocks: [
         {
           type: 'hero',
-          content: { variant: 'spotlight', title: 'בטיחות במשרד', subtitle: 'מה כל עובד צריך לדעת' },
+          content: {
+            variant: 'spotlight',
+            title: 'בטיחות במשרד',
+            subtitle: 'מה כל עובד צריך לדעת',
+            intro: 'חמש דקות',
+            backgroundType: 'gradient',
+            gradientFrom: '#14532d',
+            gradientTo: '#166534',
+            height: 'tall',
+            fullBleed: true,
+          },
         },
         {
           type: 'richText',
@@ -179,6 +191,19 @@ const EXAMPLE = {
                 { type: 'paragraph', content: [{ type: 'text', text: 'סביבת עבודה בטוחה מתחילה במודעות של כולם.' }] },
               ],
             },
+          },
+          settings: { background: 'gradientSoft' },
+        },
+        {
+          type: 'stats',
+          content: {
+            variant: 'gradient',
+            columns: 3,
+            items: [
+              { value: '90%', label: 'מהתאונות', sub: 'נמנעות במודעות פשוטה' },
+              { value: '3 דק׳', label: 'זמן פינוי', sub: 'היעד בחירום' },
+              { value: '24/7', label: 'דיווח', sub: 'לממונה הבטיחות' },
+            ],
           },
         },
         {
@@ -193,12 +218,21 @@ const EXAMPLE = {
         {
           type: 'cards',
           content: {
+            variant: 'gradient',
             columns: 3,
             items: [
               { icon: 'ShieldCheck', title: 'דיווח', text: 'מדווחים על כל מפגע לממונה.' },
               { icon: 'Flame', title: 'כיבוי אש', text: 'מכירים את מיקום המטפים.' },
               { icon: 'DoorOpen', title: 'יציאות', text: 'יודעים את דרכי המילוט.' },
             ],
+          },
+        },
+        {
+          type: 'quote',
+          content: {
+            variant: 'band',
+            text: 'בטיחות היא לא נוהל — היא הרגל יומיומי של כולנו.',
+            author: 'ממונה הבטיחות',
           },
         },
         {
@@ -222,11 +256,19 @@ const SYSTEM_PROMPT = [
   '',
   'מבנה: לומדה = { title, subtitle, description, theme, chapters:[...] }.',
   'כל פרק = { title, description, blocks:[...] }. כל בלוק = { type, content:{...} }.',
-  'אין צורך ב-id או ב-settings — המערכת משלימה אותם.',
+  'אין צורך ב-id — המערכת משלימה. לבלוק אפשר להוסיף settings:{ background } כדי',
+  'לצבוע סקשן (ראה למטה) — השתמש בזה בחוכמה, לא בכל בלוק.',
   '',
-  'הנחיות:',
-  '- פתח כל לומדה בבלוק hero עם כותרת וכותרת משנה.',
-  '- למגוון חזותי השתמש ב-cards, accordion, stats, quote ו-quiz — לא רק בפסקאות.',
+  'הנחיות — התוכן חשוב, אבל גם המראה. אל תסתפק בגרסה השטוחה של כל בלוק:',
+  '- פתח כל לומדה ב-hero מרשים: variant "spotlight" או "panel", backgroundType="gradient",',
+  '  fullBleed=true, height "tall". בחר gradientFrom/gradientTo שמתאימים לנושא.',
+  '- השתמש בוריאציות הפרימיום, לא רק ב-plain: cards variant "gradient" או "numbered",',
+  '  stats variant "gradient", quote variant "band", textImage variant "feature".',
+  '- צור מקצב: עטוף 1-2 סקשנים מרכזיים ב-settings:{ background:"gradientSoft" } או "surface"',
+  '  או "primary" — לא את כולם, כדי שהצבע יבלוט. שאר הבלוקים נשארים בלי settings.',
+  '- כשהתוכן מאפשר, כלול לפחות בלוק stats אחד (מספרים גדולים) וציטוט (quote) אחד.',
+  '- למגוון חזותי השתמש ב-cards, accordion, stats, quote, textImage ו-quiz — לא רק בפסקאות.',
+  '- בחר theme שמתאים לנושא, והעדף ערכות נועזות (vivid, sunset, midnight, forest) על clean.',
   '- בלוק quiz חייב תשובה נכונה אחת בדיוק.',
   '- תמונות: אל תמציא assetId. *כל* בלוק image ו-textImage, וכן hero עם',
   '  backgroundType="image", **חייב** שדה "query" — תיאור קצר *באנגלית* לחיפוש תמונת',

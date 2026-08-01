@@ -209,6 +209,30 @@ describe('coerceGeneratedCourse', () => {
     expectValid(course);
   });
 
+  it('שומרת וריאציה ו-settings.background שהמודל שולח (מקצב חזותי)', () => {
+    const { course } = coerceGeneratedCourse({
+      chapters: [
+        {
+          blocks: [
+            {
+              type: 'cards',
+              settings: { background: 'gradientSoft' },
+              content: {
+                variant: 'gradient',
+                items: [{ icon: 'Target', title: 'כותרת', text: 'טקסט' }],
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    const block = course.chapters[0].blocks[0];
+    expect((block.content as { variant: string }).variant).toBe('gradient');
+    expect(block.settings.background).toBe('gradientSoft');
+    expectValid(course);
+  });
+
   it('שומרת ערכי stats מה-AI גם בלי id', () => {
     const { course } = coerceGeneratedCourse({
       chapters: [
