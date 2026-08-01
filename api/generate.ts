@@ -64,7 +64,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   };
 
   const stream = client.messages.stream({
-    model: 'claude-opus-5',
+    // Sonnet ולא Opus: יצירת ה-JSON היא משימת חילוץ מובנית, ו-Sonnet מהיר
+    // משמעותית באיכות דומה — קיצור ההמתנה חשוב במיוחד בנייד, שם חיבור ארוך
+    // מתנתק כשעוברים אפליקציה. שכבת הריפוי (coerceGeneratedCourse) ממילא
+    // מבטיחה חוסן לפלט.
+    model: 'claude-sonnet-5',
     max_tokens: 32_000,
     thinking: { type: 'adaptive' },
     // effort medium מאזן איכות מול זמן: יצירת ה-JSON היא משימת חילוץ מובנית,
