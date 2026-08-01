@@ -10,7 +10,9 @@ import { buildAssetMeta, checkAssetFile } from './assetNaming';
 
 export type ImportAssetResult =
   | { ok: true; meta: AssetMeta; blob: Blob }
-  | { ok: false; error: string };
+  /** status = קוד ה-HTTP כשהכשל הגיע מתגובת שרת. מאפשר להבחין בין כשל שפיר
+   *  (404 — לא נמצאה תמונה) לכשל אקציוני (מפתח/מכסה/ספק) בלי להתאים מחרוזות. */
+  | { ok: false; error: string; status?: number };
 
 /**
  * ממדי התמונה, לתצוגה בספרייה ולשמירה ב-`AssetMeta`.
@@ -94,7 +96,11 @@ export async function importAssetFromUrl(
     // אם הצד השני החזיר גוף JSON עם `error` (למשל `/api/image`) — מעדיפים את
     // ההסבר המדויק שלו על פני קוד סטטוס גנרי, כדי שהסיבה תעלה עד ה-toast.
     const reason = await errorReasonFromResponse(response);
-    return { ok: false, error: reason ?? `הורדת התמונה נכשלה (שגיאה ${response.status}).` };
+    return {
+      ok: false,
+      error: reason ?? `הורדת התמונה נכשלה (שגיאה ${response.status}).`,
+      status: response.status,
+    };
   }
 
   const blob = await response.blob();

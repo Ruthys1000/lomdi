@@ -54,25 +54,23 @@ export function GenerateForm({ tone = 'light' }: GenerateFormProps) {
       // כל פתירת התמונות עוברת דרך /api/image (Pexels); משמיטים כתובות שהמודל
       // אולי נתן כדי שלא נפנה לרשת חיצונית ישירות. כשל → איור מציב‑מקום.
       const intents = imageIntents.map((intent) => ({ ...intent, url: undefined }));
-      const {
-        course: withImages,
-        assets,
-        warnings: imageWarnings,
-      } = await resolveImageIntents(course, intents, {
-        resolver: endpointImageResolver,
-      });
+      const { course: withImages, assets, providerError } = await resolveImageIntents(
+        course,
+        intents,
+        { resolver: endpointImageResolver },
+      );
 
       // openCourse מחליף את מסך הפתיחה בעורך — הרכיב הזה יתפרק, ולכן אין setState אחריו
       await openCourse(withImages, assets);
 
-      // כשלי תמונות לא נשארים שקטים: הם בדיוק הסיבה ש"נוצרה לומדה בלי תמונות"
-      // נראה כתעלומה. מציגים כמה תמונות לא נטענו ואת הסיבה הראשונה (למשל מפתח
-      // Pexels שגוי) כדי שהמשתמש יידע מה לתקן.
-      if (imageWarnings.length) {
-        const more = imageWarnings.length > 1 ? ` (ועוד ${imageWarnings.length - 1})` : '';
-        // durable: אחרי המתנה ארוכה קל לפספס טוסט של 4 שניות — כשל תמונות
-        // נשאר על המסך עד שהמשתמש סוגר, כדי שהסיבה לא תיעלם.
-        toast(`הלומדה נוצרה. ${imageWarnings[0]}${more}`, { tone: 'error', durable: true });
+      // רק כשל אקציוני (מפתח שגוי/חסר, חריגת מכסה, ספק לא זמין) מצדיק התראה
+      // בולטת ומתמשכת — שם באמת יש מה לתקן. תמונה בודדת ש"לא נמצאה" מקבלת
+      // placeholder מכובד ולא מדליקה באנר אדום מבהיל על לא-כלום.
+      if (providerError) {
+        toast(`הלומדה נוצרה, אך התמונות לא נטענו: ${providerError}`, {
+          tone: 'error',
+          durable: true,
+        });
       } else {
         toast(
           warnings.length

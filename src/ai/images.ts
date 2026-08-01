@@ -38,6 +38,12 @@ export interface ResolveImageIntentsResult {
   course: Course;
   assets: ResolvedAsset[];
   warnings: string[];
+  /**
+   * הכשל האקציוני הראשון — כזה שדורש פעולה (מפתח שגוי/חסר, חריגת מכסה, ספק לא
+   * זמין), להבדיל מ-404 שפיר ("לא נמצאה תמונה מתאימה") שה-placeholder מטפל בו.
+   * המתקשר משתמש בזה כדי להחליט אם להציג התראה בולטת או להישאר בשקט.
+   */
+  providerError?: string;
 }
 
 function findBlock(course: Course, blockId: string): Block | undefined {
@@ -92,6 +98,7 @@ export async function resolveImageIntents(
   const next = structuredClone(course);
   const assets: ResolvedAsset[] = [];
   const warnings: string[] = [];
+  let providerError: string | undefined;
 
   for (const intent of intents) {
     const block = findBlock(next, intent.blockId);
@@ -105,7 +112,12 @@ export async function resolveImageIntents(
     if (url) {
       const result = await importFromUrl(url, intent.alt);
       if (result.ok) resolved = { meta: result.meta, blob: result.blob };
-      else warnings.push(`תמונה לא נטענה: ${result.error}`);
+      else {
+        warnings.push(`תמונה לא נטענה: ${result.error}`);
+        // 404 = "לא נמצאה תמונה מתאימה" — שפיר, ה-placeholder מטפל בו בשקט.
+        // כל כשל אחר (מפתח/מכסה/ספק/רשת) הוא אקציוני ומדווח בבירור למשתמש.
+        if (result.status !== 404 && !providerError) providerError = result.error;
+      }
     }
 
     if (!resolved && fallback) resolved = fallback(intent, next.theme);
@@ -116,5 +128,5 @@ export async function resolveImageIntents(
     }
   }
 
-  return { course: next, assets, warnings };
+  return { course: next, assets, warnings, providerError };
 }
