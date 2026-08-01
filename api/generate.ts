@@ -48,36 +48,65 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
 
   const client = new Anthropic({ apiKey });
 
-  try {
-    // streaming כדי לא לחטוף timeout על פלט JSON גדול (ראה מדריך ה-API)
-    const stream = client.messages.stream({
-      model: 'claude-opus-5',
-      max_tokens: 32_000,
-      thinking: { type: 'adaptive' },
-      // effort high לאיכות מקסימלית. הזמן הארוך (maxDuration 800) מכסה את החשיבה
-      // הנוספת, כך שאין חשש טיימאוט.
-      output_config: { effort: 'high' },
-      system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
-      messages: [{ role: 'user', content: `צור לומדה מהתוכן הבא:\n\n${text}` }],
-    });
+  // מעבר למצב סטרימינג: מזרימים שורות NDJSON לאורך היצירה כדי שהחיבור לעולם לא
+  // יהיה "שקט". דפדפן נייד או פרוקסי מנתקים חיבור שלא זורם בו מידע לאורך דקות —
+  // וזה מה שגרם ל-"Failed to fetch" למרות שהפונקציה המשיכה לרוץ ברקע. אימותי
+  // הקלט למעלה עדיין מחזירים JSON עם קוד סטטוס, כי הם רצים לפני שליחת הכותרות.
+  res.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('X-Accel-Buffering', 'no'); // מבטל באפרינג של פרוקסי (nginx)
+  res.flushHeaders();
 
+  let open = true;
+  const writeLine = (payload: unknown): void => {
+    if (!open) return;
+    res.write(`${JSON.stringify(payload)}\n`);
+  };
+
+  const stream = client.messages.stream({
+    model: 'claude-opus-5',
+    max_tokens: 32_000,
+    thinking: { type: 'adaptive' },
+    // effort medium מאזן איכות מול זמן: יצירת ה-JSON היא משימת חילוץ מובנית,
+    // לא הוכחה מתמטית, ו-high האריך את ההמתנה מדי.
+    output_config: { effort: 'medium' },
+    system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
+    messages: [{ role: 'user', content: `צור לומדה מהתוכן הבא:\n\n${text}` }],
+  });
+
+  // דופק ראשון מיידי + כל 10 שניות: שומר את החיבור חי בזמן שהמודל חושב וכותב.
+  writeLine({ type: 'progress' });
+  const heartbeat = setInterval(() => writeLine({ type: 'progress' }), 10_000);
+
+  // אם הלקוח מתנתק — עוצרים את היצירה ומפסיקים לכתוב, כדי לא לשרוף זמן ריצה לחינם.
+  res.on('close', () => {
+    open = false;
+    clearInterval(heartbeat);
+    stream.abort();
+  });
+
+  try {
     const message = await stream.finalMessage();
 
     if (message.stop_reason === 'refusal') {
-      res.status(422).json({ error: 'הבקשה נדחתה על ידי מנגנוני הבטיחות. נסו תוכן אחר.' });
-      return;
+      writeLine({ type: 'error', error: 'הבקשה נדחתה על ידי מנגנוני הבטיחות. נסו תוכן אחר.' });
+    } else {
+      const course = extractCourseJson(message);
+      if (!course) {
+        writeLine({ type: 'error', error: 'המודל לא החזיר JSON תקין. נסו שוב.' });
+      } else {
+        writeLine({ type: 'result', course });
+      }
     }
-
-    const course = extractCourseJson(message);
-    if (!course) {
-      res.status(502).json({ error: 'המודל לא החזיר JSON תקין. נסו שוב.' });
-      return;
-    }
-
-    res.status(200).json({ course });
   } catch (error) {
-    console.error('generate failed', error);
-    res.status(502).json({ error: 'יצירת הלומדה נכשלה. נסו שוב בעוד רגע.' });
+    // התנתקות יזומה (abort) בעקבות סגירת הלקוח אינה שגיאה אמיתית לדיווח.
+    if (open) {
+      console.error('generate failed', error);
+      writeLine({ type: 'error', error: 'יצירת הלומדה נכשלה. נסו שוב בעוד רגע.' });
+    }
+  } finally {
+    clearInterval(heartbeat);
+    if (open) res.end();
   }
 }
 

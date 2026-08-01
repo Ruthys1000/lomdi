@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Loader2, Sparkles } from 'lucide-react';
 import { generateCourseFromText } from '@/ai/generateCourse';
 import { resolveImageIntents } from '@/ai/images';
@@ -24,8 +24,18 @@ interface GenerateFormProps {
 export function GenerateForm({ tone = 'light' }: GenerateFormProps) {
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const dark = tone === 'dark';
+
+  // מונה שניות חי בזמן היצירה — כדי שההמתנה הארוכה תיראה פעילה, לא תקועה.
+  useEffect(() => {
+    if (!loading) return;
+    setElapsed(0);
+    const started = Date.now();
+    const id = setInterval(() => setElapsed(Math.floor((Date.now() - started) / 1000)), 1000);
+    return () => clearInterval(id);
+  }, [loading]);
 
   const generate = async () => {
     const trimmed = text.trim();
@@ -108,7 +118,7 @@ export function GenerateForm({ tone = 'light' }: GenerateFormProps) {
             aria-live="polite"
           >
             <Loader2 className="size-4 animate-spin" aria-hidden />
-            ה‑AI כותב את הלומדה — זה עשוי לקחת כמה עשרות שניות.
+            ה‑AI כותב את הלומדה — {elapsed > 0 ? `כבר ${elapsed} שניות…` : 'רגע…'}
           </p>
         )}
       </div>
