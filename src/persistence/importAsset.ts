@@ -91,7 +91,10 @@ export async function importAssetFromUrl(
   }
 
   if (!response.ok) {
-    return { ok: false, error: `הורדת התמונה נכשלה (שגיאה ${response.status}).` };
+    // אם הצד השני החזיר גוף JSON עם `error` (למשל `/api/image`) — מעדיפים את
+    // ההסבר המדויק שלו על פני קוד סטטוס גנרי, כדי שהסיבה תעלה עד ה-toast.
+    const reason = await errorReasonFromResponse(response);
+    return { ok: false, error: reason ?? `הורדת התמונה נכשלה (שגיאה ${response.status}).` };
   }
 
   const blob = await response.blob();
@@ -99,4 +102,19 @@ export async function importAssetFromUrl(
   const file = new File([blob], name, { type: blob.type });
 
   return importAssetFile(file);
+}
+
+/**
+ * מחלץ הודעת שגיאה בעברית מגוף JSON של תגובה כושלת (`{ error }`), אם יש כזה.
+ * מחזיר undefined כשהגוף אינו JSON — ואז המתקשר נופל להודעה הגנרית לפי הסטטוס.
+ */
+async function errorReasonFromResponse(response: Response): Promise<string | undefined> {
+  const type = response.headers.get('content-type') ?? '';
+  if (!type.includes('application/json')) return undefined;
+  try {
+    const data = (await response.json()) as { error?: unknown };
+    return typeof data.error === 'string' && data.error ? data.error : undefined;
+  } catch {
+    return undefined;
+  }
 }

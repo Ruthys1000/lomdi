@@ -237,6 +237,10 @@ lomdi-safety-2026-07-25.zip
   נקבעים ב‑Vercel → Project → Settings → Environment Variables (Production +
   Preview), לעולם לא בריפו. לפיתוח מקומי: `.env` (ב‑gitignore, ראה
   `.env.example`) והרצה עם `vercel dev`.
+  **חשוב:** משתנה סביבה חדש נכנס לתוקף רק אחרי **redeploy**, וחייב להיות מסומן
+  לסביבת **Production**. "הגדרתי `PEXELS_API_KEY` ועדיין אין תמונות" הוא כמעט תמיד
+  אחד מהשניים. כשל בטעינת תמונה כבר אינו שקט — הודעת ה‑toast אחרי היצירה מציגה
+  את הסיבה (מפתח שגוי, חריגת מכסה, אין תוצאה).
 
 > **IndexedDB הוא לפי origin.** פרויקט שנשמר אוטומטית ב-`localhost` לא יופיע
 > בכתובת הפרוסה, ומכיוון שלכל preview deployment יש כתובת משלו — גם לא יעבור
