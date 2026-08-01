@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sparkles } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
 import { generateCourseFromText } from '@/ai/generateCourse';
 import { resolveImageIntents } from '@/ai/images';
 import { endpointImageResolver } from '@/ai/imageResolver';
@@ -89,14 +89,26 @@ export function GenerateForm({ tone = 'light' }: GenerateFormProps) {
           type="button"
           onClick={() => void generate()}
           disabled={loading || !text.trim()}
-          className="inline-flex items-center gap-2 rounded-xl bg-volt px-6 py-3 font-extrabold text-on-volt transition hover:bg-volt-bright disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-xl bg-volt px-6 py-3 font-extrabold text-on-volt transition hover:bg-volt-bright disabled:opacity-70"
         >
-          <Sparkles className="size-4.5" aria-hidden />
+          {loading ? (
+            <Loader2 className="size-4.5 animate-spin" aria-hidden />
+          ) : (
+            <Sparkles className="size-4.5" aria-hidden />
+          )}
           {loading ? 'מחולל לומדה…' : 'צרו לומדה'}
         </button>
         {loading && (
-          <p className={cn('text-sm', dark ? 'text-shell-muted' : 'text-fg-muted')} role="status">
-            זה עשוי לקחת עד דקה.
+          <p
+            className={cn(
+              'inline-flex items-center gap-2 text-sm',
+              dark ? 'text-shell-muted' : 'text-fg-muted',
+            )}
+            role="status"
+            aria-live="polite"
+          >
+            <Loader2 className="size-4 animate-spin" aria-hidden />
+            ה‑AI כותב את הלומדה — זה עשוי לקחת כמה עשרות שניות.
           </p>
         )}
       </div>

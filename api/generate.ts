@@ -15,7 +15,9 @@ import Anthropic from '@anthropic-ai/sdk';
  * לעדכן גם כאן. הפלט ממילא עובר ריפוי סלחני (`importGeneratedCourse`) בצד הלקוח.
  */
 
-export const config = { maxDuration: 60 };
+// חלון ריצה מקסימלי. ב-60 שניות היינו חוטפים FUNCTION_INVOCATION_TIMEOUT על
+// לומדות גדולות; עם Fluid compute מותר עד 300, וזה נותן מרווח לפלט ארוך.
+export const config = { maxDuration: 300 };
 
 const MAX_INPUT_CHARS = 20_000;
 
@@ -50,6 +52,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       model: 'claude-opus-5',
       max_tokens: 32_000,
       thinking: { type: 'adaptive' },
+      // effort medium מאזן איכות מול זמן: יצירת ה-JSON היא משימת חילוץ מובנית,
+      // לא הוכחה מתמטית, ו-high היה מבזבז חשיבה ומקרב אותנו לטיימאוט.
+      output_config: { effort: 'medium' },
       system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: `צור לומדה מהתוכן הבא:\n\n${text}` }],
     });
