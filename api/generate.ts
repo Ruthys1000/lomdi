@@ -1,17 +1,18 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Anthropic from '@anthropic-ai/sdk';
-import { buildGenerationContract, type GenerationContract } from '../src/ai/contract';
 
 /**
  * פונקציית ה-serverless שמחוללת לומדה מטקסט.
  *
  * זהו הצד המאובטח של החיבור ל-AI: מפתח ה-API חי כאן בלבד (משתנה סביבה בשרת),
- * והדפדפן לעולם לא רואה אותו. הפונקציה חד-תכליתית בכוונה — היא מקבלת טקסט
- * ומחזירה JSON של לומדה, ותו לא — כדי שלא תהפוך ל"ממסר פתוח" שמריץ כל פרומפט
- * על חשבון המפתח.
+ * והדפדפן לעולם לא רואה אותו. הפונקציה חד-תכליתית בכוונה — מקבלת טקסט ומחזירה
+ * JSON של לומדה, ותו לא — כדי שלא תהפוך ל"ממסר פתוח".
  *
- * הפלט מוחזר *גולמי*: האימות והריפוי (`importGeneratedCourse`) רצים בצד הלקוח,
- * שם ממילא חיים העורך וה-stores.
+ * **הפונקציה עצמאית לחלוטין ואינה מייבאת מ-`src/`.** ה-bundler של Vercel לא
+ * פותר את ה-alias `@/`, וייבוא גרף האפליקציה (רגיסטרי הבלוקים, zod) הפיל את
+ * הפונקציה בטעינה (FUNCTION_INVOCATION_FAILED). לכן הפרומפט מוטמע כאן כקבועים.
+ * מקור האמת לקטלוג הבלוקים הוא קבצי content שבתיקיות הבלוקים; אם משתנים שדות,
+ * לעדכן גם כאן. הפלט ממילא עובר ריפוי סלחני (`importGeneratedCourse`) בצד הלקוח.
  */
 
 export const config = { maxDuration: 60 };
@@ -41,7 +42,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     return;
   }
 
-  const contract = buildGenerationContract();
   const client = new Anthropic({ apiKey });
 
   try {
@@ -50,7 +50,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       model: 'claude-opus-5',
       max_tokens: 32_000,
       thinking: { type: 'adaptive' },
-      system: [{ type: 'text', text: systemPrompt(contract), cache_control: { type: 'ephemeral' } }],
+      system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: `צור לומדה מהתוכן הבא:\n\n${text}` }],
     });
 
@@ -93,36 +93,112 @@ function extractCourseJson(message: Anthropic.Message): unknown {
   }
 }
 
-/** המפרט שמזין את המודל — נגזר מהחוזה, כדי שלא יסטה ממה שהמערכת מקבלת */
-function systemPrompt(contract: GenerationContract): string {
-  const blocks = contract.blocks.map((block) => ({
-    type: block.type,
-    label: block.label,
-    description: block.description,
-    category: block.category,
-    contentSchema: block.schema,
-  }));
+// ─────────────────────────── הפרומפט המוטמע ───────────────────────────
+// מקור האמת לשדות: src/blocks/*/content.ts. הפלט עובר ריפוי בצד הלקוח,
+// ולכן דיוק חלקי כאן מספיק — coerce משלים ברירות מחדל ומשמיט שדות פגומים.
 
-  return [
-    'אתה מחולל לומדות (קורסים דיגיטליים) בעברית. קלט: תוכן גולמי. פלט: לומדה אחת כ-JSON.',
-    '',
-    contract.guide,
-    '',
-    'מבנה הלומדה (JSON Schema):',
-    JSON.stringify(contract.course),
-    '',
-    'סוגי הבלוקים המותרים, כל אחד עם סכמת התוכן שלו:',
-    JSON.stringify(blocks),
-    '',
-    'ערכות עיצוב זמינות (בחר לפי id בשדה theme):',
-    JSON.stringify(contract.themes),
-    '',
-    'טקסט עשיר (doc) מותר רק עם ה-nodes וה-marks הבאים:',
-    JSON.stringify(contract.richText),
-    '',
-    'דוגמה מלאה ותקינה:',
-    JSON.stringify(contract.example),
-    '',
-    'החזר אך ורק את ה-JSON של הלומדה — בלי טקסט לפניו או אחריו, ובלי גדרות קוד (```).',
-  ].join('\n');
-}
+const BLOCK_CATALOG = `סוגי הבלוקים (type + השדות המרכזיים ב-content):
+- hero — מסך פתיחה. variant(centered|spotlight|panel|minimal), title, subtitle, intro, backgroundType(color|gradient|image), backgroundColor, gradientFrom, gradientTo, height(compact|medium|tall|screen), alignment(start|center|end). לרקע תמונה: backgroundType="image" + query + alt.
+- richText — טקסט רץ. doc (מסמך ProseMirror, ראה למטה), maxWidth(narrow|normal|wide).
+- image — תמונה. query, alt, caption, aspectRatio(auto|16:9|4:3|1:1|3:2|21:9), fit(cover|contain), roundness(none|small|medium|large|full).
+- textImage — טקסט לצד תמונה. doc, query, alt, caption, layout(imageStart|imageEnd|imageTop), ratio(50-50|40-60|60-40), variant(standard|feature).
+- cards — כרטיסים. variant, columns(2-4), items:[{icon, title, text}].
+- accordion — פריטים נפתחים. items:[{title, doc}], mode(single|multiple), openFirstByDefault.
+- quiz — שאלת בחירה. question, hint, options:[{text, correct}] (בדיוק אחת correct:true), feedbackCorrect, feedbackIncorrect.
+- stats — מספרים גדולים. variant, columns, items:[{value, label, sub}].
+- quote — ציטוט. variant, text, author, role.
+- video — וידאו. source(youtube|vimeo|upload), url.
+- divider — מפריד. style(space|line|icon|gradient), icon, height.`;
+
+const RICH_TEXT = `doc הוא מסמך ProseMirror: { "type":"doc", "content":[ ... ] }.
+nodes מותרים: doc, paragraph, text, heading(attrs.level 2–4), bulletList, orderedList, listItem, blockquote, hardBreak.
+marks מותרים: bold, italic, underline, strike, link.
+דוגמה: {"type":"doc","content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"text","text":"כותרת"}]},{"type":"paragraph","content":[{"type":"text","text":"פסקה."}]},{"type":"bulletList","content":[{"type":"listItem","content":[{"type":"paragraph","content":[{"type":"text","text":"פריט"}]}]}]}]}`;
+
+const THEMES = 'ערכות עיצוב (בחר id בשדה theme של הלומדה): clean, darkElegant, vivid, warmSand, forest, highContrast, sunset, midnight.';
+
+const EXAMPLE = {
+  title: 'בטיחות במשרד',
+  subtitle: 'לומדת מבוא קצרה',
+  theme: 'clean',
+  chapters: [
+    {
+      title: 'פתיחה',
+      blocks: [
+        {
+          type: 'hero',
+          content: { variant: 'spotlight', title: 'בטיחות במשרד', subtitle: 'מה כל עובד צריך לדעת' },
+        },
+        {
+          type: 'richText',
+          content: {
+            doc: {
+              type: 'doc',
+              content: [
+                { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'למה זה חשוב' }] },
+                { type: 'paragraph', content: [{ type: 'text', text: 'סביבת עבודה בטוחה מתחילה במודעות של כולם.' }] },
+              ],
+            },
+          },
+        },
+        {
+          type: 'image',
+          content: { query: 'modern safe office workspace', alt: 'משרד מודרני ומסודר' },
+        },
+      ],
+    },
+    {
+      title: 'עקרונות',
+      blocks: [
+        {
+          type: 'cards',
+          content: {
+            columns: 3,
+            items: [
+              { icon: 'ShieldCheck', title: 'דיווח', text: 'מדווחים על כל מפגע לממונה.' },
+              { icon: 'Flame', title: 'כיבוי אש', text: 'מכירים את מיקום המטפים.' },
+              { icon: 'DoorOpen', title: 'יציאות', text: 'יודעים את דרכי המילוט.' },
+            ],
+          },
+        },
+        {
+          type: 'quiz',
+          content: {
+            question: 'מה עושים כשמזהים מפגע בטיחותי?',
+            options: [
+              { text: 'מדווחים לממונה', correct: true },
+              { text: 'מתעלמים וממשיכים', correct: false },
+              { text: 'מחכים שמישהו אחר יטפל', correct: false },
+            ],
+          },
+        },
+      ],
+    },
+  ],
+};
+
+const SYSTEM_PROMPT = [
+  'אתה מחולל לומדות (קורסים דיגיטליים) בעברית. קלט: תוכן גולמי. פלט: לומדה אחת כ-JSON.',
+  '',
+  'מבנה: לומדה = { title, subtitle, description, theme, chapters:[...] }.',
+  'כל פרק = { title, description, blocks:[...] }. כל בלוק = { type, content:{...} }.',
+  'אין צורך ב-id או ב-settings — המערכת משלימה אותם.',
+  '',
+  'הנחיות:',
+  '- פתח כל לומדה בבלוק hero עם כותרת וכותרת משנה.',
+  '- למגוון חזותי השתמש ב-cards, accordion, stats, quote ו-quiz — לא רק בפסקאות.',
+  '- בלוק quiz חייב תשובה נכונה אחת בדיוק.',
+  '- תמונות: אל תמציא assetId. בבלוקי image/textImage/hero כתוב בשדה "query" תיאור',
+  '  קצר *באנגלית* לחיפוש תמונת סטוק (למשל "modern office team"), ו-"alt" בעברית לנגישות.',
+  '',
+  BLOCK_CATALOG,
+  '',
+  RICH_TEXT,
+  '',
+  THEMES,
+  '',
+  'דוגמה מלאה ותקינה:',
+  JSON.stringify(EXAMPLE),
+  '',
+  'החזר אך ורק את ה-JSON של הלומדה — בלי טקסט לפניו או אחריו, ובלי גדרות קוד (```).',
+].join('\n');
