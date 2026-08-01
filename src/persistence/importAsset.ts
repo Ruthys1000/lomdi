@@ -57,3 +57,46 @@ export async function importAssetFile(file: File): Promise<ImportAssetResult> {
   // ההעלאה, ו-structuredClone של IndexedDB שומר אותם ללא צורך
   return { ok: true, meta, blob: new Blob([file], { type: file.type }) };
 }
+
+/**
+ * שם קובץ סביר מתוך כתובת. השם הזה משמש רק ל-`originalName` (לתצוגה) —
+ * השם הפנימי נגזר תמיד מהמזהה ב-`buildAssetMeta`, ולכן תו לא תקין כאן
+ * לא יכול לדלוף לתוצר.
+ */
+function fileNameFromUrl(url: string): string {
+  try {
+    const path = new URL(url).pathname;
+    const name = path.split('/').filter(Boolean).pop();
+    return name && name.length <= 120 ? decodeURIComponent(name) : 'image';
+  } catch {
+    return 'image';
+  }
+}
+
+/**
+ * קליטת נכס מכתובת — התפר שדרכו מקור תמונות חיצוני (סטוק/AI images) מזין
+ * לומדה שנוצרה ב-AI. מושך את הכתובת ל-Blob ומריץ בדיוק את אותו מסלול של
+ * העלאת קובץ (בדיקת סוג/גודל, מדידת ממדים, שם פנימי), כך שאין נתיב נכס
+ * שני שיכול לסטות מהראשון.
+ */
+export async function importAssetFromUrl(
+  url: string,
+  originalName?: string,
+): Promise<ImportAssetResult> {
+  let response: Response;
+  try {
+    response = await fetch(url);
+  } catch {
+    return { ok: false, error: `לא ניתן להוריד תמונה מהכתובת שסופקה.` };
+  }
+
+  if (!response.ok) {
+    return { ok: false, error: `הורדת התמונה נכשלה (שגיאה ${response.status}).` };
+  }
+
+  const blob = await response.blob();
+  const name = originalName ?? fileNameFromUrl(url);
+  const file = new File([blob], name, { type: blob.type });
+
+  return importAssetFile(file);
+}

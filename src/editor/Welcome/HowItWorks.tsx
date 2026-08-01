@@ -1,4 +1,4 @@
-import { Blocks, PackageCheck, Palette } from 'lucide-react';
+import { Blocks, PackageCheck, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
 /**
@@ -17,16 +17,16 @@ import { cn } from '@/lib/cn';
 
 const STEPS = [
   {
-    icon: Blocks,
-    title: 'מרכיבים מבלוקים',
-    text: 'גוררים פנימה בלוקים מוכנים — טקסט, תמונה, וידאו, שאלה — וממלאים בתוכן שלכם.',
-    kbd: '9 סוגי בלוקים',
+    icon: Sparkles,
+    title: 'מדביקים טקסט',
+    text: 'מדביקים תוכן — נוהל, מאמר, סיכום — וה-AI מחולל ממנו לומדה שלמה: פרקים, בלוקים ושאלות תרגול.',
+    kbd: 'יצירה ב-AI',
   },
   {
-    icon: Palette,
-    title: 'בוחרים עיצוב',
-    text: 'בוחרים ערכה אחת מתוך שש, וכל הלומדה מתלבשת עליה — קריא בכל מסך, גם בטלפון.',
-    kbd: '6 ערכות מוכנות',
+    icon: Blocks,
+    title: 'עורכים ומעצבים',
+    text: 'משכללים על הקנבס: מוסיפים ומסדרים בלוקים, מחליפים תמונות, ובוחרים ערכת עיצוב — הכול חי.',
+    kbd: '11 בלוקים · 8 ערכות',
   },
   {
     icon: PackageCheck,
