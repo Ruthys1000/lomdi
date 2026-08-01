@@ -12,7 +12,19 @@ const ENDPOINT = '/api/generate';
 
 export interface GenerateCourseOptions {
   signal?: AbortSignal;
+  /** נקרא על כל פעימת התקדמות מהשרת — שימושי לחיווי "עדיין עובד" */
+  onProgress?: () => void;
 }
+
+/**
+ * ה-endpoint מזרים שורות NDJSON: `progress` (דופק ששומר את החיבור חי),
+ * `result` (הלומדה הגמורה) או `error` (הודעה למשתמש). קוראים אותן תוך כדי,
+ * כך שחיבור ארוך לא "נשתק" ונחתך על ידי הדפדפן ("Failed to fetch").
+ */
+type StreamLine =
+  | { type: 'progress' }
+  | { type: 'result'; course?: unknown }
+  | { type: 'error'; error?: unknown };
 
 export async function generateCourseFromText(
   text: string,
@@ -25,12 +37,62 @@ export async function generateCourseFromText(
     ...(options.signal ? { signal: options.signal } : {}),
   });
 
+  // אימותי קלט נכשלים לפני הסטרימינג ומוחזרים כ-JSON עם קוד סטטוס.
   if (!response.ok) {
     throw new Error(await readErrorMessage(response));
   }
 
-  const data = (await response.json()) as { course?: unknown };
-  return importGeneratedCourse(data.course);
+  // תאימות לאחור: אם אין גוף מוזרם (למשל בסביבת בדיקה ישנה) — קוראים JSON יחיד.
+  if (!response.body) {
+    const data = (await response.json()) as { course?: unknown };
+    return importGeneratedCourse(data.course);
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  const handle = (line: StreamLine): GeneratedCourse | undefined => {
+    if (line.type === 'progress') {
+      options.onProgress?.();
+      return undefined;
+    }
+    if (line.type === 'error') {
+      const message = typeof line.error === 'string' && line.error ? line.error : undefined;
+      throw new Error(message ?? 'יצירת הלומדה נכשלה.');
+    }
+    return importGeneratedCourse(line.course);
+  };
+
+  // כל שורה שלמה (מופרדת ב-\n) היא אובייקט JSON אחד.
+  const drain = (chunk: string): GeneratedCourse | undefined => {
+    buffer += chunk;
+    let newline: number;
+    while ((newline = buffer.indexOf('\n')) !== -1) {
+      const raw = buffer.slice(0, newline).trim();
+      buffer = buffer.slice(newline + 1);
+      if (!raw) continue;
+      const result = handle(JSON.parse(raw) as StreamLine);
+      if (result) return result;
+    }
+    return undefined;
+  };
+
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    const result = drain(decoder.decode(value, { stream: true }));
+    if (result) return result;
+  }
+
+  // השורה האחרונה עשויה להגיע בלי \n מסיים.
+  const tail = buffer.trim();
+  if (tail) {
+    const result = handle(JSON.parse(tail) as StreamLine);
+    if (result) return result;
+  }
+
+  throw new Error('יצירת הלומדה הסתיימה ללא תוצאה. נסו שוב.');
 }
 
 async function readErrorMessage(response: Response): Promise<string> {
