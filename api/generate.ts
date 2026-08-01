@@ -15,9 +15,11 @@ import Anthropic from '@anthropic-ai/sdk';
  * לעדכן גם כאן. הפלט ממילא עובר ריפוי סלחני (`importGeneratedCourse`) בצד הלקוח.
  */
 
-// חלון ריצה מקסימלי. ב-60 שניות היינו חוטפים FUNCTION_INVOCATION_TIMEOUT על
-// לומדות גדולות; עם Fluid compute מותר עד 300, וזה נותן מרווח לפלט ארוך.
-export const config = { maxDuration: 300 };
+// חלון ריצה מקסימלי. ב-60 שניות חטפנו FUNCTION_INVOCATION_TIMEOUT על לומדות
+// גדולות. בתוכנית בתשלום עם Fluid compute מותר עד 800 שניות — מגדירים את
+// התקרה המלאה כדי שטיימאוט לא יהיה תרחיש כישלון. מחייבים רק על זמן ריצה בפועל,
+// כך שתקרה גבוהה לא מייקרת בקשות שמסתיימות מהר.
+export const config = { maxDuration: 800 };
 
 const MAX_INPUT_CHARS = 20_000;
 
