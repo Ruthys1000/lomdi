@@ -6,7 +6,10 @@ import { createBlock, createChapter, createCourse } from '@/model/factory';
 import { bulletList, heading, paragraph, richText } from '@/model/richText';
 import { getThemePreset } from '@/model/themes';
 import {
+  courseOutlineIllustration,
   featureMockupIllustration,
+  learnerPathIllustration,
+  practiceStopIllustration,
   safetyChecklistIllustration,
   welcomeIllustration,
 } from '@/sample/illustrations';
@@ -501,6 +504,378 @@ function safetyExample(): TemplateResult {
   return { course, assets: [checklist] };
 }
 
+// ─────────────────────────── מודעות סייבר ───────────────────────────
+
+function cyberExample(): TemplateResult {
+  const theme = getThemePreset('darkElegant')!.theme;
+  const shield = practiceStopIllustration(theme.colors);
+
+  const course = createCourse({
+    title: 'מודעות סייבר',
+    subtitle: 'ההגנה הכי טובה זה אתה',
+    description: 'איך מזהים פישינג, שומרים על סיסמאות, ומגיבים נכון כשמשהו נראה חשוד.',
+    theme,
+    chapters: [
+      createChapter({
+        title: 'האיום קרוב מכפי שנדמה',
+        description: '',
+        blocks: [
+          hero({
+            variant: 'panel',
+            title: 'סייבר מתחיל בך',
+            subtitle: 'רוב הפריצות לא שוברות קוד — הן מבקשות יפה. שבע דקות שיחסכו לך יום שלם של צרות.',
+            intro: 'מודעות · 7 דקות',
+            gradientFrom: '#0f172a',
+            gradientTo: '#1e3a8a',
+            height: 'tall',
+          }),
+          createBlock('richText', {
+            settings: { background: 'gradientSoft', spacingTop: 'large', spacingBottom: 'large' },
+            content: {
+              maxWidth: 'normal',
+              doc: richText(
+                heading(2, 'למה דווקא אנחנו'),
+                paragraph(
+                  'תוקפים לא מחפשים את המערכת הכי חזקה — הם מחפשים את האדם העסוק ביותר. הודעה דחופה, קישור מוכר, בקשה קטנה: כל מה שצריך זה שנייה אחת של היסח דעת.',
+                ),
+              ),
+            },
+          }),
+          createBlock('stats', {
+            content: {
+              variant: 'gradient',
+              columns: 3,
+              items: [
+                createStat({ value: '1 מ-3', label: 'מיילים חשודים', sub: 'מגיעים לתיבה של עובד ממוצע בחודש' }),
+                createStat({ value: '90%', label: 'מהפריצות', sub: 'מתחילות בהודעה, לא בקוד' }),
+                createStat({ value: '8 שנ׳', label: 'זה כל מה שצריך', sub: 'לעצור ולבדוק לפני שלוחצים' }),
+              ],
+            },
+          }),
+        ],
+      }),
+
+      createChapter({
+        title: 'שלושה הרגלים שמגנים',
+        description: '',
+        blocks: [
+          createBlock('textImage', {
+            content: {
+              variant: 'feature',
+              layout: 'imageEnd',
+              ratio: '50-50',
+              verticalAlign: 'center',
+              aspectRatio: '4:3',
+              roundness: 'large',
+              imageAssetId: shield.meta.id,
+              alt: 'עצירה ובדיקה לפני לחיצה',
+              caption: '',
+              button: { enabled: false, label: '', href: '', newTab: false },
+              doc: richText(
+                heading(2, 'עצור. חשוב. ואז לחץ.'),
+                paragraph('הכלל האחד ששווה את כל השאר: כשמשהו דחוף, מפתה או מפחיד מדי — זה בדיוק הרגע לעצור שנייה ולבדוק מי באמת שלח.'),
+              ),
+            },
+          }),
+          createBlock('cards', {
+            content: {
+              variant: 'gradient',
+              columns: 3,
+              media: 'icon',
+              roundness: 'medium',
+              textAlign: 'start',
+              items: [
+                createCard({ icon: 'Lock', title: 'סיסמאות', text: 'סיסמה ייחודית לכל מערכת, ומנהל סיסמאות שיזכור במקומך. אימות דו-שלבי בכל מקום שאפשר.' }),
+                createCard({ icon: 'Mail', title: 'פישינג', text: 'בדוק את כתובת השולח, לא רק את השם. קישור חשוד? העבר עליו את העכבר לפני שאתה לוחץ.' }),
+                createCard({ icon: 'Shield', title: 'עדכונים', text: 'עדכון שמופיע הוא לרוב תיקון של חור אבטחה. אל תדחה אותו לשבוע הבא — זה בדיוק החלון של התוקף.' }),
+              ],
+            },
+          }),
+          createBlock('quote', {
+            settings: { width: 'full', background: 'gradientSoft', spacingTop: 'large', spacingBottom: 'large' },
+            content: {
+              variant: 'band',
+              text: 'הדיווח על מייל חשוד שהתברר כלא-כלום עדיף פי אלף על השתיקה שהתבררה כפריצה.',
+              author: 'צוות אבטחת המידע',
+              role: '',
+            },
+          }),
+          createBlock('quiz', {
+            content: {
+              question: 'קיבלת מייל דחוף מ״המנהל״ שמבקש להעביר תשלום מיד. מה עושים?',
+              hint: 'חשוב על הערוץ, לא רק על התוכן.',
+              options: [
+                createQuizOption({ text: 'עוצרים, ומאמתים בערוץ אחר — טלפון או צ׳אט — לפני כל פעולה', correct: true }),
+                createQuizOption({ text: 'מעבירים מיד, כי המנהל ביקש והזמן דוחק' }),
+                createQuizOption({ text: 'משיבים למייל ושואלים אם זה אמיתי' }),
+              ],
+              feedbackCorrect: 'נכון. אימות בערוץ נפרד הוא ההגנה היחידה שעובדת נגד התחזות — דחיפות היא בדיוק הפיתיון.',
+              feedbackIncorrect: 'לא מדויק. תשובה לאותו מייל מגיעה לתוקף עצמו. מאמתים תמיד בערוץ אחר.',
+              shuffle: true,
+              allowRetry: true,
+              showSolution: true,
+              labels: { submit: 'בדיקה', retry: 'ניסיון נוסף', solution: 'הצגת הפתרון' },
+            },
+          }),
+        ],
+      }),
+    ],
+  });
+
+  return { course, assets: [shield] };
+}
+
+// ─────────────────────────── שירות לקוחות ───────────────────────────
+
+function serviceExample(): TemplateResult {
+  const theme = getThemePreset('vivid')!.theme;
+  const path = learnerPathIllustration(theme.colors);
+
+  const course = createCourse({
+    title: 'שירות שלקוחות זוכרים',
+    subtitle: 'מיומנויות שירות מצוין',
+    description: 'איך הופכים פנייה רגילה — ואפילו תלונה — לרגע שהלקוח מספר עליו לטובה.',
+    theme,
+    chapters: [
+      createChapter({
+        title: 'כל פנייה היא הזדמנות',
+        description: '',
+        blocks: [
+          hero({
+            title: 'הלקוח זוכר איך גרמת לו להרגיש',
+            subtitle: 'לא את זמן ההמתנה ולא את הנוהל — את התחושה. הנה איך יוצרים אותה שוב ושוב.',
+            intro: 'שירות · 8 דקות',
+            gradientFrom: '#0e7490',
+            gradientTo: '#0891b2',
+            height: 'tall',
+          }),
+          createBlock('richText', {
+            settings: { background: 'gradientSoft', spacingTop: 'large', spacingBottom: 'large' },
+            content: {
+              maxWidth: 'normal',
+              doc: richText(
+                heading(2, 'העיקרון האחד'),
+                paragraph(
+                  'לקוח שפונה לא באמת מחפש רק פתרון — הוא מחפש להרגיש שמישהו הבין אותו. תפתור את הבעיה בלי זה, ותאבד אותו; תוסיף את זה, והוא ימחל לך גם על תקלה.',
+                ),
+              ),
+            },
+          }),
+          createBlock('stats', {
+            content: {
+              variant: 'gradient',
+              columns: 3,
+              items: [
+                createStat({ value: 'פי 5', label: 'עולה יותר', sub: 'להשיג לקוח חדש מלשמר קיים' }),
+                createStat({ value: '70%', label: 'מהלקוחות', sub: 'חוזרים אחרי תלונה שטופלה היטב' }),
+                createStat({ value: '1 רגע', label: 'זה כל מה שצריך', sub: 'כדי להפוך תסכול להערכה' }),
+              ],
+            },
+          }),
+        ],
+      }),
+
+      createChapter({
+        title: 'ארבעה צעדים בכל שיחה',
+        description: '',
+        blocks: [
+          createBlock('textImage', {
+            content: {
+              variant: 'feature',
+              layout: 'imageStart',
+              ratio: '50-50',
+              verticalAlign: 'center',
+              aspectRatio: '4:3',
+              roundness: 'large',
+              imageAssetId: path.meta.id,
+              alt: 'מסלול השיחה בארבעה שלבים',
+              caption: '',
+              button: { enabled: false, label: '', href: '', newTab: false },
+              doc: richText(
+                heading(2, 'להקשיב לפני שפותרים'),
+                paragraph('רוב אנשי השירות קופצים ישר לפתרון. אבל שלושים השניות הראשונות של הקשבה אמיתית שוות יותר מכל תשובה מהירה — הן אלה שמרגיעות.'),
+              ),
+            },
+          }),
+          createBlock('cards', {
+            content: {
+              variant: 'numbered',
+              columns: 2,
+              media: 'icon',
+              roundness: 'medium',
+              textAlign: 'start',
+              items: [
+                createCard({ icon: 'MessageCircleQuestion', title: 'מקשיבים עד הסוף', text: 'לא קוטעים, לא מניחים. נותנים ללקוח לסיים, ומשקפים במילים שלנו כדי לוודא שהבנו.' }),
+                createCard({ icon: 'Heart', title: 'מכירים ברגש', text: '״אני מבין/ה שזה מתסכל״ — משפט אחד שמוריד את הלחץ ומאותת שיש כאן בן אדם, לא נוהל.' }),
+                createCard({ icon: 'CircleCheck', title: 'פותרים או מסבירים', text: 'אם אפשר לפתור — פותרים. אם לא — מסבירים בדיוק מה כן יקרה ומתי, בלי הבטחות באוויר.' }),
+                createCard({ icon: 'ThumbsUp', title: 'סוגרים יפה', text: 'מוודאים שהכול טופל, מודים על הסבלנות, ומשאירים דלת פתוחה להמשך.' }),
+              ],
+            },
+          }),
+          createBlock('quote', {
+            settings: { width: 'full', background: 'gradientSoft', spacingTop: 'large', spacingBottom: 'large' },
+            content: {
+              variant: 'band',
+              text: 'לא נצחת בשיחה כשהוכחת שצדקת. ניצחת כשהלקוח הרגיש ששמעת אותו.',
+              author: 'מנהלת שירות',
+              role: '',
+            },
+          }),
+          createBlock('quiz', {
+            content: {
+              question: 'לקוח מתקשר כועס על תקלה שאינה באשמתך. מה הצעד הראשון?',
+              hint: 'מה הלקוח צריך לפני פתרון?',
+              options: [
+                createQuizOption({ text: 'להקשיב עד הסוף ולהכיר בתסכול לפני שמסבירים', correct: true }),
+                createQuizOption({ text: 'להבהיר מיד שזו לא אשמתך' }),
+                createQuizOption({ text: 'להעביר את השיחה למחלקה אחרת' }),
+              ],
+              feedbackCorrect: 'נכון. הכרה ברגש קודמת לכל פתרון — היא מה שמאפשר ללקוח בכלל לשמוע אותך.',
+              feedbackIncorrect: 'לא מדויק. התגוננות או העברה מיד רק מגבירות את הכעס. קודם מקשיבים ומכירים.',
+              shuffle: true,
+              allowRetry: true,
+              showSolution: true,
+              labels: { submit: 'בדיקה', retry: 'ניסיון נוסף', solution: 'הצגת הפתרון' },
+            },
+          }),
+        ],
+      }),
+    ],
+  });
+
+  return { course, assets: [path] };
+}
+
+// ─────────────────────────── סביבת עבודה מכבדת ───────────────────────────
+
+function respectExample(): TemplateResult {
+  const theme = getThemePreset('warmSand')!.theme;
+  const outline = courseOutlineIllustration(theme.colors);
+
+  const course = createCourse({
+    title: 'סביבת עבודה מכבדת',
+    subtitle: 'כבוד מתחיל בכל אחד מאיתנו',
+    description: 'מה יוצר אווירה בטוחה ומכבדת, איך מזהים חצייה של גבול, ומה עושים כשזה קורה.',
+    theme,
+    chapters: [
+      createChapter({
+        title: 'למה זה חשוב לכולם',
+        description: '',
+        blocks: [
+          hero({
+            variant: 'panel',
+            title: 'כבוד מתחיל בי',
+            subtitle: 'סביבה מכבדת היא לא מובן מאליו — היא תוצאה של הרגלים קטנים שכולנו בוחרים בהם כל יום.',
+            intro: 'תרבות ארגונית · 6 דקות',
+            gradientFrom: '#9a3412',
+            gradientTo: '#c2410c',
+            height: 'medium',
+          }),
+          createBlock('textImage', {
+            content: {
+              variant: 'feature',
+              layout: 'imageEnd',
+              ratio: '50-50',
+              verticalAlign: 'center',
+              aspectRatio: '4:3',
+              roundness: 'medium',
+              imageAssetId: outline.meta.id,
+              alt: 'צוות מגוון עובד יחד',
+              caption: '',
+              button: { enabled: false, label: '', href: '', newTab: false },
+              doc: richText(
+                heading(2, 'מה נותנת סביבה מכבדת'),
+                paragraph('כשאנשים מרגישים בטוחים, הם מדברים בפתיחות, מבקשים עזרה, ומעזים להציע רעיונות. כבוד הוא לא רק ערך — הוא מה שמאפשר לצוות לעבוד טוב באמת.'),
+              ),
+            },
+          }),
+          createBlock('stats', {
+            settings: { width: 'wide', background: 'gradientSoft', spacingTop: 'large', spacingBottom: 'large' },
+            content: {
+              variant: 'plain',
+              columns: 3,
+              items: [
+                createStat({ value: 'פי 3', label: 'יותר מעורבות', sub: 'בצוותים שבהם מרגישים בטוחים לדבר' }),
+                createStat({ value: '2 מ-3', label: 'מהאירועים', sub: 'לא מדווחים — כי לא ברור למי ואיך' }),
+                createStat({ value: 'עֵד אחד', label: 'זה כל מה שצריך', sub: 'כדי לעצור מצב לא נעים בזמן' }),
+              ],
+            },
+          }),
+        ],
+      }),
+
+      createChapter({
+        title: 'לזהות, להגיב, לפנות',
+        description: '',
+        blocks: [
+          createBlock('cards', {
+            content: {
+              variant: 'gradient',
+              columns: 3,
+              media: 'icon',
+              roundness: 'medium',
+              textAlign: 'start',
+              items: [
+                createCard({ icon: 'Users', title: 'המבחן הפשוט', text: 'הקובע הוא לא הכוונה אלא ההשפעה: אם התנהגות גורמת למישהו אי-נוחות, זה מספיק כדי לעצור אותה.' }),
+                createCard({ icon: 'Heart', title: 'עֵד שמדבר', text: 'משפט קטן — ״בוא נעצור עם זה״ — עוצר אירוע. שתיקה מאותתת שזה בסדר, וזה כמעט תמיד לא.' }),
+                createCard({ icon: 'MessageCircleQuestion', title: 'אפשר רק להתייעץ', text: 'לא חייבים להגיש תלונה כדי לדבר. אפשר לפנות לגורם המקצועי רק כדי להבין את האפשרויות.' }),
+              ],
+            },
+          }),
+          createBlock('accordion', {
+            content: {
+              mode: 'single',
+              openFirstByDefault: true,
+              items: [
+                createAccordionItem({
+                  title: 'מה נחשב חציית גבול?',
+                  doc: richText(paragraph('כל התנהגות בעלת אופי פוגעני שאינה רצויה לצד השני — הערה, בדיחה, מגע או הודעה. אם אינך בטוח, זו כבר סיבה טובה לעצור ולשאול.')),
+                }),
+                createAccordionItem({
+                  title: 'אני עֵד למצב לא נעים — מה עושים?',
+                  doc: richText(paragraph('אפשר להעיר בעדינות בזמן אמת, לשאול בפרטיות את מי שנפגע אם הכול בסדר, ולעדכן גורם מוסמך אם זה חוזר.')),
+                }),
+                createAccordionItem({
+                  title: 'למי פונים?',
+                  doc: richText(paragraph('החליפו כאן בכתובת הפנייה הארגונית שלכם — ממונה, גורם משאבי אנוש או ערוץ דיווח ייעודי. ציינו ערוץ אחד ברור.')),
+                }),
+              ],
+            },
+          }),
+          createBlock('quote', {
+            settings: { width: 'full', background: 'gradient', spacingTop: 'large', spacingBottom: 'large' },
+            content: {
+              variant: 'band',
+              text: 'סביבה מכבדת נבנית לא ברגעים הגדולים, אלא באלף ההחלטות הקטנות של איך אנחנו מדברים זה עם זה.',
+              author: 'סיכום ההדרכה',
+              role: '',
+            },
+          }),
+          createBlock('quiz', {
+            content: {
+              question: 'לפי המבחן שראינו, מה קובע אם התנהגות חצתה גבול?',
+              hint: 'לא מה התכוונת — אלא מה קרה.',
+              options: [
+                createQuizOption({ text: 'ההשפעה על מי שספג אותה, גם אם הכוונה הייתה תמימה', correct: true }),
+                createQuizOption({ text: 'רק אם התכוונת לפגוע' }),
+                createQuizOption({ text: 'רק אם היו עדים' }),
+              ],
+              feedbackCorrect: 'נכון. המבחן הוא ההשפעה, לא הכוונה — ולכן ״לא התכוונתי״ אינו פוטר מאחריות לעצור.',
+              feedbackIncorrect: 'לא מדויק. הקובע הוא איך ההתנהגות התקבלה, לא מה עמד מאחוריה.',
+              shuffle: true,
+              allowRetry: true,
+              showSolution: true,
+              labels: { submit: 'בדיקה', retry: 'ניסיון נוסף', solution: 'הצגת הפתרון' },
+            },
+          }),
+        ],
+      }),
+    ],
+  });
+
+  return { course, assets: [outline] };
+}
+
 export const exampleTemplates = [
   {
     id: 'example-onboarding',
@@ -519,5 +894,23 @@ export const exampleTemplates = [
     name: 'בטיחות וציות',
     description: 'עקרונות, כללים באקורדיון, בדיקת הבנה ואישור קריאה.',
     create: safetyExample,
+  },
+  {
+    id: 'example-cyber',
+    name: 'מודעות סייבר',
+    description: 'זיהוי פישינג, סיסמאות והרגלים — עם מספרים גדולים ותרחיש אמיתי.',
+    create: cyberExample,
+  },
+  {
+    id: 'example-service',
+    name: 'שירות לקוחות מצוין',
+    description: 'ארבעה צעדים בכל שיחה, כרטיסים ממוספרים ותרחיש התמודדות.',
+    create: serviceExample,
+  },
+  {
+    id: 'example-respect',
+    name: 'סביבת עבודה מכבדת',
+    description: 'מה יוצר אווירה מכבדת, איך מזהים חצייה של גבול, ולמי פונים.',
+    create: respectExample,
   },
 ] as const;
