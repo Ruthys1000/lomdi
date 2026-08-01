@@ -54,9 +54,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       model: 'claude-opus-5',
       max_tokens: 32_000,
       thinking: { type: 'adaptive' },
-      // effort medium מאזן איכות מול זמן: יצירת ה-JSON היא משימת חילוץ מובנית,
-      // לא הוכחה מתמטית, ו-high היה מבזבז חשיבה ומקרב אותנו לטיימאוט.
-      output_config: { effort: 'medium' },
+      // effort high לאיכות מקסימלית. הזמן הארוך (maxDuration 800) מכסה את החשיבה
+      // הנוספת, כך שאין חשש טיימאוט.
+      output_config: { effort: 'high' },
       system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: `צור לומדה מהתוכן הבא:\n\n${text}` }],
     });
