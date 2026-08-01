@@ -20,6 +20,7 @@ import type {
 } from '@/model/types';
 import { readImageHint, type ImageField, type ImageIntent } from './imageIntent';
 import { sanitizeRichText } from './sanitizeRichText';
+import { coerceVisualStyle, type VisualStyle } from './visualStyle';
 
 /**
  * שכבת הקליטה של תוכן שנוצר ב-AI.
@@ -35,6 +36,8 @@ import { sanitizeRichText } from './sanitizeRichText';
 export interface CoerceResult {
   course: Course;
   imageIntents: ImageIntent[];
+  /** ה-art direction ללומדה כולה — מכוון את יצירת התמונות ב-AI */
+  visualStyle: VisualStyle;
   warnings: string[];
 }
 
@@ -356,5 +359,9 @@ export function coerceGeneratedCourse(raw: unknown): CoerceResult {
     chapters,
   });
 
-  return { course, imageIntents: ctx.intents, warnings: ctx.warnings };
+  // ה-brief נגזר על גבי הערכה הסופית, כך שכשהמודל השמיט אותו — הפלטה עדיין
+  // מתלכדת עם צבעי ה-theme של הלומדה.
+  const visualStyle = coerceVisualStyle(root.visualStyle, course.theme);
+
+  return { course, imageIntents: ctx.intents, visualStyle, warnings: ctx.warnings };
 }

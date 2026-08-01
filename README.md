@@ -281,7 +281,9 @@ src/
   - [x] פרוסה אנכית: פונקציית `api/generate` מאובטחת + פאנל יצירה במסך הפתיחה
   - [x] דף בית AI-first (היצירה כ-CTA הראשי ב-Hero) + קופי שיווקי
   - [x] ספק תמונות: Pexels דרך `ImageResolver` + `api/image`
-  - [ ] אופציה ל-AI-generated images (מאחורי אותו endpoint)
+  - [x] אופציה ל-AI-generated images: סט איורים קוהרנטי לפי `visualStyle` של
+    הלומדה (Claude מכוון art direction, `api/generate-image` מרנדר ב-Recraft),
+    בורר מקור תמונות בטופס היצירה. נצרב כ-Blob — הלומדה נשארת אופליין.
 
 ### איך שלב מתנהל
 

@@ -19,6 +19,26 @@ function expectValid(course: unknown) {
   expect(result.ok, result.ok ? '' : result.errors.join('; ')).toBe(true);
 }
 
+describe('coerceGeneratedCourse — visualStyle', () => {
+  it('מכבד visualStyle תקין שהגיע מ-AI', () => {
+    const { visualStyle } = coerceGeneratedCourse({
+      theme: 'vivid',
+      visualStyle: { artStyle: 'watercolor', palette: ['#abcdef'], motif: 'waves' },
+      chapters: [],
+    });
+    expect(visualStyle.artStyle).toBe('watercolor');
+    expect(visualStyle.palette).toEqual(['#abcdef']);
+    expect(visualStyle.motif).toBe('waves');
+  });
+
+  it('גוזר brief מהערכה כשהמודל השמיט אותו', () => {
+    const { course, visualStyle } = coerceGeneratedCourse({ theme: 'forest', chapters: [] });
+    expect(visualStyle.artStyle).toBeTruthy();
+    // הפלטה מתלכדת עם צבעי ה-theme של הלומדה
+    expect(visualStyle.palette).toContain(course.theme.colors.primary);
+  });
+});
+
 describe('coerceGeneratedCourse', () => {
   it('הופכת פלט תקין ללומדה תקינה', () => {
     const { course, warnings } = coerceGeneratedCourse({

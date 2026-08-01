@@ -163,6 +163,13 @@ const EXAMPLE = {
   title: 'בטיחות במשרד',
   subtitle: 'לומדת מבוא קצרה',
   theme: 'forest',
+  visualStyle: {
+    artStyle:
+      'clean modern flat vector illustration, soft rounded shapes, calm and reassuring, ' +
+      'consistent line weight, generous negative space, no text',
+    palette: ['#14532d', '#166534', '#4ade80'],
+    motif: 'subtle shield and leaf motifs',
+  },
   chapters: [
     {
       title: 'פתיחה',
@@ -254,7 +261,7 @@ const EXAMPLE = {
 const SYSTEM_PROMPT = [
   'אתה מחולל לומדות (קורסים דיגיטליים) בעברית. קלט: תוכן גולמי. פלט: לומדה אחת כ-JSON.',
   '',
-  'מבנה: לומדה = { title, subtitle, description, theme, chapters:[...] }.',
+  'מבנה: לומדה = { title, subtitle, description, theme, visualStyle, chapters:[...] }.',
   'כל פרק = { title, description, blocks:[...] }. כל בלוק = { type, content:{...} }.',
   'אין צורך ב-id — המערכת משלימה. לבלוק אפשר להוסיף settings:{ background } כדי',
   'לצבוע סקשן (ראה למטה) — השתמש בזה בחוכמה, לא בכל בלוק.',
@@ -271,9 +278,14 @@ const SYSTEM_PROMPT = [
   '- בחר theme שמתאים לנושא, והעדף ערכות נועזות (vivid, sunset, midnight, forest) על clean.',
   '- בלוק quiz חייב תשובה נכונה אחת בדיוק.',
   '- תמונות: אל תמציא assetId. *כל* בלוק image ו-textImage, וכן hero עם',
-  '  backgroundType="image", **חייב** שדה "query" — תיאור קצר *באנגלית* לחיפוש תמונת',
-  '  סטוק (למשל "modern office team"). בלי query התמונה לא תיטען. הוסף גם "alt"',
+  '  backgroundType="image", **חייב** שדה "query" — תיאור קצר *באנגלית* לתמונה',
+  '  (למשל "modern office team"). בלי query התמונה לא תיטען. הוסף גם "alt"',
   '  בעברית לנגישות. אל תשתמש בבלוק image בלי query.',
+  '- visualStyle: הגדר art direction אחד לכל הלומדה, כדי שכל התמונות ייראו כסט',
+  '  מעוצב אחד ולא אוסף אקראי. אובייקט עליון: { artStyle, palette, motif }.',
+  '  artStyle = תיאור סגנון האיור *באנגלית* (למשל "flat vector illustration,',
+  '  soft rounded shapes, no text"); palette = מערך צבעי hex שמתאימים ל-theme;',
+  '  motif = מוטיב חוזר אופציונלי. בחר סגנון שמתאים לנושא ולערכה שבחרת.',
   '',
   BLOCK_CATALOG,
   '',
