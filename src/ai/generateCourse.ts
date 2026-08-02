@@ -64,6 +64,17 @@ export async function generateCourseFromText(
     return importGeneratedCourse(line.course);
   };
 
+  // שורה שאינה JSON תקין (דופק שנחתך באמצע, הזרקת פרוקסי) — מדלגים עליה במקום
+  // להפיל את כל היצירה בחריגה לא-מטופלת. שורות ה-result/error מגיעות מהשרת שלנו
+  // כ-JSON תקין תמיד, כך שדילוג פוגע רק בשורות רעש.
+  const parseLine = (raw: string): StreamLine | undefined => {
+    try {
+      return JSON.parse(raw) as StreamLine;
+    } catch {
+      return undefined;
+    }
+  };
+
   // כל שורה שלמה (מופרדת ב-\n) היא אובייקט JSON אחד.
   const drain = (chunk: string): GeneratedCourse | undefined => {
     buffer += chunk;
@@ -72,7 +83,9 @@ export async function generateCourseFromText(
       const raw = buffer.slice(0, newline).trim();
       buffer = buffer.slice(newline + 1);
       if (!raw) continue;
-      const result = handle(JSON.parse(raw) as StreamLine);
+      const line = parseLine(raw);
+      if (!line) continue;
+      const result = handle(line);
       if (result) return result;
     }
     return undefined;
@@ -88,8 +101,11 @@ export async function generateCourseFromText(
   // השורה האחרונה עשויה להגיע בלי \n מסיים.
   const tail = buffer.trim();
   if (tail) {
-    const result = handle(JSON.parse(tail) as StreamLine);
-    if (result) return result;
+    const line = parseLine(tail);
+    if (line) {
+      const result = handle(line);
+      if (result) return result;
+    }
   }
 
   throw new Error('יצירת הלומדה הסתיימה ללא תוצאה. נסו שוב.');

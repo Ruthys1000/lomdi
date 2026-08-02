@@ -63,52 +63,69 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     res.write(`${JSON.stringify(payload)}\n`);
   };
 
-  const stream = client.messages.stream({
-    // Sonnet ולא Opus: יצירת ה-JSON היא משימת חילוץ מובנית, ו-Sonnet מהיר
-    // משמעותית באיכות דומה — קיצור ההמתנה חשוב במיוחד בנייד, שם חיבור ארוך
-    // מתנתק כשעוברים אפליקציה. שכבת הריפוי (coerceGeneratedCourse) ממילא
-    // מבטיחה חוסן לפלט.
-    model: 'claude-sonnet-5',
-    max_tokens: 32_000,
-    thinking: { type: 'adaptive' },
-    // effort medium מאזן איכות מול זמן: יצירת ה-JSON היא משימת חילוץ מובנית,
-    // לא הוכחה מתמטית, ו-high האריך את ההמתנה מדי.
-    output_config: { effort: 'medium' },
-    system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
-    messages: [{ role: 'user', content: `צור לומדה מהתוכן הבא:\n\n${text}` }],
-  });
+  // ה-stream הפעיל נשמר במשתנה כדי ש-abort (בסגירת הלקוח) יפנה תמיד לניסיון
+  // הנוכחי — היצירה עשויה לרוץ בשני ניסיונות, וכל אחד פותח stream משלו.
+  let activeStream: ReturnType<typeof client.messages.stream> | null = null;
 
-  // דופק ראשון מיידי + כל 10 שניות: שומר את החיבור חי בזמן שהמודל חושב וכותב.
+  // ניסיון יצירה בודד: פותח stream, מסמן אותו כפעיל, וממתין לתשובה המלאה.
+  // הפרמטרים זהים בכל ניסיון.
+  const attemptGenerate = (): Promise<Anthropic.Message> => {
+    const stream = client.messages.stream({
+      // Sonnet ולא Opus: יצירת ה-JSON היא משימת חילוץ מובנית, ו-Sonnet מהיר
+      // משמעותית באיכות דומה — קיצור ההמתנה חשוב במיוחד בנייד, שם חיבור ארוך
+      // מתנתק כשעוברים אפליקציה. שכבת הריפוי (coerceGeneratedCourse) ממילא
+      // מבטיחה חוסן לפלט.
+      model: 'claude-sonnet-5',
+      max_tokens: 32_000,
+      thinking: { type: 'adaptive' },
+      // effort medium מאזן איכות מול זמן: יצירת ה-JSON היא משימת חילוץ מובנית,
+      // לא הוכחה מתמטית, ו-high האריך את ההמתנה מדי.
+      output_config: { effort: 'medium' },
+      system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
+      messages: [{ role: 'user', content: `צור לומדה מהתוכן הבא:\n\n${text}` }],
+    });
+    activeStream = stream;
+    return stream.finalMessage();
+  };
+
+  // דופק ראשון מיידי + כל 10 שניות: שומר את החיבור חי לאורך *כל* הניסיונות,
+  // בזמן שהמודל חושב וכותב.
   writeLine({ type: 'progress' });
   const heartbeat = setInterval(() => writeLine({ type: 'progress' }), 10_000);
 
-  // אם הלקוח מתנתק — עוצרים את היצירה ומפסיקים לכתוב, כדי לא לשרוף זמן ריצה לחינם.
+  // אם הלקוח מתנתק — עוצרים את הניסיון הפעיל ומפסיקים לכתוב, כדי לא לשרוף זמן
+  // ריצה לחינם.
   res.on('close', () => {
     open = false;
     clearInterval(heartbeat);
-    stream.abort();
+    activeStream?.abort();
   });
 
   try {
-    const message = await stream.finalMessage();
+    // ניסיון ראשון. אם לא הופק JSON שמיש — ריפוי שנכשל, קטיעה, או refusal —
+    // מנסים שוב *פעם אחת*. תשובה פגומה חד-פעמית של המודל היא התקלה הנפוצה, וניסיון
+    // חוזר הופך אותה להצלחה בלי שהמשתמש צריך ללחוץ "נסו שוב". שכבת ה-coerce בצד
+    // הלקוח נשארת רשת הביטחון המבנית מעל שני הניסיונות.
+    let message = await attemptGenerate();
+    let course = extractCourseJson(message);
+    if (!course && open) {
+      message = await attemptGenerate();
+      course = extractCourseJson(message);
+    }
 
-    if (message.stop_reason === 'refusal') {
+    if (course) {
+      writeLine({ type: 'result', course });
+    } else if (message.stop_reason === 'refusal') {
       writeLine({ type: 'error', error: 'הבקשה נדחתה על ידי מנגנוני הבטיחות. נסו תוכן אחר.' });
+    } else if (message.stop_reason === 'max_tokens') {
+      // ריפוי נכשל *וגם* התשובה נקטעה בגלל תקרת ה-tokens — הודעה ממוקדת שמכוונת
+      // לפעולה, במקום ה"נסו שוב" הגנרי.
+      writeLine({
+        type: 'error',
+        error: 'הלומדה שנוצרה ארוכה מדי והתשובה נקטעה. נסו טקסט קצר יותר או פצלו אותו לחלקים.',
+      });
     } else {
-      // הריפוי (parseCourseJson) רץ ראשון, כך שגם תשובה שנקטעה אך ניתנת לתיקון
-      // עדיין מצליחה. רק כשהריפוי נכשל *וגם* התשובה נקטעה בגלל תקרת ה-tokens
-      // מציגים הודעה ממוקדת שמכוונת לפעולה, במקום ה"נסו שוב" הגנרי.
-      const course = extractCourseJson(message);
-      if (course) {
-        writeLine({ type: 'result', course });
-      } else if (message.stop_reason === 'max_tokens') {
-        writeLine({
-          type: 'error',
-          error: 'הלומדה שנוצרה ארוכה מדי והתשובה נקטעה. נסו טקסט קצר יותר או פצלו אותו לחלקים.',
-        });
-      } else {
-        writeLine({ type: 'error', error: 'המודל לא החזיר JSON תקין. נסו שוב.' });
-      }
+      writeLine({ type: 'error', error: 'המודל לא החזיר JSON תקין. נסו שוב.' });
     }
   } catch (error) {
     // התנתקות יזומה (abort) בעקבות סגירת הלקוח אינה שגיאה אמיתית לדיווח.
