@@ -5,7 +5,6 @@ import { getTemplate } from '@/templates';
 import type { TemplateResult } from '@/templates';
 import { APP_NAME, APP_VERSION } from '@/version';
 import { Hero } from './Hero';
-import { HowItWorks } from './HowItWorks';
 import { MyCoursesDrawer } from './MyCoursesDrawer';
 import { useRecentProjects } from './useRecentProjects';
 
@@ -18,9 +17,9 @@ interface WelcomeScreenProps {
 /**
  * מסך הפתיחה — הדלת הראשית של הכלי.
  *
- * **נחיתה אחת לכולם.** אותו דף בדיוק למבקר חדש ולחוזר: Hero עם מיני-לומדי
- * חי, "איך עובדים" כפס ייצור, ובנטו הבלוקים. הדף *הוא* ה-landing, ואפשר
- * לחזור אליו מהעורך גם אחרי שכבר נבנו לומדות.
+ * **נחיתה אחת לכולם.** אותו דף בדיוק למבקר חדש ולחוזר: Hero עם מחולל
+ * הלומדות בלבו, ומתחתיו סוגר עם CTA וייבוא קובץ. הדף *הוא* ה-landing,
+ * ואפשר לחזור אליו מהעורך גם אחרי שכבר נבנו לומדות.
  *
  * **הלומדות השמורות חיות בחוצץ נפרד** (MyCoursesDrawer) שנפתח מכפתור בפס
  * העליון — ולא כרצועה שדוחפת את הנחיתה מטה. הכפתור מופיע רק כשיש לומדות.
@@ -83,7 +82,6 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
 
       {/* נחיתה אחת לכולם — מוצגת תמיד, גם אחרי שנבנו לומדות */}
       <Hero onBuild={() => startTemplate('blank')} />
-      <HowItWorks />
       <Closer onBuild={() => startTemplate('blank')} loading={loading} fileErrors={fileErrors} onPickFile={pickFile} />
 
       {/* חוצץ "הלומדות שלי" — נפתח מהפס העליון, מחוץ לגלילת הנחיתה */}

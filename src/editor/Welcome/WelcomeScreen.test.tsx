@@ -71,9 +71,9 @@ describe('מסך הפתיחה', () => {
     expect(screen.queryByRole('button', { name: /נוהל או מדיניות/ })).not.toBeInTheDocument();
   });
 
-  it('הנחיתה ("איך עובדים עם לומדי") מוצגת תמיד — גם למבקר חדש וגם עם לומדות שמורות', async () => {
+  it('הנחיתה (ה-Hero) מוצגת תמיד — גם למבקר חדש וגם עם לומדות שמורות', async () => {
     await setup();
-    expect(screen.getByRole('heading', { name: 'איך עובדים עם לומדי' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /הפכו כל טקסט/ })).toBeInTheDocument();
     // בלי לומדות שמורות אין כפתור "הלומדות שלי"
     expect(screen.queryByRole('button', { name: 'הלומדות שלי' })).not.toBeInTheDocument();
 
@@ -83,7 +83,7 @@ describe('מסך הפתיחה', () => {
     await setup();
 
     // הנחיתה נשארת זהה, ונוסף כפתור הגישה ללומדות השמורות
-    expect(screen.getByRole('heading', { name: 'איך עובדים עם לומדי' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /הפכו כל טקסט/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'הלומדות שלי' })).toBeInTheDocument();
   });
 
