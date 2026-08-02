@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Anthropic from '@anthropic-ai/sdk';
+import { parseCourseJson } from './lib/repairJson';
 
 /**
  * פונקציית ה-serverless שמחוללת לומדה מטקסט.
@@ -95,11 +96,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     if (message.stop_reason === 'refusal') {
       writeLine({ type: 'error', error: 'הבקשה נדחתה על ידי מנגנוני הבטיחות. נסו תוכן אחר.' });
     } else {
+      // הריפוי (parseCourseJson) רץ ראשון, כך שגם תשובה שנקטעה אך ניתנת לתיקון
+      // עדיין מצליחה. רק כשהריפוי נכשל *וגם* התשובה נקטעה בגלל תקרת ה-tokens
+      // מציגים הודעה ממוקדת שמכוונת לפעולה, במקום ה"נסו שוב" הגנרי.
       const course = extractCourseJson(message);
-      if (!course) {
-        writeLine({ type: 'error', error: 'המודל לא החזיר JSON תקין. נסו שוב.' });
-      } else {
+      if (course) {
         writeLine({ type: 'result', course });
+      } else if (message.stop_reason === 'max_tokens') {
+        writeLine({
+          type: 'error',
+          error: 'הלומדה שנוצרה ארוכה מדי והתשובה נקטעה. נסו טקסט קצר יותר או פצלו אותו לחלקים.',
+        });
+      } else {
+        writeLine({ type: 'error', error: 'המודל לא החזיר JSON תקין. נסו שוב.' });
       }
     }
   } catch (error) {
@@ -114,7 +123,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   }
 }
 
-/** מחלץ את גוף ה-JSON מהתשובה — גם אם המודל עטף אותו בגדרות קוד או בטקסט */
+/**
+ * מחלץ את גוף ה-JSON מהתשובה — גם אם המודל עטף אותו בגדרות קוד, הוסיף טקסט, פלט
+ * פסיקים עודפים או נקטע באמצע. הריפוי הסלחני חי ב-`./lib/repairJson`.
+ */
 function extractCourseJson(message: Anthropic.Message): unknown {
   const raw = message.content
     .filter((block): block is Anthropic.TextBlock => block.type === 'text')
@@ -122,15 +134,7 @@ function extractCourseJson(message: Anthropic.Message): unknown {
     .join('')
     .trim();
 
-  const start = raw.indexOf('{');
-  const end = raw.lastIndexOf('}');
-  if (start === -1 || end <= start) return null;
-
-  try {
-    return JSON.parse(raw.slice(start, end + 1));
-  } catch {
-    return null;
-  }
+  return parseCourseJson(raw);
 }
 
 // ─────────────────────────── הפרומפט המוטמע ───────────────────────────
