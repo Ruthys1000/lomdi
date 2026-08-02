@@ -48,17 +48,16 @@ async function setup() {
 }
 
 describe('מסך הפתיחה', () => {
-  it('מציג פעולה ראשית "מתחילים לבנות"', async () => {
+  it('מציג פעולה משנית "התחילו מלומדה ריקה"', async () => {
     await setup();
 
-    // ה-CTA הראשי מופיע גם ב-Hero וגם בסוגר — לכן getAllByRole
-    expect(screen.getAllByRole('button', { name: 'מתחילים לבנות' }).length).toBeGreaterThan(0);
+    expect(screen.getByRole('button', { name: 'התחילו מלומדה ריקה' })).toBeInTheDocument();
   });
 
-  it('לחיצה על "מתחילים לבנות" מחזירה לומדה עם פרק, ולא רק שם תבנית', async () => {
+  it('לחיצה על "התחילו מלומדה ריקה" מחזירה לומדה עם פרק, ולא רק שם תבנית', async () => {
     const { onStart } = await setup();
 
-    fireEvent.click(screen.getAllByRole('button', { name: 'מתחילים לבנות' })[0]);
+    fireEvent.click(screen.getByRole('button', { name: 'התחילו מלומדה ריקה' }));
 
     expect(onStart).toHaveBeenCalledTimes(1);
     expect(onStart.mock.calls[0][0].course.chapters.length).toBeGreaterThan(0);
