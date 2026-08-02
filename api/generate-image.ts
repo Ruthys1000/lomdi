@@ -8,10 +8,11 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
  * של הלומדה כולה — סגנון, פלטה ומוטיב — כך שכל התמונות בלומדה נראות כסט אחד
  * מעוצב, לא כאוסף אקראי. זה ה-wow: איורים שנעשו *ללומדה הזו*, לא סטוק גנרי.
  *
- * בדיוק כמו ב-Pexels, הבייטים נמשכים **בצד השרת** ומוחזרים מאותו origin, כדי
+ * בדיוק כמו ב-Pexels, הבייטים מוחזרים מאותו origin עם cache, כדי
  * ש-`importAssetFromUrl` יטמיע אותם כ-Blob — תנאי הכרחי ללומדה שרצה מ-`file://`
- * אחרי הייצוא. מפתח ה-API חי כאן בלבד. הספק (Recraft היום) חבוי מאחורי
- * `generateImage`; החלפתו היא שינוי מקומי אחד, כי הלקוח לא יודע מי מרנדר.
+ * אחרי הייצוא. מפתח ה-API חי כאן בלבד. הספק נבחר במשתני סביבה (`IMAGE_PROVIDER`,
+ * או אוטומטית Gemini כשמוגדר `GEMINI_API_KEY`): Recraft מחזיר URL שנמשך בצד
+ * השרת, ו-Gemini מחזיר בייטים מוטמעים ישירות. הלקוח לא יודע מי מרנדר.
  *
  * כשל תמיד רך: כל סטטוס לא-2xx מפיל את הלקוח חזרה לאיור מציב-מקום, אבל הגוף
  * נושא הודעת שגיאה מובחנת (`error`) שעולה עד ה-toast — בדיוק כמו `api/image.ts`.
@@ -84,6 +85,77 @@ export async function generateImage(
   return { ok: false, status: 502, error: 'הספק לא החזיר תמונה.' };
 }
 
+// ─────────────────────────── ספק Gemini ───────────────────────────
+// שלא כמו Recraft שמחזיר URL, Gemini מחזיר את התמונה כ-base64 מוטמע
+// (inlineData) בגוף התשובה — כך שאין הורדה שנייה: מפענחים ל-Buffer ומחזירים
+// ישירות ללקוח. ברירת המחדל של המודל ניתנת לשדרוג דרך משתנה סביבה בלי קוד.
+
+const GEMINI_DEFAULT_MODEL = 'gemini-2.5-flash-image';
+const geminiEndpoint = (model: string): string =>
+  `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+
+interface GeminiResponse {
+  candidates?: {
+    content?: { parts?: { inlineData?: { data?: string; mimeType?: string } }[] };
+  }[];
+}
+
+/** תוצאת יצירה מבוססת-בייטים: התמונה המפוענחת + סוגה, או שגיאה מובחנת. */
+export type GeneratedImage =
+  | { ok: true; contentType: string; data: Buffer }
+  | { ok: false; status: number; error: string };
+
+/**
+ * מייצר איור ב-Gemini ומחזיר את בייטי התמונה. סלחני ומדווח באותו חוזה כמו
+ * `generateImage` (Recraft): שגיאת מפתח/הרשאה (400/401/403) או חריגת מכסה (429)
+ * מוחזרות מיד עם הודעה ברורה, ללא ניסיון חוזר. מקבל `fetchImpl` להזרקה בבדיקות.
+ */
+export async function generateImageWithGemini(
+  prompt: string,
+  apiKey: string,
+  fetchImpl: typeof fetch = fetch,
+  model: string = process.env.GEMINI_IMAGE_MODEL || GEMINI_DEFAULT_MODEL,
+): Promise<GeneratedImage> {
+  let response: Response;
+  try {
+    response = await fetchImpl(geminiEndpoint(model), {
+      method: 'POST',
+      headers: { 'x-goog-api-key': apiKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { responseModalities: ['IMAGE'] },
+      }),
+    });
+  } catch {
+    return { ok: false, status: 502, error: 'ספק התמונות אינו זמין כרגע.' };
+  }
+
+  if (!response.ok) {
+    // מפתח לא תקין ב-Gemini מוחזר כ-400 (API_KEY_INVALID), הרשאה חסרה כ-403.
+    if (response.status === 400 || response.status === 401 || response.status === 403) {
+      return { ok: false, status: 502, error: 'מפתח Gemini שגוי או חסר הרשאה.' };
+    }
+    if (response.status === 429) {
+      return { ok: false, status: 429, error: 'חריגה ממכסת Gemini — נסו שוב מאוחר יותר.' };
+    }
+    return { ok: false, status: 502, error: 'יצירת התמונה נכשלה.' };
+  }
+
+  const payload = (await response.json()) as GeminiResponse;
+  const parts = payload.candidates?.[0]?.content?.parts ?? [];
+  for (const part of parts) {
+    if (part.inlineData?.data) {
+      return {
+        ok: true,
+        contentType: part.inlineData.mimeType ?? 'image/png',
+        data: Buffer.from(part.inlineData.data, 'base64'),
+      };
+    }
+  }
+
+  return { ok: false, status: 502, error: 'הספק לא החזיר תמונה.' };
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   if (req.method !== 'GET') {
     res.status(405).json({ error: 'שיטה לא נתמכת.' });
@@ -101,33 +173,55 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     return;
   }
 
-  const apiKey = process.env.RECRAFT_API_KEY;
-  if (!apiKey) {
-    res.status(500).json({ error: 'ספק התמונות (Recraft) לא הוגדר בשרת.' });
-    return;
-  }
+  // בחירת ספק: הגדרת GEMINI_API_KEY לבד מפעילה את Gemini; IMAGE_PROVIDER דורס
+  // במפורש. פריסות Recraft קיימות (בלי מפתח Gemini) ממשיכות לעבוד כרגיל.
+  const provider = process.env.IMAGE_PROVIDER ?? (process.env.GEMINI_API_KEY ? 'gemini' : 'recraft');
 
-  const style = typeof req.query.style === 'string' ? req.query.style : undefined;
-  const substyle = typeof req.query.substyle === 'string' ? req.query.substyle : undefined;
+  // הבייטים תמיד מוחזרים מאותו origin עם cache — כך `importAssetFromUrl` מטמיע
+  // אותם כ-Blob, תנאי הכרחי ללומדה שרצה מ-`file://` אחרי הייצוא.
+  const sendImage = (contentType: string, buffer: Buffer): void => {
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.status(200).send(buffer);
+  };
 
   try {
+    if (provider === 'gemini') {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        res.status(500).json({ error: 'ספק התמונות (Gemini) לא הוגדר בשרת.' });
+        return;
+      }
+      const result = await generateImageWithGemini(prompt, apiKey);
+      if (!result.ok) {
+        res.status(result.status).json({ error: result.error });
+        return;
+      }
+      // Gemini מחזיר את הבייטים ישירות (base64 מוטמע) — אין הורדה שנייה.
+      sendImage(result.contentType, result.data);
+      return;
+    }
+
+    const apiKey = process.env.RECRAFT_API_KEY;
+    if (!apiKey) {
+      res.status(500).json({ error: 'ספק התמונות (Recraft) לא הוגדר בשרת.' });
+      return;
+    }
+    const style = typeof req.query.style === 'string' ? req.query.style : undefined;
+    const substyle = typeof req.query.substyle === 'string' ? req.query.substyle : undefined;
+
     const result = await generateImage(prompt, apiKey, fetch, { style, substyle });
     if (!result.ok) {
       res.status(result.status).json({ error: result.error });
       return;
     }
-
+    // Recraft מחזיר URL — מושכים את הבייטים בצד השרת.
     const image = await fetch(result.url);
     if (!image.ok) {
       res.status(502).json({ error: 'הורדת התמונה נכשלה.' });
       return;
     }
-
-    const contentType = image.headers.get('content-type') ?? 'image/png';
-    const buffer = Buffer.from(await image.arrayBuffer());
-    res.setHeader('Content-Type', contentType);
-    res.setHeader('Cache-Control', 'public, max-age=86400');
-    res.status(200).send(buffer);
+    sendImage(image.headers.get('content-type') ?? 'image/png', Buffer.from(await image.arrayBuffer()));
   } catch (error) {
     console.error('image generation failed', error);
     res.status(502).json({ error: 'ספק התמונות אינו זמין כרגע.' });
