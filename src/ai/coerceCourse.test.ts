@@ -253,34 +253,6 @@ describe('coerceGeneratedCourse', () => {
     expectValid(course);
   });
 
-  it('שומרת ערכי stats מה-AI גם בלי id', () => {
-    const { course } = coerceGeneratedCourse({
-      chapters: [
-        {
-          blocks: [
-            {
-              type: 'stats',
-              content: {
-                items: [
-                  { value: '+40%', label: 'שיפור', sub: 'בשנה האחרונה' },
-                  { value: '24/7', label: 'זמינות', sub: 'לאורך כל השבוע' },
-                ],
-              },
-            },
-          ],
-        },
-      ],
-    });
-
-    const content = course.chapters[0].blocks[0].content as {
-      items: { id: string; value: string; label: string }[];
-    };
-    expect(content.items.map((i) => i.value)).toEqual(['+40%', '24/7']);
-    expect(content.items.map((i) => i.label)).toEqual(['שיפור', 'זמינות']);
-    expect(content.items.every((i) => i.id)).toBe(true);
-    expectValid(course);
-  });
-
   it('שומרת פריטי accordion מה-AI כולל ה-doc', () => {
     const { course } = coerceGeneratedCourse({
       chapters: [

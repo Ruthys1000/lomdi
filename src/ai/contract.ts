@@ -43,7 +43,7 @@ const GUIDE = `הנחיות ליצירת לומדה:
 - פתחו כל לומדה בבלוק "hero" עם כותרת וכותרת משנה.
 - טקסט רץ נכתב כבלוק "richText". השדה "doc" הוא מסמך ProseMirror JSON: { "type": "doc", "content": [ ... ] }.
   מותרים רק ה-nodes וה-marks שברשימה הלבנה. כותרות גוף הן ברמות 2–4 בלבד.
-- למגוון חזותי השתמשו ב-cards, accordion, stats, quote ו-quiz — לא רק בפסקאות טקסט.
+- למגוון חזותי השתמשו ב-cards, accordion, quote ו-quiz — לא רק בפסקאות טקסט.
 - בלוק שאלה (quiz) חייב תשובה נכונה אחת בדיוק.
 - בחרו ערכת עיצוב לפי המזהה שלה בשדה "theme" (מחרוזת), למשל "clean" או "vivid".
 - תמונות: אל תמציאו assetId. בבלוקי image/textImage/hero כתבו בשדה "query" תיאור

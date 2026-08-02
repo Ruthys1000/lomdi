@@ -7,7 +7,7 @@ import '@testing-library/jest-dom/vitest';
  */
 /*
  * jsdom אינו מממש את ResizeObserver ואת URL.createObjectURL — שניהם
- * נדרשים לתצוגה החיה של גלריית הדוגמאות (ExamplesGallery). polyfill
+ * נדרשים לתצוגות החיות (תצוגה מקדימה של לומדה, מודלים ומגירות). polyfill
  * מינימלי ומוגן, כך שהוא לא נוגע בדפדפן אמיתי.
  */
 if (typeof globalThis.ResizeObserver === 'undefined') {

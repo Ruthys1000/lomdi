@@ -9,7 +9,7 @@ export const defaultBlockSettings: BlockSettings = {
 };
 
 export const defaultNavigation: NavigationSettings = {
-  mode: 'chapters',
+  mode: 'scroll',
   showProgress: true,
   showChapterMenu: true,
   showChapterNumber: true,
