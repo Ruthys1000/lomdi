@@ -348,7 +348,6 @@ const BLOCK_CATALOG = `סוגי הבלוקים (type + השדות המרכזיי
 - cards — כרטיסים. variant, columns(2-4), items:[{icon, title, text}].
 - accordion — פריטים נפתחים. items:[{title, doc}], mode(single|multiple), openFirstByDefault.
 - quiz — שאלת בחירה. question, hint, options:[{text, correct}] (בדיוק אחת correct:true), feedbackCorrect, feedbackIncorrect.
-- stats — מספרים גדולים. variant, columns, items:[{value, label, sub}].
 - quote — ציטוט. variant, text, author, role.
 - video — וידאו. source(youtube|vimeo|upload), url.
 - divider — מפריד. style(space|line|icon|gradient), icon, height.
@@ -403,18 +402,6 @@ const EXAMPLE = {
             },
           },
           settings: { background: 'gradientSoft' },
-        },
-        {
-          type: 'stats',
-          content: {
-            variant: 'gradient',
-            columns: 3,
-            items: [
-              { value: '90%', label: 'מהתאונות', sub: 'נמנעות במודעות פשוטה' },
-              { value: '3 דק׳', label: 'זמן פינוי', sub: 'היעד בחירום' },
-              { value: '24/7', label: 'דיווח', sub: 'לממונה הבטיחות' },
-            ],
-          },
         },
         {
           type: 'image',
@@ -473,11 +460,11 @@ const SYSTEM_PROMPT = [
   '- פתח כל לומדה ב-hero מרשים: variant "spotlight" או "panel", backgroundType="gradient",',
   '  fullBleed=true, height "tall". בחר gradientFrom/gradientTo שמתאימים לנושא.',
   '- השתמש בוריאציות הפרימיום, לא רק ב-plain: cards variant "gradient" או "numbered",',
-  '  stats variant "gradient", quote variant "band", textImage variant "feature".',
+  '  quote variant "band", textImage variant "feature".',
   '- צור מקצב: עטוף 1-2 סקשנים מרכזיים ב-settings:{ background:"gradientSoft" } או "surface"',
   '  או "primary" — לא את כולם, כדי שהצבע יבלוט. שאר הבלוקים נשארים בלי settings.',
-  '- כשהתוכן מאפשר, כלול לפחות בלוק stats אחד (מספרים גדולים) וציטוט (quote) אחד.',
-  '- למגוון חזותי השתמש ב-cards, accordion, stats, quote, textImage ו-quiz — לא רק בפסקאות.',
+  '- כשהתוכן מאפשר, כלול ציטוט (quote) אחד.',
+  '- למגוון חזותי השתמש ב-cards, accordion, quote, textImage ו-quiz — לא רק בפסקאות.',
   '- בחר theme שמתאים לנושא, והעדף ערכות נועזות (vivid, sunset, midnight, forest) על clean.',
   '- בלוק quiz חייב תשובה נכונה אחת בדיוק.',
   '- תמונות: אל תמציא assetId. *כל* בלוק image ו-textImage, וכן hero עם',

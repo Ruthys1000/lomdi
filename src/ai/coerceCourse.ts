@@ -3,7 +3,6 @@ import { getSharedBlockDefinition } from '@/blocks/registry.shared';
 import { createAccordionItem, type AccordionItem } from '@/blocks/accordion/content';
 import { createCard, type CardItem } from '@/blocks/cards/content';
 import type { QuizOption } from '@/blocks/quiz/content';
-import { createStat, type StatItem } from '@/blocks/stats/content';
 import { createBlockSettings, defaultNavigation } from '@/model/defaults';
 import { createChapter, createCourse } from '@/model/factory';
 import { createId } from '@/model/ids';
@@ -122,7 +121,7 @@ function repairQuiz(content: Record<string, unknown>, ctx: Ctx): void {
 }
 
 /**
- * משחזר מערכי `items` בבלוקים cards/stats/accordion.
+ * משחזר מערכי `items` בבלוקים cards/accordion.
  *
  * הפריטים האלה נושאים שדות חובה שהמודל מושמט לפי הוראת הפרומפט (`id`, וגם
  * `button`/`imageAssetId` בכרטיס). בלי תיקון, כשל אימות על פריט אחד גורם
@@ -144,15 +143,6 @@ function repairItemArrays(type: string, content: Record<string, unknown>, ctx: C
       if (typeof record.text === 'string') overrides.text = record.text;
       if (typeof record.imageAssetId === 'string') overrides.imageAssetId = record.imageAssetId;
       return createCard(overrides);
-    });
-  } else if (type === 'stats') {
-    content.items = raw.map((item): StatItem => {
-      const record = isRecord(item) ? item : {};
-      const overrides: Partial<StatItem> = {};
-      if (typeof record.value === 'string') overrides.value = record.value;
-      if (typeof record.label === 'string') overrides.label = record.label;
-      if (typeof record.sub === 'string') overrides.sub = record.sub;
-      return createStat(overrides);
     });
   } else if (type === 'accordion') {
     content.items = raw.map((item): AccordionItem => {

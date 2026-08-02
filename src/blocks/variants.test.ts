@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { heroContentSchema, createHeroContent } from './hero/content';
 import { cardsContentSchema, createCardsContent } from './cards/content';
 import { textImageContentSchema, createTextImageContent } from './textImage/content';
-import { statsContentSchema, createStatsContent } from './stats/content';
 import { quoteContentSchema, createQuoteContent } from './quote/content';
 
 /**
@@ -16,7 +15,6 @@ describe('תאימות אחורה של שדה variant', () => {
     ['hero', heroContentSchema, createHeroContent(), 'centered'],
     ['cards', cardsContentSchema, createCardsContent(), 'plain'],
     ['textImage', textImageContentSchema, createTextImageContent(), 'standard'],
-    ['stats', statsContentSchema, createStatsContent(), 'plain'],
     ['quote', quoteContentSchema, createQuoteContent(), 'emphasis'],
   ])('%s — תוכן בלי variant נטען כברירת המחדל', (_name, schema, content, expected) => {
     const legacy = { ...(content as Record<string, unknown>) };
@@ -26,11 +24,7 @@ describe('תאימות אחורה של שדה variant', () => {
     expect(parsed.variant).toBe(expected);
   });
 
-  it.each([
-    ['stats', createStatsContent()],
-    ['quote', createQuoteContent()],
-  ])('%s — ברירת המחדל תקפה מול הסכמה', (_name, content) => {
-    const schema = _name === 'stats' ? statsContentSchema : quoteContentSchema;
-    expect(schema.safeParse(content).success).toBe(true);
+  it('quote — ברירת המחדל תקפה מול הסכמה', () => {
+    expect(quoteContentSchema.safeParse(createQuoteContent()).success).toBe(true);
   });
 });

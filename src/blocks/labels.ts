@@ -16,7 +16,6 @@ export const blockLabels: Record<string, string> = {
   video: 'וידאו',
   quiz: 'שאלת בחירה',
   divider: 'מפריד',
-  stats: 'מספרים',
   quote: 'ציטוט',
 };
 
