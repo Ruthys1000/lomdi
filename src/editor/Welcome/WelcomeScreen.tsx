@@ -1,11 +1,10 @@
 import { useRef, useState } from 'react';
-import { BookOpen, FileUp, FolderOpen, Plus, Upload } from 'lucide-react';
+import { BookOpen, FileUp, FolderOpen, Upload } from 'lucide-react';
 import { openProjectFile } from '@/persistence/session';
 import { getTemplate } from '@/templates';
 import type { TemplateResult } from '@/templates';
 import { APP_NAME, APP_VERSION } from '@/version';
 import { Hero } from './Hero';
-import { HowItWorks } from './HowItWorks';
 import { MyCoursesDrawer } from './MyCoursesDrawer';
 import { useRecentProjects } from './useRecentProjects';
 
@@ -18,9 +17,9 @@ interface WelcomeScreenProps {
 /**
  * מסך הפתיחה — הדלת הראשית של הכלי.
  *
- * **נחיתה אחת לכולם.** אותו דף בדיוק למבקר חדש ולחוזר: Hero עם מיני-לומדי
- * חי, "איך עובדים" כפס ייצור, ובנטו הבלוקים. הדף *הוא* ה-landing, ואפשר
- * לחזור אליו מהעורך גם אחרי שכבר נבנו לומדות.
+ * **נחיתה אחת לכולם.** אותו דף בדיוק למבקר חדש ולחוזר: Hero עם מחולל
+ * הלומדות בלבו, ומתחתיו סוגר עם CTA וייבוא קובץ. הדף *הוא* ה-landing,
+ * ואפשר לחזור אליו מהעורך גם אחרי שכבר נבנו לומדות.
  *
  * **הלומדות השמורות חיות בחוצץ נפרד** (MyCoursesDrawer) שנפתח מכפתור בפס
  * העליון — ולא כרצועה שדוחפת את הנחיתה מטה. הכפתור מופיע רק כשיש לומדות.
@@ -83,8 +82,7 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
 
       {/* נחיתה אחת לכולם — מוצגת תמיד, גם אחרי שנבנו לומדות */}
       <Hero onBuild={() => startTemplate('blank')} />
-      <HowItWorks />
-      <Closer onBuild={() => startTemplate('blank')} loading={loading} fileErrors={fileErrors} onPickFile={pickFile} />
+      <Closer loading={loading} fileErrors={fileErrors} onPickFile={pickFile} />
 
       {/* חוצץ "הלומדות שלי" — נפתח מהפס העליון, מחוץ לגלילת הנחיתה */}
       <MyCoursesDrawer
@@ -156,34 +154,16 @@ function Header({ hasProjects, onOpenCourses }: HeaderProps) {
 }
 
 interface CloserProps {
-  onBuild: () => void;
   loading: boolean;
   fileErrors: string[];
   onPickFile: () => void;
 }
 
-/** סוגר הדף: CTA שקט + ייבוא קובץ קיים + שורת אמון. מוצג תמיד, זהה לכולם. */
-function Closer({ onBuild, loading, fileErrors, onPickFile }: CloserProps) {
+/** סוגר הדף: ייבוא קובץ קיים + שורת אמון. מוצג תמיד, זהה לכולם. */
+function Closer({ loading, fileErrors, onPickFile }: CloserProps) {
   return (
     <section className="mx-auto max-w-5xl px-6 pt-10 pb-11">
-      {/* CTA שקט אחד — לא רצועה גדולה; ניטרלי, כי הדף זהה לכל מבקר */}
-      <div className="flex flex-wrap items-center justify-center gap-4 text-center">
-        <p className="text-lg font-extrabold text-balance text-fg md:text-xl">
-          מוכנים? הלומדה שלכם במרחק הדבקה אחת.
-        </p>
-        <button
-          type="button"
-          onClick={onBuild}
-          className="inline-flex items-center gap-2 rounded-xl bg-volt px-6 py-3 font-extrabold text-on-volt transition hover:bg-volt-bright"
-        >
-          <Plus className="size-4.5" aria-hidden />
-          מתחילים לבנות
-        </button>
-      </div>
-
-      <div className="mt-7">
-        <ImportRow loading={loading} fileErrors={fileErrors} onPickFile={onPickFile} />
-      </div>
+      <ImportRow loading={loading} fileErrors={fileErrors} onPickFile={onPickFile} />
 
       <Footer />
     </section>

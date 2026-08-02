@@ -48,17 +48,16 @@ async function setup() {
 }
 
 describe('מסך הפתיחה', () => {
-  it('מציג פעולה ראשית "מתחילים לבנות"', async () => {
+  it('מציג פעולה משנית "התחילו מלומדה ריקה"', async () => {
     await setup();
 
-    // ה-CTA הראשי מופיע גם ב-Hero וגם בסוגר — לכן getAllByRole
-    expect(screen.getAllByRole('button', { name: 'מתחילים לבנות' }).length).toBeGreaterThan(0);
+    expect(screen.getByRole('button', { name: 'התחילו מלומדה ריקה' })).toBeInTheDocument();
   });
 
-  it('לחיצה על "מתחילים לבנות" מחזירה לומדה עם פרק, ולא רק שם תבנית', async () => {
+  it('לחיצה על "התחילו מלומדה ריקה" מחזירה לומדה עם פרק, ולא רק שם תבנית', async () => {
     const { onStart } = await setup();
 
-    fireEvent.click(screen.getAllByRole('button', { name: 'מתחילים לבנות' })[0]);
+    fireEvent.click(screen.getByRole('button', { name: 'התחילו מלומדה ריקה' }));
 
     expect(onStart).toHaveBeenCalledTimes(1);
     expect(onStart.mock.calls[0][0].course.chapters.length).toBeGreaterThan(0);
@@ -71,9 +70,9 @@ describe('מסך הפתיחה', () => {
     expect(screen.queryByRole('button', { name: /נוהל או מדיניות/ })).not.toBeInTheDocument();
   });
 
-  it('הנחיתה ("איך עובדים עם לומדי") מוצגת תמיד — גם למבקר חדש וגם עם לומדות שמורות', async () => {
+  it('הנחיתה (ה-Hero) מוצגת תמיד — גם למבקר חדש וגם עם לומדות שמורות', async () => {
     await setup();
-    expect(screen.getByRole('heading', { name: 'איך עובדים עם לומדי' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /הפכו כל טקסט/ })).toBeInTheDocument();
     // בלי לומדות שמורות אין כפתור "הלומדות שלי"
     expect(screen.queryByRole('button', { name: 'הלומדות שלי' })).not.toBeInTheDocument();
 
@@ -83,7 +82,7 @@ describe('מסך הפתיחה', () => {
     await setup();
 
     // הנחיתה נשארת זהה, ונוסף כפתור הגישה ללומדות השמורות
-    expect(screen.getByRole('heading', { name: 'איך עובדים עם לומדי' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /הפכו כל טקסט/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'הלומדות שלי' })).toBeInTheDocument();
   });
 

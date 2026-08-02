@@ -223,20 +223,3 @@
   .lc-status-export { opacity: 1; }
   .lc-filechip { opacity: 1; }
 }
-
-/*
- * קו מחבר בפס "איך עובדים": מקצה ה-end של המספר עד קצה העמודה, מצביע אל
- * השלב הבא (משמאל ב-RTL). לוגי, לא פיזי, כדי שיתהפך נכון אם יתווסף LTR.
- */
-.lc-step-line::after {
-  content: "";
-  position: absolute;
-  top: 44px;
-  height: 0;
-  inset-inline-start: 64px;
-  inset-inline-end: 0;
-  border-top: 2px dashed var(--color-edge-strong);
-}
-@media (max-width: 640px) {
-  .lc-step-line::after { display: none; }
-}
