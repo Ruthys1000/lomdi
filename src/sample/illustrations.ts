@@ -70,35 +70,6 @@ export function courseOutlineIllustration(c: Palette): TemplateAsset {
   return svgAsset('שלד-לומדה.svg', 800, 600, body);
 }
 
-/** מסע הלומד: שלוש תחנות על מסלול אחד, האחרונה היא היעד */
-export function learnerPathIllustration(c: Palette): TemplateAsset {
-  const stops = [
-    { x: 176, y: 424, filled: true },
-    { x: 400, y: 300, filled: true },
-    { x: 624, y: 176, filled: false },
-  ];
-
-  const body = `
-    <rect width="800" height="600" fill="${c.background}"/>
-    <path d="M176 424 C 288 424, 288 300, 400 300 S 512 176, 624 176" fill="none" stroke="${c.border}" stroke-width="10" stroke-linecap="round"/>
-    <path d="M176 424 C 288 424, 288 300, 400 300" fill="none" stroke="${c.primary}" stroke-width="10" stroke-linecap="round" opacity="0.45"/>
-    ${stops
-      .map(
-        ({ x, y, filled }) => `
-      <circle cx="${x}" cy="${y}" r="30" fill="${c.background}" stroke="${filled ? c.primary : c.border}" stroke-width="6"/>
-      ${filled ? `<circle cx="${x}" cy="${y}" r="12" fill="${c.primary}"/>` : ''}`,
-      )
-      .join('')}
-    <rect x="600" y="88" width="8" height="72" rx="4" fill="${c.text}"/>
-    <path d="M608 96 L 692 112 L 608 132 Z" fill="${c.accent}"/>
-    <rect x="112" y="480" width="128" height="10" rx="5" fill="${c.textMuted}" opacity="0.3"/>
-    <rect x="336" y="356" width="128" height="10" rx="5" fill="${c.textMuted}" opacity="0.3"/>
-    <rect x="560" y="232" width="128" height="10" rx="5" fill="${c.textMuted}" opacity="0.3"/>
-  `;
-
-  return svgAsset('מסע-הלומד.svg', 800, 600, body);
-}
-
 /** עצירה לתרגול: שאלה ושלוש אפשרויות, אחת מסומנת נכונה */
 export function practiceStopIllustration(c: Palette): TemplateAsset {
   const options = [
