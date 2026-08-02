@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { parseCourseJson } from './repairJson';
+// הלוגיקה מוטמעת ב-`api/generate.ts` כדי שפונקציית ה-serverless תישאר עצמאית
+// (Vercel לא כולל קובץ אח ב-slice של הפונקציה בזמן ריצה). הבדיקה מייבאת אותה
+// משם דרך נתיב יחסי — ה-import מסוג type של `@vercel/node` נמחק בטרנספילציה,
+// ו-`new Anthropic()` חי בתוך ה-handler ולא ברמת המודול, כך שהייבוא בטוח.
+import { parseCourseJson } from '../../api/generate';
 
 describe('parseCourseJson', () => {
   it('מפרסרת JSON תקין דרך המסלול המהיר', () => {
