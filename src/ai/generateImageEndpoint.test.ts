@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { generateImage } from '../../api/generate-image';
+import { generateImage, generateImageWithGemini } from '../../api/generate-image';
 
 /**
  * בדיקות לפונקציית היצירה של `/api/generate-image`. שומרות על אותו חוזה כשל-רך
@@ -75,6 +75,84 @@ describe('generateImage', () => {
     const { fetchImpl } = fakeFetch([() => jsonResponse({ data: [] })]);
 
     const result = await generateImage('x', 'key', fetchImpl);
+
+    expect(result).toEqual({ ok: false, status: 502, error: 'הספק לא החזיר תמונה.' });
+  });
+});
+
+/**
+ * בדיקות לספק Gemini. חוזה הכשל זהה ל-Recraft (מיפוי סטטוסים להודעות מובחנות,
+ * נפילה רכה כשה-fetch זורק), אבל תשובת ההצלחה שונה: Gemini מטמיע את התמונה
+ * כ-base64 בגוף התשובה, ולכן הפונקציה מחזירה בייטים מפוענחים ולא URL.
+ */
+describe('generateImageWithGemini', () => {
+  const geminiOk = (base64: string, mimeType = 'image/png'): Response =>
+    jsonResponse({ candidates: [{ content: { parts: [{ inlineData: { data: base64, mimeType } }] } }] });
+
+  it('מחזירה את בייטי התמונה שהמודל הטמיע כ-base64', async () => {
+    const base64 = Buffer.from('PNGDATA').toString('base64');
+    const { fetchImpl, urls, bodies } = fakeFetch([() => geminiOk(base64)]);
+
+    const result = await generateImageWithGemini(
+      'a friendly office',
+      'key',
+      fetchImpl,
+      'gemini-2.5-flash-image',
+    );
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.contentType).toBe('image/png');
+      expect(result.data.toString()).toBe('PNGDATA');
+    }
+    expect(urls[0]).toContain('generativelanguage.googleapis.com');
+    expect(urls[0]).toContain('gemini-2.5-flash-image');
+    expect(bodies[0]).toContain('a friendly office');
+    expect(bodies[0]).toContain('responseModalities');
+  });
+
+  it('ממפה 400 (מפתח לא תקין) להודעת מפתח שגוי/חסר הרשאה', async () => {
+    const { fetchImpl } = fakeFetch([() => jsonResponse({}, 400)]);
+
+    const result = await generateImageWithGemini('x', 'bad-key', fetchImpl);
+
+    expect(result).toEqual({ ok: false, status: 502, error: 'מפתח Gemini שגוי או חסר הרשאה.' });
+  });
+
+  it('ממפה 403 (הרשאה חסרה) להודעת מפתח שגוי/חסר הרשאה', async () => {
+    const { fetchImpl } = fakeFetch([() => jsonResponse({}, 403)]);
+
+    const result = await generateImageWithGemini('x', 'key', fetchImpl);
+
+    expect(result).toEqual({ ok: false, status: 502, error: 'מפתח Gemini שגוי או חסר הרשאה.' });
+  });
+
+  it('ממפה 429 לחריגת מכסה', async () => {
+    const { fetchImpl } = fakeFetch([() => jsonResponse({}, 429)]);
+
+    const result = await generateImageWithGemini('x', 'key', fetchImpl);
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.status).toBe(429);
+      expect(result.error).toContain('מכסת Gemini');
+    }
+  });
+
+  it('נופלת רך כשה-fetch עצמו זורק', async () => {
+    const { fetchImpl } = fakeFetch([() => new Error('network down')]);
+
+    const result = await generateImageWithGemini('x', 'key', fetchImpl);
+
+    expect(result).toEqual({ ok: false, status: 502, error: 'ספק התמונות אינו זמין כרגע.' });
+  });
+
+  it('מחזירה שגיאה כשהתשובה תקינה אך בלי חלק תמונה', async () => {
+    const { fetchImpl } = fakeFetch([
+      () => jsonResponse({ candidates: [{ content: { parts: [{ text: 'אין תמונה' }] } }] }),
+    ]);
+
+    const result = await generateImageWithGemini('x', 'key', fetchImpl);
 
     expect(result).toEqual({ ok: false, status: 502, error: 'הספק לא החזיר תמונה.' });
   });
