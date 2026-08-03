@@ -8,7 +8,7 @@ import { useCourseProgress } from './progress/useCourseProgress';
 import { RenderContext, type RenderContextValue } from './RenderContext';
 import { ScrollNavigation } from './ScrollNavigation';
 import { useScrollReveal } from './scrollEffects';
-import { themeToCssVarMap } from './theme/themeToCssVars';
+import { isDarkSurface, themeToCssVarMap } from './theme/themeToCssVars';
 import './styles/course.css';
 
 /**
@@ -187,6 +187,7 @@ export function CourseRenderer({
         lang={course.language}
         style={themeStyle}
         data-navigation={course.navigation.mode}
+        data-scheme={isDarkSurface(course.theme.colors.background) ? 'dark' : 'light'}
         data-heading-style={course.theme.typography.headingStyle}
         data-button-style={course.theme.shape.buttonStyle}
         data-card-style={course.theme.shape.cardStyle}

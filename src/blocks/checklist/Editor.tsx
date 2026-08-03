@@ -28,6 +28,7 @@ export function ChecklistEditor({ block, onChange }: ChecklistEditorProps) {
           <li key={item.id} className="lc-checklist__item">
             <label className="lc-checklist__label">
               <input type="checkbox" className="lc-checklist__box" disabled checked={false} readOnly />
+              <span className="lc-control lc-control--check" aria-hidden />
               <span className="lc-checklist__text">
                 <InlineText
                   as="span"

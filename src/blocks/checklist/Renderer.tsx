@@ -41,6 +41,7 @@ export function ChecklistRenderer({ block }: { block: BlockOf<ChecklistContent> 
                   disabled={isEditing}
                   onChange={() => toggle(item.id)}
                 />
+                <span className="lc-control lc-control--check" aria-hidden />
                 <span className="lc-checklist__text">
                   <span className="lc-checklist__title">{item.text}</span>
                   {item.description && (

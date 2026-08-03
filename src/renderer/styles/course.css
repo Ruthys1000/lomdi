@@ -45,8 +45,33 @@
      כולם נגזרים ממשתני הצבע שלמעלה, ולכן כל ערכה — כולל ערכה מותאמת —
      מקבלת גרדיאנטים, משטחים ועומק בלי להגדיר אותם בעצמה. */
 
-  /* גרדיאנט מותג מ-primary ל-accent, בזווית עקבית עם ה-hero */
-  --lc-gradient-brand: linear-gradient(135deg, var(--lc-color-primary), var(--lc-color-accent));
+  /*
+   * גרדיאנט מותג. נוסע *לכיוון* ה-accent אבל לא עד אליו, ומתערבב ב-oklab.
+   * primary→accent מלא היה עובר דרך בוץ בכל ערכה שבה השניים רחוקים על גלגל
+   * הצבעים: ב'נקי ובהיר' כחול `#2563eb` אל ענבר `#f59e0b` נתן חום-זיתני,
+   * וזה היה הצבע של תג המספר בכרטיסים ושל המפריד הגרדיאנטי.
+   */
+  --lc-gradient-brand: linear-gradient(
+    135deg in oklab,
+    var(--lc-color-primary),
+    color-mix(in oklab, var(--lc-color-accent) 55%, var(--lc-color-primary))
+  );
+
+  /*
+   * רקע ה-hero לפי הערכה.
+   *
+   * כל העצירות מעורבבות עם כמעט-שחור, ולכן הרקע כהה בכל ערכה — כולל ערכות
+   * שה-primary שלהן בהיר (`darkElegant`) — והטקסט הלבן של ה-hero נשאר קריא
+   * בלי לבדוק ניגודיות בזמן עריכה. הגוון נשאר של הערכה, ולכן ה-hero מפסיק
+   * להיות אותו מלבן כחול-סגול בכל הערכות.
+   */
+  --lc-hero-ink: #060a14;
+  --lc-gradient-hero: linear-gradient(
+    135deg in oklab,
+    color-mix(in oklab, var(--lc-color-primary) 88%, var(--lc-hero-ink)) 0%,
+    color-mix(in oklab, var(--lc-color-primary) 52%, var(--lc-hero-ink)) 58%,
+    color-mix(in oklab, var(--lc-color-accent) 34%, var(--lc-hero-ink)) 100%
+  );
   /* גרסה עדינה על רקע הלומדה — לרצועות סקשן שטקסט רגיל יושב עליהן */
   --lc-gradient-soft: linear-gradient(
     135deg,
@@ -66,6 +91,27 @@
   /* טבעת הדגשה עדינה סביב אלמנטים אינטראקטיביים */
   --lc-ring: color-mix(in srgb, var(--lc-color-primary) 22%, transparent);
 
+  /*
+   * ─── צבעים סמנטיים: נכון ושגוי ────────────────────────────────
+   * היו hex קשיחים בתוך כללי השאלה והאתגר, ולכן בערכות הכהות הירוק והאדום
+   * נראו כמו חלקים ממוצר אחר. כאן הם טוקנים, ו-`data-scheme='dark'` מחליף
+   * אותם בגרסאות בהירות — כי `var(--lc-color-success)` על רקע `#0a0f1e` כמעט בלתי נראה.
+   */
+  --lc-color-success: #15803d;
+  --lc-color-danger: #b91c1c;
+  --lc-surface-success: color-mix(in srgb, var(--lc-color-success) 10%, var(--lc-color-background));
+  --lc-surface-danger: color-mix(in srgb, var(--lc-color-danger) 10%, var(--lc-color-background));
+
+  /*
+   * ─── סקאלה בתוך בלוקים ────────────────────────────────────────
+   * שלוש דרגות אחת לכל הבלוקים. עד כה כל בלוק בחר גדלים משלו, וכותרת בלוק,
+   * כותרת פריט וטקסט גוף יצאו כמעט באותו גודל — ולכן כל בלוק נקרא כרשימה
+   * אפורה, וכל העמוד באותו טון.
+   */
+  --lc-size-block-title: 1.3em;
+  --lc-size-item-title: 1.05em;
+  --lc-size-item-text: 0.95em;
+
   margin: 0;
   padding: 0;
   min-block-size: 100%;
@@ -76,6 +122,14 @@
   line-height: var(--lc-line-height);
   -webkit-font-smoothing: antialiased;
   text-size-adjust: 100%;
+}
+
+/* ערכה כהה: הירוק והאדום הכהים נבלעים ברקע, ולכן עוברים לגרסאות בהירות */
+.lc-course[data-scheme='dark'] {
+  --lc-color-success: #4ade80;
+  --lc-color-danger: #fca5a5;
+  --lc-surface-success: color-mix(in srgb, var(--lc-color-success) 16%, var(--lc-color-background));
+  --lc-surface-danger: color-mix(in srgb, var(--lc-color-danger) 16%, var(--lc-color-background));
 }
 
 .lc-course *,
@@ -496,8 +550,8 @@
 /* גבול שגיאה מוצג רק בעורך — גוון אזהרה מבדיל אותו ממצב "בקרוב" */
 .lc-block-error {
   border-style: solid;
-  border-color: #dc2626;
-  color: #b91c1c;
+  border-color: var(--lc-color-danger);
+  color: var(--lc-color-danger);
   line-height: 1.7;
 }
 
@@ -655,11 +709,18 @@
 
 /* ─────────────────────── כותרת ראשית ─────────────────────── */
 
+/*
+ * הרקע כאן ולא ב-Renderer: `backgroundType: 'theme'` (ברירת המחדל) אינו מייצר
+ * style מוטבע, ולכן הוא מקבל את גרדיאנט הערכה — וגם hero שהוגדר לתמונה שעדיין
+ * לא הועלתה נופל לרקע מכובד במקום למלבן ריק. צבע או גרדיאנט מפורשים דורסים
+ * את זה ב-style מוטבע.
+ */
 .lc-hero {
   position: relative;
   display: grid;
   align-items: center;
   overflow: hidden;
+  background: var(--lc-gradient-hero);
   color: #ffffff;
   isolation: isolate;
 }
@@ -1172,6 +1233,148 @@
   }
 }
 
+/* ═══════════════════ בקרות בחירה ═══════════════════
+   שאלה, אתגר וצ׳ק-ליסט השתמשו ב-checkbox וב-radio נייטיביים עם `accent-color`
+   בלבד. ווידג'ט של מערכת ההפעלה הוא מה שגרם לשלושת הבלוקים להיראות כמו טופס
+   ולא כמו תוכן למידה.
+
+   ה-input האמיתי מוסתר חזותית (נשאר לתווית / מקלדת / קורא מסך). הסימן
+   הוויזואלי הוא `.lc-control` אחריו — כי `::before` על `<input>` אינו אמין
+   בדפדפנים (אלמנט מוחלף), גם אחרי `appearance: none`. */
+
+.lc-quiz__option,
+.lc-challenge__option,
+.lc-checklist__label {
+  position: relative;
+}
+
+.lc-quiz__radio,
+.lc-challenge__radio,
+.lc-checklist__box {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+  opacity: 0;
+}
+
+.lc-quiz__radio:focus-visible,
+.lc-challenge__radio:focus-visible,
+.lc-checklist__box:focus-visible {
+  outline: none;
+}
+
+.lc-control {
+  flex: none;
+  display: grid;
+  place-items: center;
+  inline-size: 1.4em;
+  block-size: 1.4em;
+  border: 2px solid color-mix(in srgb, var(--lc-color-text) 28%, transparent);
+  background: var(--lc-color-background);
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+  pointer-events: none;
+}
+
+.lc-control--radio {
+  border-radius: 50%;
+}
+
+.lc-control--check {
+  border-radius: max(4px, calc(var(--lc-radius) * 0.35));
+  margin-block-start: 0.1em;
+}
+
+/* הסימן עצמו: נקודה לרדיו, וי ל-checkbox */
+.lc-control--radio::before {
+  content: '';
+  inline-size: 0.55em;
+  block-size: 0.55em;
+  border-radius: 50%;
+  background: var(--lc-color-on-primary);
+  transform: scale(0);
+  transition: transform 0.15s ease;
+}
+
+.lc-control--check::before {
+  content: '';
+  inline-size: 0.62em;
+  block-size: 0.34em;
+  border: 0 solid var(--lc-color-on-primary);
+  border-block-end-width: 2.5px;
+  border-inline-start-width: 2.5px;
+  transform: rotate(-45deg) scale(0);
+  transform-origin: center;
+  transition: transform 0.15s ease;
+  margin-block-start: -0.12em;
+}
+
+.lc-quiz__radio:checked + .lc-control,
+.lc-challenge__radio:checked + .lc-control,
+.lc-checklist__box:checked + .lc-control {
+  border-color: var(--lc-color-primary);
+  background: var(--lc-color-primary);
+}
+
+.lc-quiz__radio:checked + .lc-control--radio::before,
+.lc-challenge__radio:checked + .lc-control--radio::before {
+  transform: scale(1);
+}
+
+.lc-checklist__box:checked + .lc-control--check::before {
+  transform: rotate(-45deg) scale(1);
+}
+
+.lc-quiz__option:hover .lc-control,
+.lc-challenge__option:hover:has(.lc-challenge__radio:not(:disabled)) .lc-control,
+.lc-checklist__label:hover:has(.lc-checklist__box:not(:disabled)) .lc-control {
+  border-color: var(--lc-color-primary);
+}
+
+.lc-quiz__radio:focus-visible + .lc-control,
+.lc-challenge__radio:focus-visible + .lc-control,
+.lc-checklist__box:focus-visible + .lc-control {
+  outline: 3px solid var(--lc-color-accent);
+  outline-offset: 2px;
+}
+
+.lc-quiz__radio:disabled + .lc-control,
+.lc-challenge__radio:disabled + .lc-control,
+.lc-checklist__box:disabled + .lc-control {
+  opacity: 0.7;
+}
+
+.lc-quiz__option[data-state='correct'] .lc-control,
+.lc-challenge__option[data-state='correct'] .lc-control,
+.lc-challenge__option[data-correct] .lc-control {
+  border-color: var(--lc-color-success);
+  background: var(--lc-color-success);
+}
+
+.lc-quiz__option[data-state='correct'] .lc-control--radio::before,
+.lc-challenge__option[data-state='correct'] .lc-control--radio::before,
+.lc-challenge__option[data-correct] .lc-control--radio::before {
+  transform: scale(1);
+}
+
+.lc-quiz__option[data-state='incorrect'] .lc-control,
+.lc-challenge__option[data-state='incorrect'] .lc-control {
+  border-color: var(--lc-color-danger);
+  background: var(--lc-color-danger);
+}
+
+.lc-quiz__option[data-state='incorrect'] .lc-control--radio::before,
+.lc-challenge__option[data-state='incorrect'] .lc-control--radio::before {
+  transform: scale(1);
+}
+
 /* ═══════════════════ כרטיסים ═══════════════════ */
 
 .lc-cards {
@@ -1210,16 +1413,16 @@
 .lc-card__icon {
   display: grid;
   place-items: center;
-  inline-size: 2.6em;
-  block-size: 2.6em;
+  inline-size: 3em;
+  block-size: 3em;
   border-radius: var(--lc-radius-small);
-  background: color-mix(in srgb, var(--lc-color-primary) 12%, transparent);
+  background: color-mix(in srgb, var(--lc-color-primary) 14%, transparent);
   color: var(--lc-color-primary);
 }
 
 .lc-card__icon > svg {
-  inline-size: 1.3em;
-  block-size: 1.3em;
+  inline-size: 1.5em;
+  block-size: 1.5em;
 }
 
 .lc-card__image {
@@ -1227,12 +1430,13 @@
 }
 
 .lc-card__title {
-  font-size: 1.08em;
+  font-size: var(--lc-size-item-title);
+  line-height: 1.4;
 }
 
 .lc-card__text {
   color: var(--lc-color-text-muted);
-  font-size: 0.94em;
+  font-size: var(--lc-size-item-text);
   line-height: 1.65;
 }
 
@@ -1268,33 +1472,60 @@
 .lc-accordion__trigger {
   display: flex;
   align-items: center;
-  gap: calc(var(--lc-space-unit) * 1.5);
+  gap: calc(var(--lc-space-unit) * 1.75);
   inline-size: 100%;
-  padding: calc(var(--lc-space-unit) * 2) calc(var(--lc-space-unit) * 2.5);
+  padding: calc(var(--lc-space-unit) * 2.25) calc(var(--lc-space-unit) * 2.5);
   border: 0;
   background: transparent;
   color: inherit;
   font: inherit;
+  font-size: var(--lc-size-item-title);
   font-weight: 600;
   text-align: start;
   cursor: pointer;
 }
 
 .lc-accordion__trigger:hover {
-  background: var(--lc-color-surface);
+  background: var(--lc-surface-primary);
 }
 
+/*
+ * החץ בתוך עיגול בגוון הערכה.
+ *
+ * חץ עירום בקצה שורה בתוך מסגרת נראה כמו `select` — וזה בדיוק מה שהאקורדיון
+ * נראה קודם. עיגול עם רקע אומר "יש כאן עוד", ולא "בחרו מתוך רשימה".
+ */
 .lc-accordion__chevron {
   inline-size: 1.15em;
   block-size: 1.15em;
   flex: none;
+  padding: 0.35em;
+  box-sizing: content-box;
+  border-radius: 50%;
+  background: var(--lc-surface-primary);
   color: var(--lc-color-primary);
-  transition: transform 0.18s ease;
+  transition: transform 0.18s ease, background-color 0.15s ease;
+}
+
+.lc-accordion__trigger:hover .lc-accordion__chevron {
+  background: color-mix(in srgb, var(--lc-color-primary) 18%, var(--lc-color-background));
 }
 
 /* החץ הוא חיזוק חזותי בלבד; המידע עובר דרך aria-expanded */
 .lc-accordion__item[data-open] .lc-accordion__chevron {
   transform: rotate(180deg);
+  background: var(--lc-color-primary);
+  color: var(--lc-color-on-primary);
+}
+
+/* הפריט הפתוח מסומן גם בפס בגוון הערכה — כדי שבאקורדיון ארוך יהיה ברור
+   איזו שורה נפתחה בלי לספור חצים */
+.lc-accordion__item[data-open] {
+  background: color-mix(in srgb, var(--lc-color-primary) 4%, var(--lc-color-background));
+  box-shadow: inset 3px 0 0 var(--lc-color-primary);
+}
+.lc-course[dir='rtl'] .lc-accordion__item[data-open] {
+  box-shadow: inset -3px 0 0 var(--lc-color-primary);
 }
 
 .lc-accordion__chevron-button {
@@ -1369,9 +1600,10 @@
 
 .lc-quiz__question {
   padding: 0;
-  font-size: 1.1em;
-  font-weight: 600;
-  line-height: 1.45;
+  font-family: var(--lc-heading-family);
+  font-size: var(--lc-size-block-title);
+  font-weight: var(--lc-heading-weight);
+  line-height: 1.35;
 }
 
 .lc-quiz__hint {
@@ -1387,20 +1619,33 @@
   margin-block-start: calc(var(--lc-space-unit) * 2.5);
 }
 
+/* אפשרות = שורת בחירה, לא שדה קלט: מסגרת דו-פיקסלית שנצבעת בבחירה, ורקע
+   שמתמלא בגוון הערכה. קודם המצב "נבחר" היה נראה רק בעיגול הקטן */
 .lc-quiz__option {
   display: flex;
   align-items: center;
   gap: calc(var(--lc-space-unit) * 1.5);
-  padding: calc(var(--lc-space-unit) * 1.5) calc(var(--lc-space-unit) * 2);
-  border: 1px solid var(--lc-color-border);
+  padding: calc(var(--lc-space-unit) * 1.75) calc(var(--lc-space-unit) * 2);
+  /* גוון מהטקסט ולא `--lc-color-border`: ב'נקי ובהיר' משטח הפאנל (#f8fafc)
+     ורקע האפשרות (#ffffff) כמעט זהים, וגבול חיוור הפך את השורות לשדות קלט */
+  border: 2px solid color-mix(in srgb, var(--lc-color-text) 12%, transparent);
   border-radius: var(--lc-radius-small);
   background: var(--lc-color-background);
+  font-size: var(--lc-size-item-title);
   cursor: pointer;
   transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .lc-quiz__option:hover {
+  border-color: color-mix(in srgb, var(--lc-color-primary) 55%, var(--lc-color-border));
+  background: var(--lc-surface-primary);
+}
+
+/* `:has` ולא קלאס מהרנדרר: הבחירה היא מצב של ה-input, ועדיף שה-CSS יקרא אותו
+   ישירות מלהחזיק state נוסף ב-React רק בשביל מסגרת */
+.lc-quiz__option:has(.lc-quiz__radio:checked) {
   border-color: var(--lc-color-primary);
+  background: var(--lc-surface-primary);
 }
 
 /*
@@ -1408,22 +1653,16 @@
  * ולכן הרנדרר מוסיף אייקון עם aria-label לצד כל תשובה שנחשפה.
  */
 .lc-quiz__option[data-state='correct'] {
-  border-color: #15803d;
-  background: color-mix(in srgb, #15803d 8%, var(--lc-color-background));
+  border-color: var(--lc-color-success);
+  background: var(--lc-surface-success);
 }
 
 .lc-quiz__option[data-state='incorrect'] {
-  border-color: #b91c1c;
-  background: color-mix(in srgb, #b91c1c 8%, var(--lc-color-background));
+  border-color: var(--lc-color-danger);
+  background: var(--lc-surface-danger);
 }
 
-.lc-quiz__radio {
-  inline-size: 1.05em;
-  block-size: 1.05em;
-  flex: none;
-  accent-color: var(--lc-color-primary);
-}
-
+/* הגודל והצבע של הבקרה מוגדרים במקום אחד — בקטע "בקרות בחירה" למעלה */
 .lc-quiz__label {
   flex: 1;
   min-inline-size: 0;
@@ -1436,10 +1675,10 @@
 }
 
 .lc-quiz__option[data-state='correct'] .lc-quiz__mark {
-  color: #15803d;
+  color: var(--lc-color-success);
 }
 .lc-quiz__option[data-state='incorrect'] .lc-quiz__mark {
-  color: #b91c1c;
+  color: var(--lc-color-danger);
 }
 
 .lc-quiz__correct-toggle {
@@ -1462,8 +1701,8 @@
 }
 
 .lc-quiz__correct-toggle[aria-pressed='true'] {
-  border-color: #15803d;
-  background: #15803d;
+  border-color: var(--lc-color-success);
+  background: var(--lc-color-success);
   color: #ffffff;
 }
 
@@ -1490,13 +1729,13 @@
 }
 
 .lc-quiz__feedback-text[data-tone='correct'] {
-  background: color-mix(in srgb, #15803d 10%, var(--lc-color-background));
-  color: #14532d;
+  background: var(--lc-surface-success);
+  color: var(--lc-color-text);
 }
 
 .lc-quiz__feedback-text[data-tone='incorrect'] {
-  background: color-mix(in srgb, #b91c1c 10%, var(--lc-color-background));
-  color: #7f1d1d;
+  background: var(--lc-surface-danger);
+  color: var(--lc-color-text);
 }
 
 /* ═══════════════════ מובייל ═══════════════════ */
@@ -1607,17 +1846,19 @@
 .lc-cards--v-numbered .lc-card__icon {
   display: none;
 }
+/* צבע אחיד ולא גרדיאנט: תג קטן הוא בדיוק המקום שבו גרדיאנט בין שני גוונים
+   רחוקים נראה כמו כתם חום, וזה מה שקרה כאן ב'נקי ובהיר' */
 .lc-cards--v-numbered .lc-card::before {
   content: counter(lc-card);
   display: grid;
   place-items: center;
-  inline-size: 2.6em;
-  block-size: 2.6em;
+  inline-size: 2.8em;
+  block-size: 2.8em;
   border-radius: 999px;
-  background: var(--lc-gradient-brand);
+  background: var(--lc-color-primary);
   color: var(--lc-color-on-primary);
   font-weight: 800;
-  font-size: 1.1em;
+  font-size: 1.05em;
 }
 
 /* Gradient — אריחי אייקון בגרדיאנט המותג וכרטיסים מורמים */
@@ -1814,8 +2055,8 @@
   border-inline-start: 4px solid var(--lc-color-secondary);
 }
 .lc-callout--success {
-  border-inline-start: 4px solid #16a34a;
-  background: color-mix(in srgb, #16a34a 8%, var(--lc-color-background));
+  border-inline-start: 4px solid var(--lc-color-success);
+  background: var(--lc-surface-success);
 }
 .lc-callout--warning {
   border-inline-start: 4px solid var(--lc-color-accent);
@@ -1826,8 +2067,8 @@
   display: grid;
   place-items: center;
   flex: none;
-  inline-size: 2.4em;
-  block-size: 2.4em;
+  inline-size: 2.8em;
+  block-size: 2.8em;
   border-radius: var(--lc-radius-small);
   background: color-mix(in srgb, var(--lc-color-primary) 12%, transparent);
   color: var(--lc-color-primary);
@@ -1837,8 +2078,8 @@
   color: var(--lc-color-accent);
 }
 .lc-callout__icon > svg {
-  inline-size: 1.25em;
-  block-size: 1.25em;
+  inline-size: 1.4em;
+  block-size: 1.4em;
 }
 
 .lc-callout__body {
@@ -1848,11 +2089,13 @@
   min-inline-size: 0;
 }
 .lc-callout__title {
+  font-family: var(--lc-heading-family);
   font-weight: 700;
-  font-size: 1.05em;
+  font-size: var(--lc-size-item-title);
 }
 .lc-callout__text {
   color: var(--lc-color-text-muted);
+  font-size: var(--lc-size-item-text);
   line-height: 1.65;
 }
 
@@ -1914,52 +2157,50 @@
   min-inline-size: 0;
 }
 .lc-step__title {
-  font-size: 1.1em;
+  font-size: var(--lc-size-item-title);
 }
 .lc-step__text {
   color: var(--lc-color-text-muted);
+  font-size: var(--lc-size-item-text);
   line-height: 1.65;
 }
 
 /* ═══════════════════ צ׳ק-ליסט (checklist) ═══════════════════ */
 
+/*
+ * רשימת משימות, לא רשימת שדות.
+ *
+ * כל פריט היה קופסה עם מסגרת ורקע משטח, וכך הצ׳ק-ליסט נראה זהה לשאלה
+ * ולאתגר — שלושה "פאנלים עם שורות". כאן הפריטים הם שורות מופרדות בקו שיער
+ * על רקע הלומדה, והסימון הוא מה שצובע אותן. ההבדל הזה הוא כל מה שצריך כדי
+ * שהעין תזהה מיד שזה כלי לסימון ולא שאלה.
+ */
 .lc-checklist {
   display: flex;
   flex-direction: column;
-  gap: calc(var(--lc-space-unit) * 1);
   margin: 0;
   padding: 0;
+  border-block-start: 1px solid var(--lc-color-border);
   list-style: none;
 }
 
 .lc-checklist__item {
-  border: 1px solid var(--lc-color-border);
-  border-radius: var(--lc-radius);
-  background: var(--lc-color-surface);
-  transition: background 0.15s ease, border-color 0.15s ease;
+  border-block-end: 1px solid var(--lc-color-border);
+  transition: background 0.15s ease;
+}
+.lc-checklist__item:hover {
+  background: var(--lc-surface-primary);
 }
 .lc-checklist__item[data-checked] {
-  border-color: color-mix(in srgb, var(--lc-color-primary) 40%, transparent);
-  background: var(--lc-surface-primary);
+  background: transparent;
 }
 
 .lc-checklist__label {
   display: flex;
-  gap: calc(var(--lc-space-unit) * 1.5);
+  gap: calc(var(--lc-space-unit) * 1.75);
   align-items: flex-start;
-  padding: calc(var(--lc-space-unit) * 1.5) calc(var(--lc-space-unit) * 2);
+  padding: calc(var(--lc-space-unit) * 1.75) calc(var(--lc-space-unit) * 1);
   cursor: pointer;
-}
-.lc-checklist__box:disabled {
-  cursor: default;
-}
-
-.lc-checklist__box {
-  flex: none;
-  inline-size: 1.25em;
-  block-size: 1.25em;
-  margin-block-start: 0.15em;
-  accent-color: var(--lc-color-primary);
 }
 
 .lc-checklist__text {
@@ -1969,23 +2210,32 @@
   min-inline-size: 0;
 }
 .lc-checklist__title {
+  font-size: var(--lc-size-item-title);
   font-weight: 600;
 }
 .lc-checklist__item[data-checked] .lc-checklist__title {
   text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--lc-color-text) 45%, transparent);
   color: var(--lc-color-text-muted);
+  font-weight: 500;
 }
 .lc-checklist__desc {
   color: var(--lc-color-text-muted);
-  font-size: 0.9em;
+  font-size: var(--lc-size-item-text);
   line-height: 1.55;
 }
 
+/* המונה הוא ההתקדמות, ולכן הוא נראה כמו התקדמות: שבב עם גוון הערכה */
 .lc-checklist__count {
-  margin-block-start: calc(var(--lc-space-unit) * 1.5);
-  font-size: 0.9em;
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  margin-block-start: calc(var(--lc-space-unit) * 2);
+  padding: calc(var(--lc-space-unit) * 0.75) calc(var(--lc-space-unit) * 1.75);
+  border-radius: 999px;
+  background: var(--lc-surface-primary);
   color: var(--lc-color-primary);
+  font-size: var(--lc-size-item-text);
+  font-weight: 700;
 }
 
 /* ═══════════════════ נקודת החלטה (decision) ═══════════════════ */
@@ -1998,30 +2248,50 @@
 }
 
 .lc-decision__prompt {
-  font-size: 1.15em;
-  font-weight: 700;
-  margin-block-end: calc(var(--lc-space-unit) * 2);
+  font-family: var(--lc-heading-family);
+  font-size: var(--lc-size-block-title);
+  font-weight: var(--lc-heading-weight);
+  line-height: 1.35;
+  margin-block-end: calc(var(--lc-space-unit) * 2.5);
 }
 
+/*
+ * הבחירה היא קלפים זה מול זה, ולא שורות בטור.
+ *
+ * החלטה היא הבלוק היחיד שבו התוכן *הוא* ההשוואה בין שתי דרכי פעולה, ופריסה
+ * מקבילה אומרת את זה בלי מילים. auto-fit ולא שתי עמודות קבועות: שלוש אפשרויות
+ * יתפרסו לבד, ובמסך צר הכל חוזר לטור.
+ */
 .lc-decision__options {
-  display: flex;
-  flex-direction: column;
-  gap: calc(var(--lc-space-unit) * 1.25);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: calc(var(--lc-space-unit) * 1.5);
 }
 
 .lc-decision__option {
+  display: flex;
+  align-items: center;
   text-align: start;
-  padding: calc(var(--lc-space-unit) * 1.5) calc(var(--lc-space-unit) * 2);
-  border: 1px solid var(--lc-color-border);
-  border-radius: var(--lc-radius-small);
+  min-block-size: calc(var(--lc-space-unit) * 9);
+  padding: calc(var(--lc-space-unit) * 2) calc(var(--lc-space-unit) * 2.25);
+  border: 2px solid color-mix(in srgb, var(--lc-color-text) 12%, transparent);
+  border-radius: var(--lc-radius);
   background: var(--lc-color-background);
   color: var(--lc-color-text);
   font: inherit;
+  font-size: var(--lc-size-item-title);
+  line-height: 1.5;
   cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
 }
 .lc-decision__option:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--lc-color-primary) 50%, transparent);
+  border-color: color-mix(in srgb, var(--lc-color-primary) 55%, var(--lc-color-border));
+  background: var(--lc-surface-primary);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lc-decision__option:hover:not(:disabled) {
+    transform: translateY(-2px);
+  }
 }
 .lc-decision__option[data-active] {
   border-color: var(--lc-color-primary);
@@ -2061,60 +2331,77 @@
   margin-block-end: calc(var(--lc-space-unit) * 2);
 }
 
+/* מבחן: כל שאלה היא יחידה מופרדת בקו שיער, כדי שרצף של חמש שאלות לא ייראה
+   כמו רשימה אחת ארוכה של אפשרויות */
 .lc-challenge__questions {
   display: flex;
   flex-direction: column;
-  gap: calc(var(--lc-space-unit) * 3);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+.lc-challenge__question + .lc-challenge__question {
+  margin-block-start: calc(var(--lc-space-unit) * 3);
+  padding-block-start: calc(var(--lc-space-unit) * 3);
+  border-block-start: 1px solid var(--lc-color-border);
+}
+
 .lc-challenge__prompt {
   display: flex;
-  gap: calc(var(--lc-space-unit) * 1);
-  align-items: baseline;
+  gap: calc(var(--lc-space-unit) * 1.25);
+  align-items: center;
+  font-size: var(--lc-size-item-title);
   font-weight: 700;
-  margin-block-end: calc(var(--lc-space-unit) * 1.25);
+  line-height: 1.45;
+  margin-block-end: calc(var(--lc-space-unit) * 1.75);
 }
 .lc-challenge__num {
   flex: none;
   display: inline-grid;
   place-items: center;
-  inline-size: 1.6em;
-  block-size: 1.6em;
+  inline-size: 1.9em;
+  block-size: 1.9em;
   border-radius: 50%;
   background: var(--lc-color-primary);
   color: var(--lc-color-on-primary);
-  font-size: 0.8em;
+  font-size: 0.85em;
+  font-weight: 800;
 }
 
 .lc-challenge__options {
   display: flex;
   flex-direction: column;
-  gap: calc(var(--lc-space-unit) * 0.75);
+  gap: calc(var(--lc-space-unit) * 1);
 }
 .lc-challenge__option {
   display: flex;
   gap: calc(var(--lc-space-unit) * 1.25);
   align-items: center;
-  padding: calc(var(--lc-space-unit) * 1) calc(var(--lc-space-unit) * 1.5);
-  border: 1px solid var(--lc-color-border);
+  padding: calc(var(--lc-space-unit) * 1.25) calc(var(--lc-space-unit) * 1.75);
+  border: 2px solid color-mix(in srgb, var(--lc-color-text) 12%, transparent);
   border-radius: var(--lc-radius-small);
+  background: var(--lc-color-background);
+  font-size: var(--lc-size-item-text);
   cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.lc-challenge__option:hover:has(.lc-challenge__radio:not(:disabled)) {
+  border-color: color-mix(in srgb, var(--lc-color-primary) 55%, var(--lc-color-border));
+  background: var(--lc-surface-primary);
+}
+.lc-challenge__option:has(.lc-challenge__radio:checked) {
+  border-color: var(--lc-color-primary);
+  background: var(--lc-surface-primary);
 }
 .lc-challenge__option[data-state='correct'],
 .lc-challenge__option[data-correct] {
-  border-color: #16a34a;
-  background: color-mix(in srgb, #16a34a 10%, var(--lc-color-background));
+  border-color: var(--lc-color-success);
+  background: var(--lc-surface-success);
 }
 .lc-challenge__option[data-state='incorrect'] {
-  border-color: #dc2626;
-  background: color-mix(in srgb, #dc2626 10%, var(--lc-color-background));
-}
-.lc-challenge__radio {
-  flex: none;
-  accent-color: var(--lc-color-primary);
+  border-color: var(--lc-color-danger);
+  background: var(--lc-surface-danger);
 }
 .lc-challenge__label {
   flex: 1;
@@ -2126,10 +2413,10 @@
   block-size: 1.1em;
 }
 .lc-challenge__option[data-state='correct'] .lc-challenge__mark {
-  color: #16a34a;
+  color: var(--lc-color-success);
 }
 .lc-challenge__option[data-state='incorrect'] .lc-challenge__mark {
-  color: #dc2626;
+  color: var(--lc-color-danger);
 }
 
 .lc-challenge__explanation {
@@ -2154,8 +2441,8 @@
   text-align: center;
 }
 .lc-challenge__result-box[data-tone='pass'] {
-  background: color-mix(in srgb, #16a34a 12%, var(--lc-color-background));
-  border: 1px solid color-mix(in srgb, #16a34a 40%, transparent);
+  background: var(--lc-surface-success);
+  border: 1px solid color-mix(in srgb, var(--lc-color-success) 40%, transparent);
 }
 .lc-challenge__result-box[data-tone='fail'] {
   background: var(--lc-surface-accent);

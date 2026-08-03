@@ -62,6 +62,7 @@ export function ChallengeEditor({ block, onChange }: ChallengeEditorProps) {
                 {question.options.map((option) => (
                   <label key={option.id} className="lc-challenge__option" data-correct={option.correct || undefined}>
                     <input type="radio" disabled checked={option.correct} readOnly className="lc-challenge__radio" />
+                    <span className="lc-control lc-control--radio" aria-hidden />
                     <InlineText
                       className="lc-challenge__label"
                       ariaLabel="טקסט האפשרות"

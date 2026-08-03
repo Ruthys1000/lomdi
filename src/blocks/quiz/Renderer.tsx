@@ -79,6 +79,7 @@ export function QuizRenderer({ block }: { block: BlockOf<QuizContent> }) {
                     onChange={() => setSelectedId(option.id)}
                     className="lc-quiz__radio"
                   />
+                  <span className="lc-control lc-control--radio" aria-hidden />
                   <span className="lc-quiz__label">{option.text}</span>
 
                   {/* סימון התשובה — אייקון ולא רק צבע */}

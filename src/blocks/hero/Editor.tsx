@@ -8,8 +8,14 @@ interface HeroEditorProps {
   onChange: (content: HeroContent) => void;
 }
 
+/**
+ * רקע בזמן עריכה — זהה ל-Renderer, כולל `theme` בלי style inline
+ * (הרקע מגיע מ-`--lc-gradient-hero`).
+ */
 function backgroundStyle(content: HeroContent, imageUrl: string | undefined) {
   switch (content.backgroundType) {
+    case 'theme':
+      return undefined;
     case 'color':
       return { background: content.backgroundColor };
     case 'gradient':
@@ -17,7 +23,7 @@ function backgroundStyle(content: HeroContent, imageUrl: string | undefined) {
     case 'image':
       return imageUrl
         ? { backgroundImage: `url("${imageUrl}")`, backgroundSize: 'cover', backgroundPosition: 'center' }
-        : { background: content.backgroundColor };
+        : undefined;
   }
 }
 

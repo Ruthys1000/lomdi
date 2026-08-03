@@ -15,7 +15,13 @@ export const heroContentSchema = z.object({
   title: z.string(),
   subtitle: z.string(),
   intro: z.string(),
-  backgroundType: z.enum(['color', 'gradient', 'image']),
+  /**
+   * `theme` הוא ברירת המחדל: הרקע נגזר מצבעי הערכה דרך `--lc-gradient-hero`.
+   * קודם ברירת המחדל הייתה גרדיאנט כחול-סגול קשיח בתוך התוכן, ולכן ה-hero —
+   * האלמנט הגדול והראשון בעמוד — נראה זהה בכל שמונה הערכות והתנגש עם החמות
+   * שבהן. שאר האפשרויות נשארו למי שרוצה צבע משלו.
+   */
+  backgroundType: z.enum(['theme', 'color', 'gradient', 'image']),
   backgroundColor: z.string(),
   gradientFrom: z.string(),
   gradientTo: z.string(),
@@ -37,7 +43,7 @@ export const createHeroContent = (overrides: Partial<HeroContent> = {}): HeroCon
   title: 'כותרת הלומדה',
   subtitle: 'כותרת משנה קצרה שמסבירה על מה הלומדה',
   intro: '',
-  backgroundType: 'gradient',
+  backgroundType: 'theme',
   backgroundColor: '#2563eb',
   gradientFrom: '#2563eb',
   gradientTo: '#7c3aed',

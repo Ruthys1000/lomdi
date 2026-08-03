@@ -104,6 +104,20 @@ export function readableTextOn(background: string): string {
     : TEXT_LIGHT;
 }
 
+/**
+ * האם רקע הלומדה כהה.
+ *
+ * משמש לבחירת `data-scheme` על שורש הלומדה, ומשם לצבעים הסמנטיים: ירוק כהה
+ * על רקע כמעט-שחור נראה כמו כתם, ואדום כהה נעלם. נמדד בלומינציה ולא ב"האם
+ * המזהה מכיל dark", כדי שגם ערכה מותאמת שהמשתמש בנה תיפול לצד הנכון.
+ */
+export function isDarkSurface(background: string): boolean {
+  const rgb = hexToRgb(background);
+  if (!rgb) return false;
+
+  return relativeLuminance(rgb) < 0.2;
+}
+
 export function hexToRgb(hex: string): [number, number, number] | null {
   const value = hex.replace('#', '');
   const full =
