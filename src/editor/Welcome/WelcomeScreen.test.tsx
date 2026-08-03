@@ -98,7 +98,7 @@ describe('מסך הפתיחה', () => {
     await setup();
 
     // שתי הדרכים להתחיל, שתיהן על הנחיתה
-    expect(screen.getByRole('heading', { name: /מטקסט ארוך/ })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /מטקסט ללומדה/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'התחילו מדף ריק' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /צרו עם AI/ })).toBeInTheDocument();
 
@@ -113,7 +113,7 @@ describe('מסך הפתיחה', () => {
 
   it('הנחיתה (ה-Hero) מוצגת תמיד — גם למבקר חדש וגם עם לומדות שמורות', async () => {
     await setup();
-    expect(screen.getByRole('heading', { name: /מטקסט ארוך/ })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /מטקסט ללומדה/ })).toBeInTheDocument();
     // בלי לומדות שמורות אין כפתור "הלומדות שלי"
     expect(screen.queryByRole('button', { name: /הלומדות שלי/ })).not.toBeInTheDocument();
 
@@ -123,7 +123,7 @@ describe('מסך הפתיחה', () => {
     await setup();
 
     // הנחיתה נשארת זהה, ונוסף כפתור הגישה ללומדות השמורות
-    expect(screen.getByRole('heading', { name: /מטקסט ארוך/ })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /מטקסט ללומדה/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /הלומדות שלי/ })).toBeInTheDocument();
   });
 

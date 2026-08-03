@@ -22,10 +22,10 @@ export function FormatsSection({
       <div className="mx-auto max-w-6xl px-6">
         <div className="max-w-2xl">
           <h2 id="formats-heading" className="text-2xl font-extrabold tracking-tight text-fg md:text-3xl">
-            איזה סוג לומדה בונים?
+            בחרו פורמט
           </h2>
           <p className="mt-2 max-w-[46ch] text-sm leading-relaxed text-fg-muted md:text-base">
-            כל פורמט מגיע עם שלד משלו. אחרי הבחירה מדביקים תוכן — וה‑AI ממלא את השלד.
+            לכל פורמט שלד משלו. אחרי הבחירה מדביקים תוכן — וה‑AI ממלא אותו.
           </p>
         </div>
 

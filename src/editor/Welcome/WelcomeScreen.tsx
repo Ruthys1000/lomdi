@@ -4,7 +4,7 @@ import { getFormat, type FormatDefinition, type FormatId } from '@/formats';
 import { openProjectFile } from '@/persistence/session';
 import { getTemplate } from '@/templates';
 import type { TemplateResult } from '@/templates';
-import { APP_NAME, APP_VERSION } from '@/version';
+import { APP_BRAND, APP_VERSION } from '@/version';
 import { Alert } from '../ui/Alert';
 import { FormatsSection } from './FormatsSection';
 import { Hero } from './Hero';
@@ -167,7 +167,7 @@ function Header({ hasProjects, projectCount, onOpenCourses }: HeaderProps) {
         <span className="flex size-8 items-center justify-center rounded-lg bg-volt text-on-volt">
           <BookOpen className="size-4.5" aria-hidden />
         </span>
-        <p className="text-sm font-bold tracking-tight text-shell-fg">{APP_NAME}</p>
+        <p className="text-sm font-bold tracking-tight text-shell-fg">{APP_BRAND}</p>
 
         {hasProjects && (
           <button
@@ -200,7 +200,7 @@ function Footer({
     <footer className="border-t border-edge bg-panel/60">
       <div className="mx-auto flex max-w-6xl flex-col gap-3 px-6 py-8 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-fg-muted">
-          {APP_NAME} {APP_VERSION} · העריכה נשמרת אצלכם בדפדפן.
+          {APP_BRAND} {APP_VERSION} · העריכה נשמרת בדפדפן.
         </p>
         <p className="text-xs text-fg-muted">
           יש קובץ ‎.course.zip‎? גררו לכל מקום במסך, או{' '}
