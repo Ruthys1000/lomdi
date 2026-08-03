@@ -101,8 +101,10 @@ describe('מסך הפתיחה', () => {
     expect(screen.getByRole('heading', { name: /בחרו/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'התחילו מדף ריק' })).toBeInTheDocument();
 
-    // אין כרטיס "ממשיכים" בנחיתה
+    // אין כרטיס "ממשיכים" בנחיתה, ואין רצועת קובץ פרויקט
     expect(screen.queryByText(/ממשיכים/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'בחירת קובץ' })).not.toBeInTheDocument();
+    expect(screen.queryByText(/יש לכם קובץ לומדה/)).not.toBeInTheDocument();
 
     // הלומדה השמורה קיימת ב-DOM (המגירה מורכבת תמיד) אך אינה נראית: הגישה
     // אליה עוברת דרך הכפתור בפס העליון, ולא דרך הנחיתה

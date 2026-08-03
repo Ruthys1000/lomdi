@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react';
-import { BookOpen, FileUp, FolderOpen, Upload } from 'lucide-react';
+import { useState } from 'react';
+import { BookOpen, FileUp, FolderOpen, Loader2 } from 'lucide-react';
 import { openProjectFile } from '@/persistence/session';
 import { getTemplate } from '@/templates';
 import type { TemplateResult } from '@/templates';
@@ -28,13 +28,13 @@ interface WelcomeScreenProps {
  * מופיע רק כשיש לומדות — כך שמי שכבר עבד כאן מגיע אליהן בלחיצה, בלי שהנחיתה
  * תשתנה מתחתיו.
  *
- * נשמר מהגרסה הקודמת: גרירת קובץ פרויקט על *כל* המסך עם שכבת יעד, כי
- * הגרירה תמיד תפסה את כל המסך אבל שום דבר לא הראה זאת.
+ * **קובץ פרויקט אינו חלק מהשיווק של הדף.** אין רצועת "יש לכם קובץ?", אבל
+ * גרירת `.course.zip` על *כל* המסך עדיין נטענת ומקבלת שכבת יעד — היכולת
+ * נשמרה בלי לתפוס מקום, ופתיחה מפורשת יושבת בעורך.
  */
 export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
   const { projects, error, openingId, open, remove } = useRecentProjects(onOpened);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileErrors, setFileErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -57,8 +57,6 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
     const create = getTemplate(id)?.create;
     if (create) onStart(create());
   };
-
-  const pickFile = () => fileInputRef.current?.click();
 
   return (
     <main
@@ -94,7 +92,7 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
 
       {/* נחיתה אחת לכולם — מוצגת תמיד, גם אחרי שנבנו לומדות */}
       <Hero onBuild={() => startTemplate('blank')} />
-      <Closer loading={loading} fileErrors={fileErrors} onPickFile={pickFile} />
+      <Closer fileErrors={fileErrors} />
 
       {/* חוצץ "הלומדות שלי" — נפתח מהפס העליון, מחוץ לגלילת הנחיתה */}
       <MyCoursesDrawer
@@ -107,25 +105,27 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
         onRemove={(project) => void remove(project)}
       />
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".zip"
-        className="hidden"
-        onChange={(event) => {
-          const file = event.target.files?.[0];
-          event.target.value = '';
-          if (file) void handleFile(file);
-        }}
-      />
-
-      {/* שכבת היעד. על כל המסך ולא על קופסה אחת */}
-      {dragging && (
+      {/*
+        שכבת היעד. על כל המסך ולא על קופסה אחת, וגם משמשת כחיווי הטעינה —
+        משהו חייב לענות על השחרור, אחרת הגרירה נראית כאילו לא קרה בה דבר
+      */}
+      {(dragging || loading) && (
         <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-app/85 p-8">
           <div className="flex w-full max-w-xl flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-volt-dim bg-panel/90 px-8 py-12">
-            <FileUp className="size-8 text-volt-ink" aria-hidden />
-            <p className="text-lg font-bold text-fg">שחררו. זה נטען לבד.</p>
-            <p className="text-sm text-fg-muted">‎.course.zip‎</p>
+            {loading ? (
+              <>
+                <Loader2 className="size-8 animate-spin text-volt-ink" aria-hidden />
+                <p className="text-lg font-bold text-fg" role="status">
+                  טוען את הלומדה…
+                </p>
+              </>
+            ) : (
+              <>
+                <FileUp className="size-8 text-volt-ink" aria-hidden />
+                <p className="text-lg font-bold text-fg">שחררו. זה נטען לבד.</p>
+                <p className="text-sm text-fg-muted">‎.course.zip‎</p>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -167,59 +167,20 @@ function Header({ hasProjects, onOpenCourses }: HeaderProps) {
   );
 }
 
-interface CloserProps {
-  loading: boolean;
-  fileErrors: string[];
-  onPickFile: () => void;
-}
-
-/** סוגר הדף: ייבוא קובץ קיים + שורת אמון. מוצג תמיד, זהה לכולם. */
-function Closer({ loading, fileErrors, onPickFile }: CloserProps) {
+/**
+ * סוגר הדף: שורת אמון בלבד.
+ *
+ * רצועת "יש לכם קובץ לומדה?" הוסרה מהנחיתה בכוונה — הדף מוכר יצירה, ורצועה
+ * מנוקדת שמדברת על קבצים התחרתה על אותו מקום. היכולת נשמרה: גרירת קובץ על
+ * *כל* המסך עדיין נטענת (עם שכבת יעד), ובתוך העורך יש פתיחת קובץ מפורשת.
+ * כשל ייבוא מוצג כאן, כי אין לו יותר רצועה משלו.
+ */
+function Closer({ fileErrors }: { fileErrors: string[] }) {
   return (
     <section className="mx-auto max-w-5xl px-6 pt-10 pb-11">
-      <ImportRow loading={loading} fileErrors={fileErrors} onPickFile={onPickFile} />
+      {fileErrors.length > 0 && <Alert messages={fileErrors} />}
 
       <Footer />
-    </section>
-  );
-}
-
-/** רצועת ייבוא קובץ קיים */
-function ImportRow({
-  loading,
-  fileErrors,
-  onPickFile,
-}: {
-  loading: boolean;
-  fileErrors: string[];
-  onPickFile: () => void;
-}) {
-  return (
-    <section aria-labelledby="open-heading">
-      <h2 id="open-heading" className="sr-only">
-        יש קובץ לומדה?
-      </h2>
-
-      <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-dashed border-edge-strong bg-panel px-5 py-4">
-        <Upload className="size-5 shrink-0 text-fg-muted" aria-hidden />
-        <p className="min-w-0 flex-1 text-sm leading-relaxed text-fg-muted">
-          כבר יש לכם קובץ לומדה? גררו אותו לכאן — לכל מקום במסך — כדי להמשיך לערוך.
-        </p>
-        <button
-          type="button"
-          disabled={loading}
-          onClick={onPickFile}
-          className="rounded-xl border border-edge-strong px-4 py-2 text-sm font-semibold text-fg-soft transition hover:border-volt-dim hover:text-volt-ink disabled:opacity-50"
-        >
-          {loading ? 'טוען…' : 'בחירת קובץ'}
-        </button>
-      </div>
-
-      {fileErrors.length > 0 && (
-        <div className="mt-3">
-          <Alert messages={fileErrors} />
-        </div>
-      )}
     </section>
   );
 }
