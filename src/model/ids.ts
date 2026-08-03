@@ -20,7 +20,9 @@ export type IdPrefix =
   | 'option'
   | 'stat'
   | 'step'
-  | 'checklistItem';
+  | 'checklistItem'
+  | 'decisionOption'
+  | 'challengeQuestion';
 
 export function createId(prefix: IdPrefix): string {
   return `${prefix}-${generate()}`;

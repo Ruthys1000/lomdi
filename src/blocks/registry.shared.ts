@@ -14,6 +14,8 @@ import { quoteContentSchema, createQuoteContent, quoteAssetIds } from './quote/c
 import { calloutContentSchema, createCalloutContent, calloutAssetIds } from './callout/content';
 import { stepsContentSchema, createStepsContent, stepsAssetIds } from './steps/content';
 import { checklistContentSchema, createChecklistContent, checklistAssetIds } from './checklist/content';
+import { decisionContentSchema, createDecisionContent, decisionAssetIds } from './decision/content';
+import { challengeContentSchema, createChallengeContent, challengeAssetIds } from './challenge/content';
 
 /**
  * הרגיסטרי המשותף — הצד של הבלוקים שאין בו React.
@@ -173,6 +175,24 @@ export const sharedBlockRegistry: Record<string, SharedBlockDefinition<unknown>>
     schema: checklistContentSchema,
     createContent: createChecklistContent,
     usedAssetIds: checklistAssetIds,
+  }),
+  decision: define({
+    type: 'decision',
+    label: blockLabels.decision,
+    description: 'נקודת החלטה בתרחיש — כל בחירה עם משוב משלה.',
+    category: 'interaction',
+    schema: decisionContentSchema,
+    createContent: createDecisionContent,
+    usedAssetIds: decisionAssetIds,
+  }),
+  challenge: define({
+    type: 'challenge',
+    label: blockLabels.challenge,
+    description: 'סדרת שאלות עם ציון ומשוב מעבר.',
+    category: 'interaction',
+    schema: challengeContentSchema,
+    createContent: createChallengeContent,
+    usedAssetIds: challengeAssetIds,
   }),
 };
 

@@ -11,7 +11,9 @@ import {
   Minus,
   PlayCircle,
   Quote as QuoteIcon,
+  Split,
   SquareCheckBig,
+  Trophy,
   Type,
   type LucideIcon,
 } from 'lucide-react';
@@ -40,6 +42,10 @@ import { StepsEditor } from './steps/Editor';
 import { StepsSettings } from './steps/Settings';
 import { ChecklistEditor } from './checklist/Editor';
 import { ChecklistSettings } from './checklist/Settings';
+import { DecisionEditor } from './decision/Editor';
+import { DecisionSettings } from './decision/Settings';
+import { ChallengeEditor } from './challenge/Editor';
+import { ChallengeSettings } from './challenge/Settings';
 
 /**
  * הרגיסטרי של העורך — Editor, Settings ואייקונים.
@@ -97,6 +103,8 @@ const registrations: Record<string, Registration> = {
     EditorComponent: ChecklistEditor,
     SettingsComponent: ChecklistSettings,
   },
+  decision: { icon: Split, EditorComponent: DecisionEditor, SettingsComponent: DecisionSettings },
+  challenge: { icon: Trophy, EditorComponent: ChallengeEditor, SettingsComponent: ChallengeSettings },
 };
 
 function build(type: string): EditorBlockDefinition | undefined {

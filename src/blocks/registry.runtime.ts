@@ -13,6 +13,8 @@ import { QuoteRenderer } from './quote/Renderer';
 import { CalloutRenderer } from './callout/Renderer';
 import { StepsRenderer } from './steps/Renderer';
 import { ChecklistRenderer } from './checklist/Renderer';
+import { DecisionRenderer } from './decision/Renderer';
+import { ChallengeRenderer } from './challenge/Renderer';
 
 /**
  * רגיסטרי ה-Renderers — הצד שנארז לתוך הלומדה המיוצאת.
@@ -42,6 +44,8 @@ const registry = {
   callout: CalloutRenderer,
   steps: StepsRenderer,
   checklist: ChecklistRenderer,
+  decision: DecisionRenderer,
+  challenge: ChallengeRenderer,
 } as unknown as Record<string, BlockRendererComponent>;
 
 export const rendererRegistry = registry;
