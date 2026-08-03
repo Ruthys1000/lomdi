@@ -19,26 +19,6 @@ function expectValid(course: unknown) {
   expect(result.ok, result.ok ? '' : result.errors.join('; ')).toBe(true);
 }
 
-describe('coerceGeneratedCourse — visualStyle', () => {
-  it('מכבד visualStyle תקין שהגיע מ-AI', () => {
-    const { visualStyle } = coerceGeneratedCourse({
-      theme: 'vivid',
-      visualStyle: { artStyle: 'watercolor', palette: ['#abcdef'], motif: 'waves' },
-      chapters: [],
-    });
-    expect(visualStyle.artStyle).toBe('watercolor');
-    expect(visualStyle.palette).toEqual(['#abcdef']);
-    expect(visualStyle.motif).toBe('waves');
-  });
-
-  it('גוזר brief מהערכה כשהמודל השמיט אותו', () => {
-    const { course, visualStyle } = coerceGeneratedCourse({ theme: 'forest', chapters: [] });
-    expect(visualStyle.artStyle).toBeTruthy();
-    // הפלטה מתלכדת עם צבעי ה-theme של הלומדה
-    expect(visualStyle.palette).toContain(course.theme.colors.primary);
-  });
-});
-
 describe('coerceGeneratedCourse', () => {
   it('הופכת פלט תקין ללומדה תקינה', () => {
     const { course, warnings } = coerceGeneratedCourse({
@@ -287,46 +267,52 @@ describe('coerceGeneratedCourse', () => {
     expectValid(course);
   });
 
-  it('שולפת כוונת תמונה ומאפסת את הפניית הנכס', () => {
-    const { course, imageIntents } = coerceGeneratedCourse({
+  it('שומרת פרומפט תמונה כ-imagePrompt ומאפסת את הפניית הנכס', () => {
+    const { course } = coerceGeneratedCourse({
       chapters: [{ blocks: [{ type: 'image', content: { query: 'משרד מודרני', alt: 'משרד' } }] }],
     });
 
-    expect(imageIntents).toHaveLength(1);
-    expect(imageIntents[0].field).toBe('assetId');
-    expect(imageIntents[0].query).toBe('משרד מודרני');
-    expect((course.chapters[0].blocks[0].content as { assetId: string }).assetId).toBe('');
-    expect((course.chapters[0].blocks[0].content as { alt: string }).alt).toBe('משרד');
+    const content = course.chapters[0].blocks[0].content as {
+      assetId: string;
+      imagePrompt: string;
+      alt: string;
+    };
+    expect(content.assetId).toBe('');
+    expect(content.imagePrompt).toBe('משרד מודרני');
+    expect(content.alt).toBe('משרד');
   });
 
-  it('נופלת ל-alt כשאילתה כשהמודל השמיט query', () => {
-    const { imageIntents } = coerceGeneratedCourse({
+  it('נופלת ל-alt כפרומפט כשהמודל השמיט query', () => {
+    const { course } = coerceGeneratedCourse({
       chapters: [{ blocks: [{ type: 'image', content: { alt: 'משרד מודרני ומסודר' } }] }],
     });
 
-    expect(imageIntents).toHaveLength(1);
-    expect(imageIntents[0].query).toBe('משרד מודרני ומסודר');
-    expect(imageIntents[0].alt).toBe('משרד מודרני ומסודר');
+    const content = course.chapters[0].blocks[0].content as { imagePrompt: string; alt: string };
+    expect(content.imagePrompt).toBe('משרד מודרני ומסודר');
+    expect(content.alt).toBe('משרד מודרני ומסודר');
   });
 
   it('מעדיפה query מפורש על פני ה-alt', () => {
-    const { imageIntents } = coerceGeneratedCourse({
+    const { course } = coerceGeneratedCourse({
       chapters: [{ blocks: [{ type: 'image', content: { query: 'modern office', alt: 'משרד' } }] }],
     });
 
-    expect(imageIntents[0].query).toBe('modern office');
+    expect((course.chapters[0].blocks[0].content as { imagePrompt: string }).imagePrompt).toBe(
+      'modern office',
+    );
   });
 
   it('נופלת ל-caption כשאין query ואין alt', () => {
-    const { imageIntents } = coerceGeneratedCourse({
+    const { course } = coerceGeneratedCourse({
       chapters: [{ blocks: [{ type: 'image', content: { caption: 'צוות עובד יחד' } }] }],
     });
 
-    expect(imageIntents).toHaveLength(1);
-    expect(imageIntents[0].query).toBe('צוות עובד יחד');
+    expect((course.chapters[0].blocks[0].content as { imagePrompt: string }).imagePrompt).toBe(
+      'צוות עובד יחד',
+    );
   });
 
-  it('שולפת כוונת תמונה מ-hero רק כשהרקע תמונה', () => {
+  it('שומרת פרומפט תמונה מ-hero רק כשהרקע תמונה', () => {
     const withImage = coerceGeneratedCourse({
       chapters: [{ blocks: [{ type: 'hero', content: { backgroundType: 'image', query: 'רקע' } }] }],
     });
@@ -334,7 +320,19 @@ describe('coerceGeneratedCourse', () => {
       chapters: [{ blocks: [{ type: 'hero', content: { backgroundType: 'gradient', query: 'רקע' } }] }],
     });
 
-    expect(withImage.imageIntents).toHaveLength(1);
-    expect(withGradient.imageIntents).toHaveLength(0);
+    expect((withImage.course.chapters[0].blocks[0].content as { imagePrompt: string }).imagePrompt).toBe(
+      'רקע',
+    );
+    expect(
+      (withGradient.course.chapters[0].blocks[0].content as { imagePrompt: string }).imagePrompt,
+    ).toBe('');
+  });
+
+  it('מזריקה את הפורמט הנבחר ל-Course.format', () => {
+    const { course } = coerceGeneratedCourse(
+      { chapters: [{ blocks: [{ type: 'richText', content: {} }] }] },
+      'process',
+    );
+    expect(course.format).toBe('process');
   });
 });

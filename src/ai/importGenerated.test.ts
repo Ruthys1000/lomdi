@@ -7,7 +7,7 @@ const roundTrip = (value: unknown) => JSON.parse(JSON.stringify(value));
 
 describe('importGeneratedCourse', () => {
   it('צינור מלא: JSON גולמי → לומדה ערוכה ומאומתת', () => {
-    const { course, warnings, imageIntents } = importGeneratedCourse({
+    const { course, warnings } = importGeneratedCourse({
       title: 'אבטחת מידע',
       chapters: [
         {
@@ -24,8 +24,9 @@ describe('importGeneratedCourse', () => {
     expect(course.chapters[0].blocks[0].type).toBe('hero');
     expect(warnings.some((w) => w.includes('פתיחה'))).toBe(true);
 
-    // כוונת התמונה נשמרה לפתירה מאוחרת
-    expect(imageIntents).toHaveLength(1);
+    // הפרומפט המומלץ לתמונה נשמר בתוכן הבלוק (placeholder בלבד)
+    const imageBlock = course.chapters[0].blocks.find((b) => b.type === 'image');
+    expect((imageBlock?.content as { imagePrompt: string } | undefined)?.imagePrompt).toBe('מנעול דיגיטלי');
 
     // התוצר עובר את אותו אימות של טעינת קובץ פרויקט
     const validation = validateProjectFile(

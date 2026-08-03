@@ -93,8 +93,8 @@ export async function importAssetFromUrl(
   }
 
   if (!response.ok) {
-    // אם הצד השני החזיר גוף JSON עם `error` (למשל `/api/image`) — מעדיפים את
-    // ההסבר המדויק שלו על פני קוד סטטוס גנרי, כדי שהסיבה תעלה עד ה-toast.
+    // אם הצד השני החזיר גוף JSON עם `error` — מעדיפים את ההסבר המדויק שלו על
+    // פני קוד סטטוס גנרי, כדי שהסיבה תעלה עד ה-toast.
     const reason = await errorReasonFromResponse(response);
     return {
       ok: false,

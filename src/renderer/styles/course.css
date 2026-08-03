@@ -1714,7 +1714,138 @@
   .lc-block-slot,
   .lc-card,
   .lc-quiz,
-  .lc-accordion__item {
+  .lc-accordion__item,
+  .lc-step,
+  .lc-callout {
     break-inside: avoid;
   }
+}
+
+/* ═══════════════════ מסר מרכזי (callout) ═══════════════════ */
+
+.lc-callout {
+  display: flex;
+  gap: calc(var(--lc-space-unit) * 2);
+  align-items: flex-start;
+  padding: calc(var(--lc-space-unit) * 2.5) calc(var(--lc-space-unit) * 3);
+  border-radius: var(--lc-radius);
+  border: 1px solid var(--lc-color-border);
+  background: var(--lc-color-surface);
+}
+
+/* צבע הדגש של כל וריאציה — פס צד מודגש ורקע רך תואם */
+.lc-callout--takeaway {
+  border-color: color-mix(in srgb, var(--lc-color-primary) 40%, transparent);
+  background: var(--lc-surface-primary);
+  border-inline-start: 4px solid var(--lc-color-primary);
+}
+.lc-callout--info {
+  border-inline-start: 4px solid var(--lc-color-secondary);
+}
+.lc-callout--success {
+  border-inline-start: 4px solid #16a34a;
+  background: color-mix(in srgb, #16a34a 8%, var(--lc-color-background));
+}
+.lc-callout--warning {
+  border-inline-start: 4px solid var(--lc-color-accent);
+  background: var(--lc-surface-accent);
+}
+
+.lc-callout__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  inline-size: 2.4em;
+  block-size: 2.4em;
+  border-radius: var(--lc-radius-small);
+  background: color-mix(in srgb, var(--lc-color-primary) 12%, transparent);
+  color: var(--lc-color-primary);
+}
+.lc-callout--warning .lc-callout__icon {
+  background: color-mix(in srgb, var(--lc-color-accent) 16%, transparent);
+  color: var(--lc-color-accent);
+}
+.lc-callout__icon > svg {
+  inline-size: 1.25em;
+  block-size: 1.25em;
+}
+
+.lc-callout__body {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--lc-space-unit) * 0.5);
+  min-inline-size: 0;
+}
+.lc-callout__title {
+  font-weight: 700;
+  font-size: 1.05em;
+}
+.lc-callout__text {
+  color: var(--lc-color-text-muted);
+  line-height: 1.65;
+}
+
+/* ═══════════════════ שלבים (steps) ═══════════════════ */
+
+.lc-steps {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--lc-space-unit) * 2.5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: lc-step;
+}
+
+.lc-step {
+  position: relative;
+  display: flex;
+  gap: calc(var(--lc-space-unit) * 2);
+  align-items: flex-start;
+}
+
+/* קו מקשר אנכי בין המרקרים במצב ממוספר */
+.lc-steps--numbered .lc-step:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  inset-block-start: 2.6em;
+  inset-block-end: calc(var(--lc-space-unit) * -2.5);
+  inset-inline-start: 1.3em;
+  inline-size: 2px;
+  background: var(--lc-color-border);
+  transform: translateX(-50%);
+}
+.lc-course[dir='rtl'] .lc-steps--numbered .lc-step:not(:last-child)::before {
+  transform: translateX(50%);
+}
+
+.lc-step__marker {
+  display: grid;
+  place-items: center;
+  flex: none;
+  inline-size: 2.6em;
+  block-size: 2.6em;
+  border-radius: 50%;
+  background: var(--lc-color-primary);
+  color: var(--lc-color-on-primary);
+  font-weight: 700;
+  font-size: 1em;
+}
+.lc-steps--arrow .lc-step__marker {
+  border-radius: var(--lc-radius-small);
+}
+
+.lc-step__body {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--lc-space-unit) * 0.5);
+  padding-block-start: calc(var(--lc-space-unit) * 0.5);
+  min-inline-size: 0;
+}
+.lc-step__title {
+  font-size: 1.1em;
+}
+.lc-step__text {
+  color: var(--lc-color-text-muted);
+  line-height: 1.65;
 }

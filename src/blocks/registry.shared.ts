@@ -11,6 +11,8 @@ import { videoContentSchema, createVideoContent, videoAssetIds } from './video/c
 import { quizContentSchema, createQuizContent, quizAssetIds } from './quiz/content';
 import { dividerContentSchema, createDividerContent, dividerAssetIds } from './divider/content';
 import { quoteContentSchema, createQuoteContent, quoteAssetIds } from './quote/content';
+import { calloutContentSchema, createCalloutContent, calloutAssetIds } from './callout/content';
+import { stepsContentSchema, createStepsContent, stepsAssetIds } from './steps/content';
 
 /**
  * הרגיסטרי המשותף — הצד של הבלוקים שאין בו React.
@@ -143,6 +145,24 @@ export const sharedBlockRegistry: Record<string, SharedBlockDefinition<unknown>>
     schema: quoteContentSchema,
     createContent: createQuoteContent,
     usedAssetIds: quoteAssetIds,
+  }),
+  callout: define({
+    type: 'callout',
+    label: blockLabels.callout,
+    description: 'קופסה בולטת למסר מרכזי, טיפ או אזהרה.',
+    category: 'content',
+    schema: calloutContentSchema,
+    createContent: createCalloutContent,
+    usedAssetIds: calloutAssetIds,
+  }),
+  steps: define({
+    type: 'steps',
+    label: blockLabels.steps,
+    description: 'רצף שלבים ממוספר — לנהלים ותהליכים.',
+    category: 'content',
+    schema: stepsContentSchema,
+    createContent: createStepsContent,
+    usedAssetIds: stepsAssetIds,
   }),
 };
 

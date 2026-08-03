@@ -3,6 +3,7 @@ import { getSharedBlockDefinition } from '@/blocks/registry.shared';
 import { createAccordionItem, type AccordionItem } from '@/blocks/accordion/content';
 import { createCard, type CardItem } from '@/blocks/cards/content';
 import type { QuizOption } from '@/blocks/quiz/content';
+import { createStep, type StepItem } from '@/blocks/steps/content';
 import { createBlockSettings, defaultNavigation } from '@/model/defaults';
 import { createChapter, createCourse } from '@/model/factory';
 import { createId } from '@/model/ids';
@@ -17,9 +18,8 @@ import type {
   Theme,
   ThemePresetId,
 } from '@/model/types';
-import { readImageHint, type ImageField, type ImageIntent } from './imageIntent';
+import { readImageHint, type ImageField } from './imageIntent';
 import { sanitizeRichText } from './sanitizeRichText';
-import { coerceVisualStyle, type VisualStyle } from './visualStyle';
 
 /**
  * שכבת הקליטה של תוכן שנוצר ב-AI.
@@ -34,15 +34,11 @@ import { coerceVisualStyle, type VisualStyle } from './visualStyle';
 
 export interface CoerceResult {
   course: Course;
-  imageIntents: ImageIntent[];
-  /** ה-art direction ללומדה כולה — מכוון את יצירת התמונות ב-AI */
-  visualStyle: VisualStyle;
   warnings: string[];
 }
 
 interface Ctx {
   warnings: string[];
-  intents: ImageIntent[];
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -156,6 +152,14 @@ function repairItemArrays(type: string, content: Record<string, unknown>, ctx: C
       }
       return createAccordionItem(overrides);
     });
+  } else if (type === 'steps') {
+    content.items = raw.map((item): StepItem => {
+      const record = isRecord(item) ? item : {};
+      const overrides: Partial<StepItem> = {};
+      if (typeof record.title === 'string') overrides.title = record.title;
+      if (typeof record.text === 'string') overrides.text = record.text;
+      return createStep(overrides);
+    });
   }
 }
 
@@ -165,13 +169,14 @@ const IMAGE_FIELD_BY_TYPE: Record<string, ImageField> = {
   hero: 'imageAssetId',
 };
 
-/** שולף כוונת תמונה מתוך התוכן ומאפס את הפניית הנכס, לפתירה מאוחרת */
-function extractImageIntent(
-  blockId: string,
-  type: string,
-  content: Record<string, unknown>,
-  ctx: Ctx,
-): void {
+/**
+ * במקום לפתור תמונה, שומר את הפרומפט שהמודל הציע כ-`imagePrompt` בתוכן.
+ *
+ * Lomdi לא מייצר תמונות: הבלוק נשאר עם placeholder, והמשתמש מקבל פרומפט
+ * מומלץ באנגלית להעתקה למחולל תמונות משלו. הפניית הנכס מתאפסת (אין assetId
+ * להמציא), וה-alt של המודל נשמר לנגישות.
+ */
+function applyImagePrompt(type: string, content: Record<string, unknown>): void {
   const field = IMAGE_FIELD_BY_TYPE[type];
   if (!field) return;
 
@@ -182,18 +187,11 @@ function extractImageIntent(
   content[field] = '';
   if (typeof content.alt === 'string' && hint?.alt) content.alt = hint.alt;
 
-  // fallback לשאילתה: אם המודל השמיט query (וגם אין url), משתמשים בטקסט המתאר
-  // שכן קיים — alt או caption — כדי שבלוק תמונה לא יישאר אילם רק בגלל השמטה.
+  // fallback: אם המודל השמיט query, משתמשים ב-alt/caption כדי שהבלוק לא יישאר
+  // בלי הצעת פרומפט כלל.
   const caption = typeof content.caption === 'string' ? content.caption.trim() : '';
-  const query = hint?.query ?? hint?.alt ?? (caption || undefined);
-
-  if (hint?.url || query) {
-    const intent: ImageIntent = { blockId, field };
-    if (hint?.url) intent.url = hint.url;
-    if (query) intent.query = query;
-    if (hint?.alt) intent.alt = hint.alt;
-    ctx.intents.push(intent);
-  }
+  const prompt = hint?.query ?? hint?.alt ?? (caption || undefined);
+  if (prompt) content.imagePrompt = prompt;
 }
 
 function coerceBlock(raw: unknown, ctx: Ctx): Block | null {
@@ -229,7 +227,7 @@ function coerceBlock(raw: unknown, ctx: Ctx): Block | null {
 
   if (type === 'quiz') repairQuiz(provided, ctx);
   repairItemArrays(type, provided, ctx);
-  extractImageIntent(id, type, provided, ctx);
+  applyImagePrompt(type, provided);
 
   const { content, repaired } = coerceAgainstSchema(definition.schema, base, provided);
   if (repaired) ctx.warnings.push(`תוכן בבלוק "${definition.label}" תוקן חלקית לברירת מחדל.`);
@@ -316,8 +314,8 @@ function coerceTheme(raw: unknown): Theme {
  * הופך פלט JSON חופשי מ-AI ללומדה תקינה, ואוסף אזהרות וכוונות תמונה.
  * לא זורק אף פעם: קלט חסר-תקווה מחזיר לומדה עם פרק ריק אחד.
  */
-export function coerceGeneratedCourse(raw: unknown): CoerceResult {
-  const ctx: Ctx = { warnings: [], intents: [] };
+export function coerceGeneratedCourse(raw: unknown, format?: string): CoerceResult {
+  const ctx: Ctx = { warnings: [] };
   const root = isRecord(raw) ? raw : {};
 
   if (!isRecord(raw)) ctx.warnings.push('הפלט לא היה אובייקט לומדה תקין.');
@@ -342,6 +340,9 @@ export function coerceGeneratedCourse(raw: unknown): CoerceResult {
     title: asString(root.title) ?? 'לומדה חדשה',
     subtitle: asString(root.subtitle) ?? '',
     description: asString(root.description) ?? '',
+    // הפורמט נבחר בצד הלקוח (לא ע"י המודל) ומוזרק כאן, כדי שהעורך יחיל את
+    // אילוצי הפורמט על לומדה שנוצרה ב-AI
+    ...(format ? { format } : {}),
     direction,
     language,
     theme: coerceTheme(root.theme),
@@ -349,9 +350,5 @@ export function coerceGeneratedCourse(raw: unknown): CoerceResult {
     chapters,
   });
 
-  // ה-brief נגזר על גבי הערכה הסופית, כך שכשהמודל השמיט אותו — הפלטה עדיין
-  // מתלכדת עם צבעי ה-theme של הלומדה.
-  const visualStyle = coerceVisualStyle(root.visualStyle, course.theme);
-
-  return { course, imageIntents: ctx.intents, visualStyle, warnings: ctx.warnings };
+  return { course, warnings: ctx.warnings };
 }

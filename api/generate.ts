@@ -29,8 +29,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     return;
   }
 
-  const body = (req.body ?? {}) as { text?: unknown };
+  const body = (req.body ?? {}) as { text?: unknown; format?: unknown };
   const text = typeof body.text === 'string' ? body.text.trim() : '';
+  // מזהה הפורמט קובע את "האישיות" של הפרומפט. חסר/לא-מוכר → מודול גנרי.
+  const format = typeof body.format === 'string' ? body.format : undefined;
   if (!text) {
     res.status(400).json({ error: 'לא הוזן טקסט ליצירת הלומדה.' });
     return;
@@ -47,6 +49,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   }
 
   const client = new Anthropic({ apiKey });
+
+  // הפרומפט נבנה פעם אחת לפי הפורמט, ומשמש את שני ניסיונות היצירה.
+  const systemPrompt = buildSystemPrompt(format);
 
   // מעבר למצב סטרימינג: מזרימים שורות NDJSON לאורך היצירה כדי שהחיבור לעולם לא
   // יהיה "שקט". דפדפן נייד או פרוקסי מנתקים חיבור שלא זורם בו מידע לאורך דקות —
@@ -81,8 +86,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       // effort medium מאזן איכות מול זמן: יצירת ה-JSON היא משימת חילוץ מובנית,
       // לא הוכחה מתמטית, ו-high האריך את ההמתנה מדי.
       output_config: { effort: 'medium' },
-      system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
-      messages: [{ role: 'user', content: `צור לומדה מהתוכן הבא:\n\n${text}` }],
+      system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
+      messages: [{ role: 'user', content: `צור דף מהתוכן הבא:\n\n${text}` }],
     });
     activeStream = stream;
     return stream.finalMessage();
@@ -340,19 +345,32 @@ function findStringStart(result: string): number {
 // מקור האמת לשדות: src/blocks/*/content.ts. הפלט עובר ריפוי בצד הלקוח,
 // ולכן דיוק חלקי כאן מספיק — coerce משלים ברירות מחדל ומשמיט שדות פגומים.
 
-const BLOCK_CATALOG = `סוגי הבלוקים (type + השדות המרכזיים ב-content):
-- hero — מסך פתיחה. variant(centered|spotlight|panel|minimal), title, subtitle, intro, backgroundType(color|gradient|image), backgroundColor, gradientFrom, gradientTo, height(compact|medium|tall|screen), alignment(start|center|end). לרקע תמונה: backgroundType="image" + query + alt.
-- richText — טקסט רץ. doc (מסמך ProseMirror, ראה למטה), maxWidth(narrow|normal|wide).
-- image — תמונה. query, alt, caption, aspectRatio(auto|16:9|4:3|1:1|3:2|21:9), fit(cover|contain), roundness(none|small|medium|large|full).
-- textImage — טקסט לצד תמונה. doc, query, alt, caption, layout(imageStart|imageEnd|imageTop), ratio(50-50|40-60|60-40), variant(standard|feature).
-- cards — כרטיסים. variant, columns(2-4), items:[{icon, title, text}].
-- accordion — פריטים נפתחים. items:[{title, doc}], mode(single|multiple), openFirstByDefault.
-- quiz — שאלת בחירה. question, hint, options:[{text, correct}] (בדיוק אחת correct:true), feedbackCorrect, feedbackIncorrect.
-- quote — ציטוט. variant, text, author, role.
-- video — וידאו. source(youtube|vimeo|upload), url.
-- divider — מפריד. style(space|line|icon|gradient), icon, height.
+// קטלוג הבלוקים כמפה type→שורה, כדי שכל פורמט יציג רק את הבלוקים המותרים לו —
+// זה מה שמונע מהמודל "לנדוד" לבלוקים שלא שייכים לפורמט (התיקון ל"גנרי מדי").
+const BLOCK_LINES: Record<string, string> = {
+  hero: '- hero — מסך פתיחה. variant(centered|spotlight|panel|minimal), title, subtitle, intro, backgroundType(color|gradient|image), backgroundColor, gradientFrom, gradientTo, height(compact|medium|tall|screen), alignment(start|center|end). לרקע תמונה: backgroundType="image" + query + alt.',
+  richText: '- richText — טקסט רץ. doc (מסמך ProseMirror, ראה למטה), maxWidth(narrow|normal|wide).',
+  image: '- image — תמונה. query (פרומפט קצר באנגלית לתמונה), alt, caption, aspectRatio(auto|16:9|4:3|1:1|3:2|21:9), fit(cover|contain), roundness(none|small|medium|large|full).',
+  textImage: '- textImage — טקסט לצד תמונה. doc, query (פרומפט קצר באנגלית), alt, caption, layout(imageStart|imageEnd|imageTop), ratio(50-50|40-60|60-40), variant(standard|feature).',
+  cards: '- cards — כרטיסים. variant(plain|numbered|gradient|outline), columns(2-4), items:[{icon, title, text}].',
+  accordion: '- accordion — פריטים נפתחים. items:[{title, doc}], mode(single|multiple), openFirstByDefault.',
+  quiz: '- quiz — שאלת בחירה. question, hint, options:[{text, correct}] (בדיוק אחת correct:true), feedbackCorrect, feedbackIncorrect.',
+  quote: '- quote — ציטוט. variant, text, author, role.',
+  video: '- video — וידאו. source(youtube|vimeo|upload), url.',
+  divider: '- divider — מפריד. style(space|line|icon|gradient), icon, height.',
+  callout: '- callout — מסר מרכזי בולט. variant(takeaway|info|success|warning), icon(שם lucide, למשל Lightbulb/AlertTriangle), title, text.',
+  steps: '- steps — רצף שלבים ממוספר. variant(numbered|arrow), items:[{title, text}].',
+};
 
-settings (אופציונלי, פר-בלוק, ליצירת מקצב): { background: transparent|surface|muted|primary|accent|gradient|gradientSoft }. עטוף בו סקשן בולט אחד או שניים, לא את כל הבלוקים.`;
+const SETTINGS_NOTE =
+  'settings (אופציונלי, פר-בלוק, ליצירת מקצב): { background: transparent|surface|muted|primary|accent|gradient|gradientSoft }. עטוף בו סקשן בולט אחד או שניים, לא את כל הבלוקים.';
+
+function catalogFor(types: string[]): string {
+  const lines = types.map((type) => BLOCK_LINES[type]).filter(Boolean);
+  return ['סוגי הבלוקים המותרים בפורמט זה (type + השדות המרכזיים ב-content):', ...lines, '', SETTINGS_NOTE].join(
+    '\n',
+  );
+}
 
 const RICH_TEXT = `doc הוא מסמך ProseMirror: { "type":"doc", "content":[ ... ] }.
 nodes מותרים: doc, paragraph, text, heading(attrs.level 2–4), bulletList, orderedList, listItem, blockquote, hardBreak.
@@ -361,17 +379,10 @@ marks מותרים: bold, italic, underline, strike, link.
 
 const THEMES = 'ערכות עיצוב (בחר id בשדה theme של הלומדה): clean, darkElegant, vivid, warmSand, forest, highContrast, sunset, midnight.';
 
-const EXAMPLE = {
+const GENERIC_EXAMPLE = {
   title: 'בטיחות במשרד',
   subtitle: 'לומדת מבוא קצרה',
   theme: 'forest',
-  visualStyle: {
-    artStyle:
-      'clean modern flat vector illustration, soft rounded shapes, calm and reassuring, ' +
-      'consistent line weight, generous negative space, no text',
-    palette: ['#14532d', '#166534', '#4ade80'],
-    motif: 'subtle shield and leaf motifs',
-  },
   chapters: [
     {
       title: 'פתיחה',
@@ -448,43 +459,250 @@ const EXAMPLE = {
   ],
 };
 
-const SYSTEM_PROMPT = [
-  'אתה מחולל לומדות (קורסים דיגיטליים) בעברית. קלט: תוכן גולמי. פלט: לומדה אחת כ-JSON.',
-  '',
-  'מבנה: לומדה = { title, subtitle, description, theme, visualStyle, chapters:[...] }.',
+/**
+ * דוגמת One Pager — פרק יחיד, תמצית, נקודות מפתח ומסר לקחת הביתה.
+ */
+const ONE_PAGER_EXAMPLE = {
+  title: 'ניהול זמן אפקטיבי',
+  subtitle: 'המדריך הקצר',
+  theme: 'clean',
+  chapters: [
+    {
+      title: 'עיקר',
+      blocks: [
+        {
+          type: 'hero',
+          content: {
+            variant: 'spotlight',
+            title: 'ניהול זמן אפקטיבי',
+            subtitle: 'שלוש נקודות שישנו לכם את היום',
+            backgroundType: 'gradient',
+            gradientFrom: '#2563eb',
+            gradientTo: '#7c3aed',
+            height: 'tall',
+            fullBleed: true,
+          },
+        },
+        {
+          type: 'richText',
+          content: {
+            doc: {
+              type: 'doc',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [
+                    { type: 'text', text: 'ניהול זמן טוב הוא לא לעשות יותר — אלא לבחור נכון במה להתמקד.' },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        {
+          type: 'cards',
+          content: {
+            variant: 'numbered',
+            columns: 3,
+            items: [
+              { icon: 'Target', title: 'תעדוף', text: 'התחילו מהמשימה בעלת ההשפעה הגדולה ביותר.' },
+              { icon: 'Clock', title: 'חסימת זמן', text: 'הקצו בלוקים קבועים למשימות עומק.' },
+              { icon: 'Ban', title: 'הסחות', text: 'כבו התראות בזמן עבודה ממוקדת.' },
+            ],
+          },
+        },
+        {
+          type: 'callout',
+          content: {
+            variant: 'takeaway',
+            icon: 'Lightbulb',
+            title: 'לקחת הביתה',
+            text: 'עדיפות ברורה אחת ביום שווה יותר מעשר משימות מפוזרות.',
+          },
+        },
+      ],
+    },
+  ],
+};
+
+/**
+ * דוגמת Process — פרק יחיד, פתיח קצר ובלוק steps עם כל השלבים.
+ */
+const PROCESS_EXAMPLE = {
+  title: 'פתיחת קריאת שירות',
+  subtitle: 'נוהל בארבעה שלבים',
+  theme: 'forest',
+  chapters: [
+    {
+      title: 'התהליך',
+      blocks: [
+        {
+          type: 'hero',
+          content: {
+            variant: 'panel',
+            title: 'פתיחת קריאת שירות',
+            subtitle: 'איך מטפלים בפנייה מהרגע הראשון',
+            backgroundType: 'gradient',
+            gradientFrom: '#14532d',
+            gradientTo: '#166534',
+            height: 'tall',
+            fullBleed: true,
+          },
+        },
+        {
+          type: 'richText',
+          content: {
+            doc: {
+              type: 'doc',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [
+                    { type: 'text', text: 'תהליך אחיד לפתיחת קריאה מבטיח שאף פנייה לא תיפול בין הכיסאות.' },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        {
+          type: 'steps',
+          content: {
+            variant: 'numbered',
+            items: [
+              { title: 'קבלת הפנייה', text: 'תעדו את פרטי הלקוח ואת מהות הבעיה במערכת.' },
+              { title: 'סיווג דחיפות', text: 'קבעו רמת עדיפות לפי ההשפעה על הלקוח.' },
+              { title: 'הקצאה לטיפול', text: 'נתבו את הקריאה לגורם המקצועי המתאים.' },
+              { title: 'עדכון וסגירה', text: 'עדכנו את הלקוח, ותעדו את הפתרון לפני הסגירה.' },
+            ],
+          },
+        },
+        {
+          type: 'callout',
+          content: {
+            variant: 'warning',
+            icon: 'AlertTriangle',
+            title: 'שימו לב',
+            text: 'קריאה בדחיפות גבוהה חייבת אישור מנהל תוך שעה.',
+          },
+        },
+      ],
+    },
+  ],
+};
+
+/**
+ * מודול פורמט — ה"אישיות" של הפורמט בצד ה-AI.
+ *
+ * מסונכרן ידנית עם `src/formats/index.ts` (allowedBlocks תואם ל-allowedBlockTypes).
+ * שם חי החצי הוויזואלי; כאן חי החצי הפרומפטי.
+ */
+interface FormatModule {
+  /** מי ה-AI עבור הפורמט הזה */
+  role: string;
+  /** רובריקת החילוץ — "איך לפצח את התוכן" */
+  interview: string;
+  /** המבנה הרצוי — פרקים, בלוקים, מה מותר ומה לא */
+  skeleton: string;
+  /** רק הבלוקים המותרים לפורמט — מסנן את הקטלוג */
+  allowedBlocks: string[];
+  /** דוגמת few-shot ייעודית לפורמט */
+  example: unknown;
+}
+
+const ALL_BLOCKS = Object.keys(BLOCK_LINES);
+
+const GENERIC_MODULE: FormatModule = {
+  role: 'אתה מחולל דפי למידה בעברית. קלט: תוכן גולמי. פלט: דף אחד כ-JSON.',
+  interview: [
+    '- זהה את הרעיונות המרכזיים וארגן אותם להגיון ברור.',
+    '- גוון בין טקסט, כרטיסים, ציטוט ושאלה כדי לשמור על עניין.',
+  ].join('\n'),
+  skeleton: [
+    'פתח ב-hero מרשים (variant "spotlight"/"panel", backgroundType="gradient", fullBleed=true, height "tall").',
+    'גוון בלוקים — cards, accordion, quote, quiz — לא רק פסקאות. עטוף 1-2 סקשנים ב-settings:{ background }.',
+    'העדף ערכות נועזות (vivid, sunset, midnight, forest) על clean.',
+  ].join('\n'),
+  allowedBlocks: ALL_BLOCKS,
+  example: GENERIC_EXAMPLE,
+};
+
+const FORMAT_MODULES: Record<string, FormatModule> = {
+  onePager: {
+    role: 'אתה עורך תוכן שמזקק חומר ארוך ל-One Pager — עמוד יחיד, סרוק וברור. המטרה: שהקורא יבין את המסר המרכזי במבט אחד.',
+    interview: [
+      '- זהה את המסר המרכזי האחד של התוכן.',
+      '- חלץ 3-5 נקודות מפתח תומכות.',
+      '- נסח משפט "לקחת הביתה" אחד וחד.',
+      '- זרוק פרטים משניים — One Pager הוא תמצית, לא סיכום מלא.',
+    ].join('\n'),
+    skeleton: [
+      'פרק יחיד בלבד, בלי פרקים נוספים.',
+      'פתח ב-hero. אחריו richText קצר (פתיח/תמצית). cards לנקודות המפתח (variant "numbered" או "gradient").',
+      'סיים ב-callout מסוג "takeaway" עם המסר לקחת הביתה. אפשר quote אחד אם מתאים.',
+    ].join('\n'),
+    allowedBlocks: ['hero', 'richText', 'cards', 'callout', 'quote', 'image', 'divider'],
+    example: ONE_PAGER_EXAMPLE,
+  },
+  process: {
+    role: 'אתה מעצב הדרכה שהופך נוהל או תהליך עבודה למדריך שלבים ברור לפי הסדר.',
+    interview: [
+      '- זהה את השלבים לפי הרצף הנכון לביצוע.',
+      '- לכל שלב: הפעולה, מי מבצע, הטריגר להתחלה, והתוצאה.',
+      '- אם השלבים לא מסודרים בתוכן — הסק את הסדר ההגיוני.',
+      '- הפרד אזהרה או נקודה קריטית ל-callout נפרד.',
+    ].join('\n'),
+    skeleton: [
+      'פרק יחיד בלבד, בלי פרקים נוספים.',
+      'פתח ב-hero. richText קצר שמסביר את מטרת התהליך. בלוק steps אחד עם כל השלבים (items:[{title, text}]).',
+      'אם יש נקודה קריטית — callout מסוג "warning" או "info".',
+    ].join('\n'),
+    allowedBlocks: ['hero', 'richText', 'steps', 'callout', 'image', 'divider'],
+    example: PROCESS_EXAMPLE,
+  },
+};
+
+const SHARED_RULES = [
+  'מבנה: דף = { title, subtitle, description, theme, chapters:[...] }.',
   'כל פרק = { title, description, blocks:[...] }. כל בלוק = { type, content:{...} }.',
-  'אין צורך ב-id — המערכת משלימה. לבלוק אפשר להוסיף settings:{ background } כדי',
-  'לצבוע סקשן (ראה למטה) — השתמש בזה בחוכמה, לא בכל בלוק.',
+  'אין צורך ב-id — המערכת משלימה.',
   '',
-  'הנחיות — התוכן חשוב, אבל גם המראה. אל תסתפק בגרסה השטוחה של כל בלוק:',
-  '- פתח כל לומדה ב-hero מרשים: variant "spotlight" או "panel", backgroundType="gradient",',
-  '  fullBleed=true, height "tall". בחר gradientFrom/gradientTo שמתאימים לנושא.',
-  '- השתמש בוריאציות הפרימיום, לא רק ב-plain: cards variant "gradient" או "numbered",',
-  '  quote variant "band", textImage variant "feature".',
-  '- צור מקצב: עטוף 1-2 סקשנים מרכזיים ב-settings:{ background:"gradientSoft" } או "surface"',
-  '  או "primary" — לא את כולם, כדי שהצבע יבלוט. שאר הבלוקים נשארים בלי settings.',
-  '- כשהתוכן מאפשר, כלול ציטוט (quote) אחד.',
-  '- למגוון חזותי השתמש ב-cards, accordion, quote, textImage ו-quiz — לא רק בפסקאות.',
-  '- בחר theme שמתאים לנושא, והעדף ערכות נועזות (vivid, sunset, midnight, forest) על clean.',
+  'כללי ברזל:',
+  '- השתמש רק בסוגי הבלוקים המותרים לפורמט (ראה קטלוג למטה). אל תשתמש בסוג שאינו ברשימה.',
+  '- בחר theme שמתאים לנושא (ראה רשימה למטה).',
   '- בלוק quiz חייב תשובה נכונה אחת בדיוק.',
-  '- תמונות: אל תמציא assetId. *כל* בלוק image ו-textImage, וכן hero עם',
-  '  backgroundType="image", **חייב** שדה "query" — תיאור קצר *באנגלית* לתמונה',
-  '  (למשל "modern office team"). בלי query התמונה לא תיטען. הוסף גם "alt"',
-  '  בעברית לנגישות. אל תשתמש בבלוק image בלי query.',
-  '- visualStyle: הגדר art direction אחד לכל הלומדה, כדי שכל התמונות ייראו כסט',
-  '  מעוצב אחד ולא אוסף אקראי. אובייקט עליון: { artStyle, palette, motif }.',
-  '  artStyle = תיאור סגנון האיור *באנגלית* (למשל "flat vector illustration,',
-  '  soft rounded shapes, no text"); palette = מערך צבעי hex שמתאימים ל-theme;',
-  '  motif = מוטיב חוזר אופציונלי. בחר סגנון שמתאים לנושא ולערכה שבחרת.',
-  '',
-  BLOCK_CATALOG,
-  '',
-  RICH_TEXT,
-  '',
-  THEMES,
-  '',
-  'דוגמה מלאה ותקינה:',
-  JSON.stringify(EXAMPLE),
-  '',
-  'החזר אך ורק את ה-JSON של הלומדה — בלי טקסט לפניו או אחריו, ובלי גדרות קוד (```).',
+  '- תמונות: Lomdi לא מייצר תמונות. כל בלוק image/textImage, ו-hero עם',
+  '  backgroundType="image", חייב שדה "query" — פרומפט קצר *באנגלית* לתמונה',
+  '  (למשל "modern office team, flat vector illustration"). הוא יוצג למשתמש כהמלצה',
+  '  ליצירת תמונה בעצמו; בינתיים מוצג placeholder. הוסף "alt" בעברית לנגישות.',
 ].join('\n');
+
+/**
+ * מרכיב את פרומפט המערכת לפי הפורמט: מצע משותף + מודול-פורמט + קטלוג מסונן.
+ * פורמט לא מוכר (או חסר) נופל ל-GENERIC_MODULE — התנהגות "חופשי" כמו לפני הפיבוט.
+ */
+function buildSystemPrompt(format?: string): string {
+  const mod = (format && FORMAT_MODULES[format]) || GENERIC_MODULE;
+  return [
+    mod.role,
+    '',
+    'איך לפצח את התוכן לפורמט הזה:',
+    mod.interview,
+    '',
+    'המבנה הרצוי:',
+    mod.skeleton,
+    '',
+    SHARED_RULES,
+    '',
+    catalogFor(mod.allowedBlocks),
+    '',
+    RICH_TEXT,
+    '',
+    THEMES,
+    '',
+    'דוגמה מלאה ותקינה בפורמט הזה:',
+    JSON.stringify(mod.example),
+    '',
+    'החזר אך ורק את ה-JSON של הדף — בלי טקסט לפניו או אחריו, ובלי גדרות קוד (```).',
+  ].join('\n');
+}

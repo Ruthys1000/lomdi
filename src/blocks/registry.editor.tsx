@@ -4,7 +4,9 @@ import {
   Heading1,
   Image as ImageIcon,
   LayoutGrid,
+  Lightbulb,
   ListCollapse,
+  ListOrdered,
   Minus,
   PlayCircle,
   Quote as QuoteIcon,
@@ -31,6 +33,10 @@ import { VideoSettings } from './video/Settings';
 import { QuizEditor } from './quiz/Editor';
 import { QuizSettings } from './quiz/Settings';
 import { QuoteSettings } from './quote/Settings';
+import { CalloutEditor } from './callout/Editor';
+import { CalloutSettings } from './callout/Settings';
+import { StepsEditor } from './steps/Editor';
+import { StepsSettings } from './steps/Settings';
 
 /**
  * הרגיסטרי של העורך — Editor, Settings ואייקונים.
@@ -81,6 +87,8 @@ const registrations: Record<string, Registration> = {
   quiz: { icon: SquareCheckBig, EditorComponent: QuizEditor, SettingsComponent: QuizSettings },
   // לציטוט אין עריכה ישירה בקנבס: נערך מהפאנל, כמו תמונה ומפריד
   quote: { icon: QuoteIcon, SettingsComponent: QuoteSettings },
+  callout: { icon: Lightbulb, EditorComponent: CalloutEditor, SettingsComponent: CalloutSettings },
+  steps: { icon: ListOrdered, EditorComponent: StepsEditor, SettingsComponent: StepsSettings },
 };
 
 function build(type: string): EditorBlockDefinition | undefined {

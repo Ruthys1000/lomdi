@@ -20,6 +20,8 @@ export const heroContentSchema = z.object({
   gradientFrom: z.string(),
   gradientTo: z.string(),
   imageAssetId: assetRefSchema,
+  /** פרומפט מומלץ לתמונת הרקע — placeholder בלבד, המשתמש מייצר בעצמו */
+  imagePrompt: z.string().default(''),
   /** כהות שכבת הכיסוי מעל תמונת רקע — שומרת על קריאות הכותרת */
   overlayOpacity: z.number().min(0).max(1),
   height: z.enum(['compact', 'medium', 'tall', 'screen']),
@@ -40,6 +42,7 @@ export const createHeroContent = (overrides: Partial<HeroContent> = {}): HeroCon
   gradientFrom: '#2563eb',
   gradientTo: '#7c3aed',
   imageAssetId: '',
+  imagePrompt: '',
   overlayOpacity: 0.45,
   height: 'medium',
   alignment: 'center',

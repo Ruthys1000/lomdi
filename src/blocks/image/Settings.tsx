@@ -9,6 +9,7 @@ import {
   type Option,
 } from '@/editor/controls/Field';
 import { AssetField } from '@/editor/Assets/AssetField';
+import { ImagePromptField } from '@/editor/Assets/ImagePromptField';
 import type { ImageContent } from './content';
 
 const ratioOptions: Option<ImageContent['aspectRatio']>[] = [
@@ -46,6 +47,12 @@ export function ImageSettings({
           assetId={content.assetId}
           onChange={(assetId) => update({ assetId })}
         />
+        {!content.assetId && (
+          <ImagePromptField
+            value={content.imagePrompt}
+            onChange={(imagePrompt) => update({ imagePrompt })}
+          />
+        )}
         <TextField
           label="טקסט חלופי"
           placeholder="מה רואים בתמונה"

@@ -10,6 +10,8 @@ import { AccordionRenderer } from './accordion/Renderer';
 import { VideoRenderer } from './video/Renderer';
 import { QuizRenderer } from './quiz/Renderer';
 import { QuoteRenderer } from './quote/Renderer';
+import { CalloutRenderer } from './callout/Renderer';
+import { StepsRenderer } from './steps/Renderer';
 
 /**
  * רגיסטרי ה-Renderers — הצד שנארז לתוך הלומדה המיוצאת.
@@ -36,6 +38,8 @@ const registry = {
   video: VideoRenderer,
   quiz: QuizRenderer,
   quote: QuoteRenderer,
+  callout: CalloutRenderer,
+  steps: StepsRenderer,
 } as unknown as Record<string, BlockRendererComponent>;
 
 export const rendererRegistry = registry;

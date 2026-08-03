@@ -15,6 +15,8 @@ export const textImageContentSchema = z.object({
   variant: textImageVariantSchema,
   doc: richTextDocSchema,
   imageAssetId: assetRefSchema,
+  /** פרומפט מומלץ לתמונה — placeholder בלבד, המשתמש מייצר בעצמו */
+  imagePrompt: z.string().default(''),
   alt: z.string(),
   caption: z.string(),
   layout: z.enum(['imageStart', 'imageEnd', 'imageTop']),
@@ -33,6 +35,7 @@ export const createTextImageContent = (
   variant: 'standard',
   doc: emptyRichText(),
   imageAssetId: '',
+  imagePrompt: '',
   alt: '',
   caption: '',
   layout: 'imageEnd',

@@ -9,6 +9,11 @@ interface BlockLibraryModalProps {
   open: boolean;
   onClose: () => void;
   onPick: (type: string) => void;
+  /**
+   * סוגי הבלוקים המותרים בפורמט הנוכחי. `undefined` (לומדת legacy בלי פורמט)
+   * = כל הבלוקים מוצגים, כמו לפני הפיבוט.
+   */
+  allowedTypes?: string[];
 }
 
 const categories: { id: BlockCategory | 'all'; label: string }[] = [
@@ -29,7 +34,7 @@ const isAvailable = (definition: EditorBlockDefinition) =>
  * בנויה על <dialog> המובנה, ולכן focus trap, סגירה ב-Escape ו-inert על
  * הרקע מגיעים מהדפדפן ולא ממימוש ידני שקל לשכוח בו פרט.
  */
-export function BlockLibraryModal({ open, onClose, onPick }: BlockLibraryModalProps) {
+export function BlockLibraryModal({ open, onClose, onPick, allowedTypes }: BlockLibraryModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [query, setQuery] = useState('');
 
@@ -53,6 +58,8 @@ export function BlockLibraryModal({ open, onClose, onPick }: BlockLibraryModalPr
     const term = query.trim();
 
     return editorBlockList.filter((definition) => {
+      // סינון לפי הפורמט — רק בלוקים ששייכים לפורמט הנוכחי
+      if (allowedTypes && !allowedTypes.includes(definition.type)) return false;
       if (category !== 'all' && definition.category !== category) return false;
       if (!term) return true;
       return (
@@ -61,7 +68,7 @@ export function BlockLibraryModal({ open, onClose, onPick }: BlockLibraryModalPr
         definition.type.toLowerCase().includes(term.toLowerCase())
       );
     });
-  }, [query, category]);
+  }, [query, category, allowedTypes]);
 
   return (
     <dialog

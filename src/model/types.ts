@@ -22,6 +22,13 @@ export interface Course {
   title: string;
   subtitle: string;
   description: string;
+  /**
+   * הפורמט שממנו נולדה הלומדה (One Pager, Process, Checklist…). מזהה חופשי
+   * ולא enum, בדיוק כמו `Block.type`: שכבת המודל לא מכירה את קטלוג הפורמטים,
+   * שחי ב-`src/formats`. אופציונלי בכוונה — לומדה שנשמרה לפני הפיבוט (או
+   * שנבנתה ידנית) נטענת בלי פורמט ומתנהגת כ-legacy, בלי אילוצי-עורך.
+   */
+  format?: string;
   direction: Direction;
   language: string;
   theme: Theme;

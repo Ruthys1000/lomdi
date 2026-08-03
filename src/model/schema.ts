@@ -137,6 +137,9 @@ export const courseSchema = z.object({
   title: z.string(),
   subtitle: z.string(),
   description: z.string(),
+  // מזהה הפורמט — אופציונלי כדי שקובץ ישן בלי השדה יעבור אימות בלי מיגרציה
+  // (אותו דפוס כמו headingFamily ו-trackProgress)
+  format: z.string().optional(),
   direction: z.enum(['rtl', 'ltr']),
   language: z.string().min(2),
   theme: themeSchema,
