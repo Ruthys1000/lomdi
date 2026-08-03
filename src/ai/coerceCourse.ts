@@ -2,8 +2,10 @@ import type { ZodType, ZodTypeDef } from 'zod';
 import { getSharedBlockDefinition } from '@/blocks/registry.shared';
 import { createAccordionItem, type AccordionItem } from '@/blocks/accordion/content';
 import { createCard, type CardItem } from '@/blocks/cards/content';
-import type { QuizOption } from '@/blocks/quiz/content';
+import { createQuizOption, type QuizOption } from '@/blocks/quiz/content';
 import { createStep, type StepItem } from '@/blocks/steps/content';
+import { createDecisionOption, type DecisionOption } from '@/blocks/decision/content';
+import { createChallengeQuestion, type ChallengeQuestion } from '@/blocks/challenge/content';
 import { createChecklistItem, type ChecklistItem } from '@/blocks/checklist/content';
 import { getFormat } from '@/formats';
 import { courseIconNames } from '@/renderer/icons';
@@ -129,6 +131,52 @@ function repairQuiz(content: Record<string, unknown>, ctx: Ctx): void {
   content.options = options;
 }
 
+/** נקודת החלטה — כל אפשרות עם משוב משלה, בלי "נכון". */
+function repairDecision(content: Record<string, unknown>): void {
+  if (!Array.isArray(content.options)) return;
+  content.options = content.options.map((raw): DecisionOption => {
+    const record = isRecord(raw) ? raw : {};
+    const overrides: Partial<DecisionOption> = {};
+    if (typeof record.text === 'string') overrides.text = record.text;
+    // fallback לשם שדה חלופי שהמודל אולי בחר
+    const feedback = asString(record.feedback) ?? asString(record.outcome) ?? asString(record.consequence);
+    if (feedback) overrides.feedback = feedback;
+    return createDecisionOption(overrides);
+  });
+}
+
+/** מבחן — לכל שאלה תשובה נכונה אחת בדיוק (כמו repairQuiz פר-שאלה). */
+function repairChallenge(content: Record<string, unknown>, ctx: Ctx): void {
+  if (!Array.isArray(content.questions)) return;
+  content.questions = content.questions.map((rawQ): ChallengeQuestion => {
+    const record = isRecord(rawQ) ? rawQ : {};
+    const rawOptions = Array.isArray(record.options) ? record.options : [];
+    const options: QuizOption[] = rawOptions.map((raw) => {
+      const option = isRecord(raw) ? raw : {};
+      return createQuizOption({ text: asString(option.text) ?? '', correct: option.correct === true });
+    });
+
+    const correct = options.filter((option) => option.correct);
+    if (options.length >= 2 && correct.length === 0) {
+      options[0].correct = true;
+      ctx.warnings.push('שאלה במבחן הגיעה בלי תשובה נכונה — סומנה הראשונה.');
+    } else if (correct.length > 1) {
+      let kept = false;
+      for (const option of options) {
+        if (option.correct && kept) option.correct = false;
+        else if (option.correct) kept = true;
+      }
+      ctx.warnings.push('שאלה במבחן הגיעה עם כמה תשובות נכונות — נשמרה הראשונה.');
+    }
+
+    return createChallengeQuestion({
+      prompt: asString(record.prompt) ?? asString(record.question) ?? '',
+      explanation: asString(record.explanation) ?? '',
+      options,
+    });
+  });
+}
+
 /**
  * משחזר מערכי `items` בבלוקים cards/accordion.
  *
@@ -248,6 +296,8 @@ function coerceBlock(raw: unknown, ctx: Ctx): Block | null {
   }
 
   if (type === 'quiz') repairQuiz(provided, ctx);
+  if (type === 'decision') repairDecision(provided);
+  if (type === 'challenge') repairChallenge(provided, ctx);
   // callout מחזיק אייקון בודד (לא במערך items) — מנרמלים אותו כאן לשם תקין
   if (type === 'callout') provided.icon = validIcon(provided.icon, 'Lightbulb');
   repairItemArrays(type, provided, ctx);

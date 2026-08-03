@@ -20,6 +20,8 @@ export const blockLabels: Record<string, string> = {
   callout: 'מסר מרכזי',
   steps: 'שלבים',
   checklist: 'צ׳ק-ליסט',
+  decision: 'נקודת החלטה',
+  challenge: 'בחן את עצמך',
 };
 
 export function blockLabel(type: string): string {

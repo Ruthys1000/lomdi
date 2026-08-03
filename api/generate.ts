@@ -361,6 +361,8 @@ const BLOCK_LINES: Record<string, string> = {
   callout: '- callout — מסר מרכזי בולט. variant(takeaway|info|success|warning), icon(שם lucide, למשל Lightbulb/AlertTriangle), title, text.',
   steps: '- steps — רצף שלבים ממוספר. variant(numbered|arrow), items:[{title, text}].',
   checklist: '- checklist — פריטים לסימון. items:[{text, description}] (description קצר ואופציונלי), showCount(bool).',
+  decision: '- decision — נקודת החלטה בתרחיש. prompt, options:[{text, feedback}] (בלי "נכון" — לכל בחירה feedback/השלכה משלה), allowReselect(bool).',
+  challenge: '- challenge — בחן את עצמך. intro, passScore(0-100), resultPass, resultFail, questions:[{prompt, options:[{text, correct}] (בדיוק אחת correct:true), explanation}].',
 };
 
 const SETTINGS_NOTE =
@@ -769,6 +771,143 @@ const CASE_STUDY_EXAMPLE = {
 };
 
 /**
+ * דוגמת Scenario — מצב, נקודת החלטה עם השלכות, ולקח.
+ */
+const SCENARIO_EXAMPLE = {
+  title: 'לקוח כועס בטלפון',
+  subtitle: 'תרחיש',
+  theme: 'sunset',
+  chapters: [
+    {
+      title: 'התרחיש',
+      blocks: [
+        {
+          type: 'hero',
+          content: {
+            variant: 'panel',
+            title: 'לקוח כועס בטלפון',
+            subtitle: 'מה הייתם עושים?',
+            backgroundType: 'image',
+            query: 'call center agent staying calm, thoughtful, flat vector illustration',
+            alt: 'נציג שירות רגוע',
+            gradientFrom: '#7c2d12',
+            gradientTo: '#c2410c',
+            height: 'tall',
+            fullBleed: true,
+          },
+        },
+        {
+          type: 'richText',
+          content: {
+            doc: {
+              type: 'doc',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [
+                    { type: 'text', text: 'לקוח מתקשר כועס כי המשלוח שלו התעכב בשבוע. הוא מרים את הקול.' },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        {
+          type: 'decision',
+          content: {
+            prompt: 'איך תגיבו קודם?',
+            allowReselect: true,
+            options: [
+              { text: 'מסבירים מיד את מדיניות המשלוחים', feedback: 'הלקוח מרגיש שלא הקשיבו לו — הכעס גובר.' },
+              { text: 'מקשיבים, מאשרים את התסכול ומתנצלים', feedback: 'הלקוח נרגע — הכרה ברגש מפחיתה מתח לפני פתרון.' },
+              { text: 'מעבירים אותו מיד למנהל', feedback: 'ההעברה מרגישה כהתחמקות; עדיף לטפל קודם.' },
+            ],
+          },
+        },
+        {
+          type: 'callout',
+          content: {
+            variant: 'takeaway',
+            icon: 'Lightbulb',
+            title: 'הלקח',
+            text: 'קודם מקשיבים ומאשרים את הרגש, רק אחר כך פותרים.',
+          },
+        },
+      ],
+    },
+  ],
+};
+
+/**
+ * דוגמת Challenge — פתיח קצר ובלוק challenge עם שאלות מדורגות.
+ */
+const CHALLENGE_EXAMPLE = {
+  title: 'בחן את עצמך: אבטחת מידע',
+  subtitle: 'מבחן קצר',
+  theme: 'midnight',
+  chapters: [
+    {
+      title: 'המבחן',
+      blocks: [
+        {
+          type: 'hero',
+          content: {
+            variant: 'spotlight',
+            title: 'בחן את עצמך: אבטחת מידע',
+            subtitle: 'כמה שאלות קצרות',
+            backgroundType: 'gradient',
+            gradientFrom: '#0f172a',
+            gradientTo: '#1e3a8a',
+            height: 'tall',
+            fullBleed: true,
+          },
+        },
+        {
+          type: 'richText',
+          content: {
+            doc: {
+              type: 'doc',
+              content: [
+                { type: 'paragraph', content: [{ type: 'text', text: 'בדקו את הידע שלכם בכמה שאלות קצרות.' }] },
+              ],
+            },
+          },
+        },
+        {
+          type: 'challenge',
+          content: {
+            intro: 'בחרו את התשובה הנכונה בכל שאלה.',
+            passScore: 75,
+            resultPass: 'כל הכבוד! אתם שולטים בחומר.',
+            resultFail: 'כדאי לחזור על החומר ולנסות שוב.',
+            questions: [
+              {
+                prompt: 'מה עושים כשמקבלים מייל חשוד?',
+                explanation: 'לא לוחצים על קישורים — מדווחים לצוות האבטחה.',
+                options: [
+                  { text: 'מדווחים לצוות האבטחה', correct: true },
+                  { text: 'לוחצים על הקישור כדי לבדוק', correct: false },
+                  { text: 'מעבירים לחברים', correct: false },
+                ],
+              },
+              {
+                prompt: 'סיסמה חזקה היא בעיקר...',
+                explanation: 'אורך ומורכבות חשובים יותר מהחלפה תכופה.',
+                options: [
+                  { text: 'ארוכה ומורכבת', correct: true },
+                  { text: 'השם הפרטי שלכם', correct: false },
+                  { text: '123456', correct: false },
+                ],
+              },
+            ],
+          },
+        },
+      ],
+    },
+  ],
+};
+
+/**
  * מודול פורמט — ה"אישיות" של הפורמט בצד ה-AI.
  *
  * מסונכרן ידנית עם `src/formats/index.ts` (allowedBlocks תואם ל-allowedBlockTypes).
@@ -869,6 +1008,37 @@ const FORMAT_MODULES: Record<string, FormatModule> = {
     ].join('\n'),
     allowedBlocks: ['hero', 'richText', 'textImage', 'quote', 'callout', 'cards', 'divider'],
     example: CASE_STUDY_EXAMPLE,
+  },
+  scenario: {
+    role: 'אתה תסריטאי הדרכה שבונה תרחיש: מצב ריאלי, נקודת החלטה, והשלכה לכל בחירה.',
+    interview: [
+      '- זהה מצב ריאלי אחד ומורכב מהתוכן (דילמה, אינטראקציה, אירוע).',
+      '- נסח נקודת החלטה אחת עם 2-4 אפשרויות אמינות (בלי "נכונה" ברורה מראש).',
+      '- לכל אפשרות כתוב feedback — ההשלכה של הבחירה, לא ציון.',
+      '- סיים בלקח שמזקק את העיקרון.',
+    ].join('\n'),
+    skeleton: [
+      'פרק יחיד. פתח ב-hero. richText שמתאר את המצב (2-4 משפטים).',
+      'בלוק decision אחד עם נקודת ההחלטה והאפשרויות (allowReselect=true).',
+      'סיים ב-callout מסוג "takeaway" עם הלקח.',
+    ].join('\n'),
+    allowedBlocks: ['hero', 'richText', 'image', 'decision', 'callout', 'divider'],
+    example: SCENARIO_EXAMPLE,
+  },
+  challenge: {
+    role: 'אתה בוחן שבונה מבחן קצר "בחן את עצמך" לבדיקת ידע, עם ציון ומשוב.',
+    interview: [
+      '- חלץ עובדות בנות-בדיקה מהתוכן, והפוך כל אחת לשאלת בחירה.',
+      '- לכל שאלה בדיוק תשובה נכונה אחת ומסיחים אמינים.',
+      '- כתוב explanation קצר לכל שאלה — למה התשובה נכונה.',
+      '- קבע passScore סביר (למשל 70) ומשוב מעבר/כישלון.',
+    ].join('\n'),
+    skeleton: [
+      'פרק יחיד. פתח ב-hero. richText קצר עם הנחיה.',
+      'בלוק challenge אחד עם 3-6 שאלות, passScore, resultPass ו-resultFail.',
+    ].join('\n'),
+    allowedBlocks: ['hero', 'richText', 'challenge', 'divider'],
+    example: CHALLENGE_EXAMPLE,
   },
 };
 

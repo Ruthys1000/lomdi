@@ -63,16 +63,16 @@ describe('מסך הפתיחה', () => {
     expect(onStart.mock.calls[0][0].course.chapters.length).toBeGreaterThan(0);
   });
 
-  it('גלריית הפורמטים מציגה פורמט מוכן כלחיץ ופורמט עתידי כמושבת', async () => {
+  it('גלריית הפורמטים מציגה את הפורמטים המוכנים כלחיצים', async () => {
     await setup();
 
-    // פורמט מוכן — כרטיס לחיץ
+    // כל ששת הפורמטים מוכנים — כרטיסים לחיצים, בלי "בקרוב"
     const onePager = screen.getByRole('button', { name: /One Pager/ });
     expect(onePager).toBeInTheDocument();
     expect(onePager).not.toBeDisabled();
 
-    // פורמט 'soon' מוצג עם "בקרוב" ומושבת
-    expect(screen.getAllByText(/בקרוב/).length).toBeGreaterThan(0);
+    expect(screen.getByRole('button', { name: /Process/ })).not.toBeDisabled();
+    expect(screen.queryByText(/בקרוב/)).not.toBeInTheDocument();
   });
 
   it('הנחיתה (ה-Hero) מוצגת תמיד — גם למבקר חדש וגם עם לומדות שמורות', async () => {
