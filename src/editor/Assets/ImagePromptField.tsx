@@ -51,7 +51,7 @@ export function ImagePromptField({
         rows={3}
         value={value ?? ''}
         dir="ltr"
-        placeholder="a clean modern illustration of…"
+        placeholder="cinematic still of… / watercolor sketch of… / isometric diorama…"
         onChange={(event) => onChange(event.target.value)}
         className={cn(
           'w-full resize-y rounded-lg border border-edge bg-field px-2.5 py-1.5 text-start text-sm text-fg placeholder:text-fg-muted focus:border-volt-dim focus:ring-1 focus:ring-volt-dim focus:outline-none',

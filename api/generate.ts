@@ -86,7 +86,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       // לא הוכחה מתמטית, ו-high האריך את ההמתנה מדי.
       output_config: { effort: 'medium' },
       system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
-      messages: [{ role: 'user', content: `צור דף מהתוכן הבא:\n\n${text}` }],
+      messages: [
+        {
+          role: 'user',
+          content:
+            'צור לומדה איכותית, יצירתית ומעמיקה מהתוכן הבא — עם מלל עשיר ופרומפטי תמונה ייחודיים:\n\n' +
+            text,
+        },
+      ],
     });
     activeStream = stream;
     return stream.finalMessage();
@@ -347,10 +354,10 @@ function findStringStart(result: string): number {
 // קטלוג הבלוקים כמפה type→שורה, כדי שכל פורמט יציג רק את הבלוקים המותרים לו —
 // זה מה שמונע מהמודל "לנדוד" לבלוקים שלא שייכים לפורמט (התיקון ל"גנרי מדי").
 const BLOCK_LINES: Record<string, string> = {
-  hero: '- hero — מסך פתיחה. variant(centered|spotlight|panel|minimal), title, subtitle, intro, backgroundType(color|gradient|image), backgroundColor, gradientFrom, gradientTo, height(compact|medium|tall|screen), alignment(start|center|end). לרקע תמונה: backgroundType="image" + query + alt.',
+  hero: '- hero — מסך פתיחה. variant(centered|spotlight|panel|minimal), title, subtitle, intro, backgroundType(color|gradient|image), backgroundColor, gradientFrom, gradientTo, height(compact|medium|tall|screen), alignment(start|center|end). לרקע תמונה: backgroundType="image" + query (פרומפט יצירתי באנגלית, ראה כללי תמונה) + alt בעברית.',
   richText: '- richText — טקסט רץ. doc (מסמך ProseMirror, ראה למטה), maxWidth(narrow|normal|wide).',
-  image: '- image — תמונה. query (פרומפט קצר באנגלית לתמונה), alt, caption, aspectRatio(auto|16:9|4:3|1:1|3:2|21:9), fit(cover|contain), roundness(none|small|medium|large|full).',
-  textImage: '- textImage — טקסט לצד תמונה. doc, query (פרומפט קצר באנגלית), alt, caption, layout(imageStart|imageEnd|imageTop), ratio(50-50|40-60|60-40), variant(standard|feature).',
+  image: '- image — תמונה. query (פרומפט יצירתי באנגלית — לא קלישאה גנרית), alt בעברית, caption, aspectRatio(auto|16:9|4:3|1:1|3:2|21:9), fit(cover|contain), roundness(none|small|medium|large|full).',
+  textImage: '- textImage — טקסט לצד תמונה. doc, query (פרומפט יצירתי באנגלית), alt, caption, layout(imageStart|imageEnd|imageTop), ratio(50-50|40-60|60-40), variant(standard|feature).',
   cards: '- cards — כרטיסים. variant(plain|numbered|gradient|outline), columns(2-4), items:[{icon, title, text}].',
   accordion: '- accordion — פריטים נפתחים. items:[{title, doc}], mode(single|multiple), openFirstByDefault.',
   quiz: '- quiz — שאלת בחירה. question, hint, options:[{text, correct}] (בדיוק אחת correct:true), feedbackCorrect, feedbackIncorrect.',
@@ -391,7 +398,7 @@ const THEMES = 'ערכות עיצוב (בחר id בשדה theme של הלומד�
 
 const GENERIC_EXAMPLE = {
   title: 'בטיחות במשרד',
-  subtitle: 'לומדת מבוא קצרה',
+  subtitle: 'מודעות שמצילה חיים — לא עוד נוהל שנשכח',
   theme: 'forest',
   chapters: [
     {
@@ -402,9 +409,12 @@ const GENERIC_EXAMPLE = {
           content: {
             variant: 'spotlight',
             title: 'בטיחות במשרד',
-            subtitle: 'מה כל עובד צריך לדעת',
-            intro: 'חמש דקות',
-            backgroundType: 'gradient',
+            subtitle: 'מה כל עובד צריך לדעת לפני שמשהו קורה',
+            intro: 'כ־5 דקות קריאה',
+            backgroundType: 'image',
+            query:
+              'empty office corridor at dusk, emergency exit glow reflected on polished floor, cinematic still, quiet tension',
+            alt: 'מסדרון משרד עם שלט יציאת חירום',
             gradientFrom: '#14532d',
             gradientTo: '#166534',
             height: 'tall',
@@ -418,7 +428,24 @@ const GENERIC_EXAMPLE = {
               type: 'doc',
               content: [
                 { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'למה זה חשוב' }] },
-                { type: 'paragraph', content: [{ type: 'text', text: 'סביבת עבודה בטוחה מתחילה במודעות של כולם.' }] },
+                {
+                  type: 'paragraph',
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'רוב תאונות המשרד לא קורות בגלל ציוד מסוכן — אלא בגלל הרגלים קטנים שמתעלמים מהם: כבל על הרצפה, יציאה חסומה, עיכוב בדיווח. סביבה בטוחה מתחילה במודעות יומיומית של כולם, לא רק בממונה הבטיחות.',
+                    },
+                  ],
+                },
+                {
+                  type: 'paragraph',
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'העמוד הזה מרכז שלושה עקרונות שאפשר ליישם עוד היום — בלי ציוד מיוחד ובלי הכשרה ארוכה.',
+                    },
+                  ],
+                },
               ],
             },
           },
@@ -426,7 +453,12 @@ const GENERIC_EXAMPLE = {
         },
         {
           type: 'image',
-          content: { query: 'modern safe office workspace', alt: 'משרד מודרני ומסודר' },
+          content: {
+            query:
+              'top-down watercolor sketch of a cluttered desk edge with a trailing power cable near a chair leg, soft caution mood',
+            alt: 'כבל חשמל משוך ליד כיסא — מפגע נפוץ',
+            caption: 'מפגעים נראים טריוויאליים — עד שהם לא.',
+          },
         },
       ],
     },
@@ -439,9 +471,21 @@ const GENERIC_EXAMPLE = {
             variant: 'gradient',
             columns: 3,
             items: [
-              { icon: 'ShieldCheck', title: 'דיווח', text: 'מדווחים על כל מפגע לממונה.' },
-              { icon: 'Flame', title: 'כיבוי אש', text: 'מכירים את מיקום המטפים.' },
-              { icon: 'DoorOpen', title: 'יציאות', text: 'יודעים את דרכי המילוט.' },
+              {
+                icon: 'Shield',
+                title: 'דיווח מיידי',
+                text: 'מפגע שראיתם ולא דיווחתם עליו — נשאר מפגע. מעבירים לממונה באותו היום, גם אם "רק נראה קטן".',
+              },
+              {
+                icon: 'AlertTriangle',
+                title: 'כיבוי אש',
+                text: 'לפני שצריך: דעו איפה המטף הקרוב ואיך מפעילים אותו. בדקה של עשן אין זמן לחפש הוראות.',
+              },
+              {
+                icon: 'Route',
+                title: 'דרכי מילוט',
+                text: 'לכו פעם אחת את מסלול היציאה מהשולחן שלכם עד החוץ. יציאה חסומה בארגזים היא לא "זמני" — היא סיכון.',
+              },
             ],
           },
         },
@@ -449,19 +493,22 @@ const GENERIC_EXAMPLE = {
           type: 'quote',
           content: {
             variant: 'band',
-            text: 'בטיחות היא לא נוהל — היא הרגל יומיומי של כולנו.',
-            author: 'ממונה הבטיחות',
+            text: 'בטיחות היא לא נוהל על הקיר — היא הרגל יומיומי של כולנו.',
+            author: '',
           },
         },
         {
           type: 'quiz',
           content: {
-            question: 'מה עושים כשמזהים מפגע בטיחותי?',
+            question: 'מה עושים ברגע שמזהים מפגע בטיחותי במשרד?',
+            hint: 'חשבו מה מונע את הסיכון הכי מהר.',
             options: [
-              { text: 'מדווחים לממונה', correct: true },
-              { text: 'מתעלמים וממשיכים', correct: false },
-              { text: 'מחכים שמישהו אחר יטפל', correct: false },
+              { text: 'מדווחים לממונה ומוודאים שהטיפול מתועד', correct: true },
+              { text: 'מתעלמים וממשיכים — "מישהו אחר יטפל"', correct: false },
+              { text: 'מחכים לישיבת הבטיחות הבאה', correct: false },
             ],
+            feedbackCorrect: 'נכון — דיווח מיידי סוגר את הפער בין "ראיתי" לבין "טיפלו".',
+            feedbackIncorrect: 'דחייה משאירה את הסיכון פעיל. הדיווח הוא הצעד הראשון, לא האחרון.',
           },
         },
       ],
@@ -487,8 +534,9 @@ const ONE_PAGER_EXAMPLE = {
             title: 'ניהול זמן אפקטיבי',
             subtitle: 'שלוש נקודות שישנו לכם את היום',
             backgroundType: 'image',
-            query: 'calm organized desk with clock and notebook, soft daylight, flat vector illustration',
-            alt: 'שולחן עבודה מסודר עם שעון',
+            query:
+              'single focused spotlight on an open notebook and analog watch on dark wood, shallow depth of field, editorial photo',
+            alt: 'מחברת פתוחה ושעון על שולחן — מיקוד במקום ריבוי',
             gradientFrom: '#2563eb',
             gradientTo: '#7c3aed',
             height: 'tall',
@@ -504,7 +552,19 @@ const ONE_PAGER_EXAMPLE = {
                 {
                   type: 'paragraph',
                   content: [
-                    { type: 'text', text: 'ניהול זמן טוב הוא לא לעשות יותר — אלא לבחור נכון במה להתמקד.' },
+                    {
+                      type: 'text',
+                      text: 'ניהול זמן טוב אינו "לעשות יותר באותו יום" — אלא לבחור במודע במה לא לגעת. כשהכל דחוף, שום דבר לא באמת חשוב.',
+                    },
+                  ],
+                },
+                {
+                  type: 'paragraph',
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'שלוש נקודות המפתח למטה הן הרגלים שאפשר להתחיל מחר בבוקר, בלי אפליקציה חדשה ובלי יומן מושלם.',
+                    },
                   ],
                 },
               ],
@@ -517,9 +577,21 @@ const ONE_PAGER_EXAMPLE = {
             variant: 'numbered',
             columns: 3,
             items: [
-              { icon: 'Target', title: 'תעדוף', text: 'התחילו מהמשימה בעלת ההשפעה הגדולה ביותר.' },
-              { icon: 'Clock', title: 'חסימת זמן', text: 'הקצו בלוקים קבועים למשימות עומק.' },
-              { icon: 'Zap', title: 'הסחות', text: 'כבו התראות בזמן עבודה ממוקדת.' },
+              {
+                icon: 'Target',
+                title: 'תעדוף',
+                text: 'שאלו: "אם אספיק רק דבר אחד היום — מה ישנה הכי הרבה?" התחילו משם, גם אם המייל צועק.',
+              },
+              {
+                icon: 'Clock',
+                title: 'חסימת זמן',
+                text: 'הקצו בלוק של 60–90 דקות לעומק, וסגרו אותו כמו פגישה. בלי חסימה — העומק נדחק לשולי היום.',
+              },
+              {
+                icon: 'Zap',
+                title: 'הסחות',
+                text: 'כבו התראות בזמן עבודה ממוקדת. כל קפיצה לטלפון עולה כמה דקות של חזרה לריכוז — לא רק "רגע".',
+              },
             ],
           },
         },
@@ -555,8 +627,9 @@ const PROCESS_EXAMPLE = {
             title: 'פתיחת קריאת שירות',
             subtitle: 'איך מטפלים בפנייה מהרגע הראשון',
             backgroundType: 'image',
-            query: 'friendly support agent at desk with headset, clean modern office, flat vector illustration',
-            alt: 'נציג שירות במוקד',
+            query:
+              'headset resting on empty call-center desk at blue hour, soft bokeh screens behind, documentary candid photo',
+            alt: 'אוזניות על שולחן במוקד שירות בשעת בין-ערביים',
             gradientFrom: '#14532d',
             gradientTo: '#166534',
             height: 'tall',
@@ -572,7 +645,10 @@ const PROCESS_EXAMPLE = {
                 {
                   type: 'paragraph',
                   content: [
-                    { type: 'text', text: 'תהליך אחיד לפתיחת קריאה מבטיח שאף פנייה לא תיפול בין הכיסאות.' },
+                    {
+                      type: 'text',
+                      text: 'כשכל נציג פותח קריאה "בדרך שלו", פניות נופלות בין מחלקות — והלקוח משלם בזמן. תהליך אחיד לא מחליף שיקול דעת; הוא מבטיח שאף פנייה לא נעלמת.',
+                    },
                   ],
                 },
               ],
@@ -584,10 +660,22 @@ const PROCESS_EXAMPLE = {
           content: {
             variant: 'numbered',
             items: [
-              { title: 'קבלת הפנייה', text: 'תעדו את פרטי הלקוח ואת מהות הבעיה במערכת.' },
-              { title: 'סיווג דחיפות', text: 'קבעו רמת עדיפות לפי ההשפעה על הלקוח.' },
-              { title: 'הקצאה לטיפול', text: 'נתבו את הקריאה לגורם המקצועי המתאים.' },
-              { title: 'עדכון וסגירה', text: 'עדכנו את הלקוח, ותעדו את הפתרון לפני הסגירה.' },
+              {
+                title: 'קבלת הפנייה',
+                text: 'תעדו במערכת את פרטי הלקוח, ערוץ הפנייה, ומהות הבעיה במילים של הלקוח — לא בפרשנות שלכם.',
+              },
+              {
+                title: 'סיווג דחיפות',
+                text: 'קבעו עדיפות לפי ההשפעה על הלקוח והעסק (השבתה ≠ שאלה כללית). אם לא בטוחים — העדיפו דרגה גבוהה יותר.',
+              },
+              {
+                title: 'הקצאה לטיפול',
+                text: 'נתבו לגורם המקצועי המתאים, וודאו שיש בעלים ברור לקריאה. "כולם רואים" אומר שלרוב אף אחד לא מטפל.',
+              },
+              {
+                title: 'עדכון וסגירה',
+                text: 'עדכנו את הלקוח לפני הסגירה, ותעדו את הפתרון כך שהפנייה הבאה לא תתחיל מאפס.',
+              },
             ],
           },
         },
@@ -622,10 +710,13 @@ const CHECKLIST_EXAMPLE = {
             variant: 'panel',
             title: 'לפני שמפרסמים פוסט',
             subtitle: 'בדיקה אחרונה לפני פרסום',
-            backgroundType: 'gradient',
+            backgroundType: 'image',
+            query:
+              'risograph poster of a checklist clipboard and red pen hovering mid-air, bold ink layers, playful graphic',
+            alt: 'לוח צ׳ק-ליסט ועט אדום בסגנון פוסטר',
             gradientFrom: '#2563eb',
             gradientTo: '#7c3aed',
-            height: 'medium',
+            height: 'tall',
             fullBleed: true,
           },
         },
@@ -637,7 +728,12 @@ const CHECKLIST_EXAMPLE = {
               content: [
                 {
                   type: 'paragraph',
-                  content: [{ type: 'text', text: 'עברו על הרשימה לפני כל פרסום, כדי לא לפספס שלב.' }],
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'פרסום בלי בדיקה אחרונה הוא הימור מיותר: קישור שבור, תמונה מטושטשת או שגיאת כתיב מגיעים בדיוק לקהל שאתם מנסים לשכנע. עברו על הרשימה לפני כל פרסום — גם כשאתם ממהרים.',
+                    },
+                  ],
                 },
               ],
             },
@@ -687,8 +783,9 @@ const CASE_STUDY_EXAMPLE = {
             title: 'איך חברת X קיצרה זמני תגובה',
             subtitle: 'מקרה בוחן בשירות לקוחות',
             backgroundType: 'image',
-            query: 'customer support team collaborating in a modern office, flat vector illustration',
-            alt: 'צוות שירות לקוחות',
+            query:
+              'isometric diorama of a support ops floor with glowing ticket lanes converging to one desk, soft 3D render, cool blues',
+            alt: 'דגם איזומטרי של מוקד עם נתיבי פניות',
             gradientFrom: '#0f172a',
             gradientTo: '#334155',
             height: 'tall',
@@ -704,7 +801,21 @@ const CASE_STUDY_EXAMPLE = {
                 { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'ההקשר' }] },
                 {
                   type: 'paragraph',
-                  content: [{ type: 'text', text: 'חברת X היא ספקית שירות עם אלפי פניות ביום.' }],
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'חברת X מטפלת באלפי פניות שירות ביום. הצמיחה הייתה מהירה — אבל התשתית התפעולית נשארה מאחור: כל צוות עבד בכלים משלו, ופניות "רגילות" חיכו בתור ליד תקלות קריטיות.',
+                    },
+                  ],
+                },
+                {
+                  type: 'paragraph',
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'ההנהלה הציבה יעד ברור: לקצר את זמן התגובה בלי להגדיל את מצבת הנציגים באותו קצב.',
+                    },
+                  ],
                 },
               ],
             },
@@ -723,7 +834,21 @@ const CASE_STUDY_EXAMPLE = {
               content: [
                 {
                   type: 'paragraph',
-                  content: [{ type: 'text', text: 'זמני התגובה הגיעו ל-48 שעות, והלקוחות התלוננו.' }],
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'זמן התגובה הממוצע הגיע ל־48 שעות. הלקוחות דיווחו שאותה שאלה נשאלה שוב ושוב לנציגים שונים — והאמון בשירות ירד בדיוק כשהיקף הפניות עלה.',
+                    },
+                  ],
+                },
+                {
+                  type: 'paragraph',
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'האתגר לא היה "לעבוד קשה יותר", אלא לבנות מערכת שמנתבת נכון ומשאירה ידע משותף.',
+                    },
+                  ],
                 },
               ],
             },
@@ -740,9 +865,21 @@ const CASE_STUDY_EXAMPLE = {
             variant: 'numbered',
             columns: 3,
             items: [
-              { icon: 'Route', title: 'ניתוב חכם', text: 'פניות נותבו אוטומטית לצוות המתאים.' },
-              { icon: 'BookOpen', title: 'בסיס ידע', text: 'תשובות נפוצות רוכזו למאגר אחד.' },
-              { icon: 'Clock', title: 'יעדי זמן', text: 'הוגדרו יעדי תגובה ברורים.' },
+              {
+                icon: 'Route',
+                title: 'ניתוב חכם',
+                text: 'פניות סווגו אוטומטית לפי נושא ודחיפות, והגיעו ישר לצוות שיודע לטפל — בלי תור כללי ענק.',
+              },
+              {
+                icon: 'BookOpen',
+                title: 'בסיס ידע',
+                text: 'תשובות נפוצות רוכזו למאגר אחד מעודכן, כדי שנציג חדש לא ימציא תשובה מאפס בכל שיחה.',
+              },
+              {
+                icon: 'Clock',
+                title: 'יעדי זמן',
+                text: 'הוגדרו יעדי תגובה שקופים לפי רמת דחיפות — והם נמדדו בפועל, לא רק נכתבו במצגת.',
+              },
             ],
           },
         },
@@ -761,7 +898,7 @@ const CASE_STUDY_EXAMPLE = {
             variant: 'takeaway',
             icon: 'Lightbulb',
             title: 'הלקח',
-            text: 'שיפור תהליך הניתוב היה בעל ההשפעה הגדולה ביותר.',
+            text: 'השיפור הגדול ביותר לא בא מגיוס המוני — אלא מניתוב נכון וממאגר ידע משותף. כשהפנייה מגיעה לאדם הנכון בפעם הראשונה, הזמן והאמון חוזרים יחד.',
           },
         },
       ],
@@ -787,8 +924,9 @@ const SCENARIO_EXAMPLE = {
             title: 'לקוח כועס בטלפון',
             subtitle: 'מה הייתם עושים?',
             backgroundType: 'image',
-            query: 'call center agent staying calm, thoughtful, flat vector illustration',
-            alt: 'נציג שירות רגוע',
+            query:
+              'close-up of a hand hovering over a phone receiver, warm late-afternoon light through blinds, film still tension',
+            alt: 'יד מעל שפופרת טלפון באור שקיעה — רגע לפני מענה',
             gradientFrom: '#7c2d12',
             gradientTo: '#c2410c',
             height: 'tall',
@@ -888,7 +1026,10 @@ const CHALLENGE_EXAMPLE = {
             variant: 'spotlight',
             title: 'בחן את עצמך: אבטחת מידע',
             subtitle: 'כמה שאלות קצרות',
-            backgroundType: 'gradient',
+            backgroundType: 'image',
+            query:
+              'conceptual surreal metaphor: glowing padlock dissolving into binary moths over a dark keyboard, ink and light, mysterious',
+            alt: 'מנעול זוהר מתפרק מעל מקלדת — מטאפורה לאבטחת מידע',
             gradientFrom: '#0f172a',
             gradientTo: '#1e3a8a',
             height: 'tall',
@@ -901,7 +1042,15 @@ const CHALLENGE_EXAMPLE = {
             doc: {
               type: 'doc',
               content: [
-                { type: 'paragraph', content: [{ type: 'text', text: 'בדקו את הידע שלכם בכמה שאלות קצרות.' }] },
+                {
+                  type: 'paragraph',
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'השאלות הבאות בודקות לא רק "מה כתוב בנוהל" — אלא איך תפעלו ברגע האמת. קראו לאט, בחרו, וקראו את ההסבר גם כשצדקתם.',
+                    },
+                  ],
+                },
               ],
             },
           },
@@ -909,27 +1058,29 @@ const CHALLENGE_EXAMPLE = {
         {
           type: 'challenge',
           content: {
-            intro: 'בחרו את התשובה הנכונה בכל שאלה.',
+            intro: 'ענו על כל השאלות. אחרי כל תשובה — קראו את ההסבר; שם נמצא הלמידה האמיתית.',
             passScore: 75,
-            resultPass: 'כל הכבוד! אתם שולטים בחומר.',
-            resultFail: 'כדאי לחזור על החומר ולנסות שוב.',
+            resultPass: 'כל הכבוד — אתם מזהים סיכונים ומגיבים נכון תחת לחץ.',
+            resultFail: 'לא נורא. חזרו על ההסברים לשאלות שפספסתם, ונסו שוב עם עיניים חדות יותר.',
             questions: [
               {
-                prompt: 'מה עושים כשמקבלים מייל חשוד?',
-                explanation: 'לא לוחצים על קישורים — מדווחים לצוות האבטחה.',
+                prompt: 'קיבלתם מייל דחוף "מהמנהל" עם קישור לעדכון סיסמה. מה הצעד הנכון?',
+                explanation:
+                  'לא לוחצים על קישורים ממייל חשוד — גם כשהטון דחוף. מדווחים לצוות האבטחה ובודקים בערוץ פנימי אמין. דחיפות היא טריק נפוץ של פישינג.',
                 options: [
-                  { text: 'מדווחים לצוות האבטחה', correct: true },
-                  { text: 'לוחצים על הקישור כדי לבדוק', correct: false },
-                  { text: 'מעבירים לחברים', correct: false },
+                  { text: 'מדווחים לצוות האבטחה ולא לוחצים על הקישור', correct: true },
+                  { text: 'לוחצים לבדוק אם הקישור באמת נפתח', correct: false },
+                  { text: 'מעבירים לחברים כדי להזהיר אותם עם אותו קישור', correct: false },
                 ],
               },
               {
-                prompt: 'סיסמה חזקה היא בעיקר...',
-                explanation: 'אורך ומורכבות חשובים יותר מהחלפה תכופה.',
+                prompt: 'מה הופך סיסמה לחזקה באמת?',
+                explanation:
+                  'אורך ומורכבות חשובים יותר מהחלפה תכופה של סיסמה קצרה וחלשה. משפט סיסמה ארוך (passphrase) עדיף על מילה בודדת עם ספרה בסוף.',
                 options: [
-                  { text: 'ארוכה ומורכבת', correct: true },
-                  { text: 'השם הפרטי שלכם', correct: false },
-                  { text: '123456', correct: false },
+                  { text: 'ארוכה ומורכבת — עדיף משפט סיסמה', correct: true },
+                  { text: 'השם הפרטי שלכם עם השנה הנוכחית', correct: false },
+                  { text: '123456 — קל לזכור ולכן "בטוח לתפעול"', correct: false },
                 ],
               },
             ],
@@ -962,15 +1113,18 @@ interface FormatModule {
 const ALL_BLOCKS = Object.keys(BLOCK_LINES);
 
 const GENERIC_MODULE: FormatModule = {
-  role: 'אתה מחולל דפי למידה בעברית. קלט: תוכן גולמי. פלט: דף אחד כ-JSON.',
+  role:
+    'אתה מחולל לומדות בעברית ברמה עריכתית גבוהה. קלט: תוכן גולמי. פלט: דף JSON ' +
+    'שמרגיש כמו מוצר למידה מקורי — עמוק, קריא וייחודי לנושא — לא תבנית ריקה.',
   interview: [
-    '- זהה את הרעיונות המרכזיים וארגן אותם להגיון ברור.',
-    '- גוון בין טקסט, כרטיסים, ציטוט ושאלה כדי לשמור על עניין.',
+    '- חלץ את הרעיונות, המתחים והדוגמאות הקונקרטיות מהמקור — לא רק כותרות.',
+    '- בנה קשת: פתיחה שמעוררת עניין → גוף שמסביר עם דוגמאות → תרגול/מסר לסיום.',
+    '- כתוב מלל עשיר: פסקאות עם הקשר והשלכה, לא משפט בודד לכל סעיף.',
   ].join('\n'),
   skeleton: [
-    'פתח ב-hero מרשים (variant "spotlight"/"panel", backgroundType="gradient", fullBleed=true, height "tall").',
-    'גוון בלוקים — cards, accordion, quote, quiz — לא רק פסקאות. עטוף 1-2 סקשנים ב-settings:{ background }.',
-    'העדף ערכות נועזות (vivid, sunset, midnight, forest) על clean.',
+    'פתח ב-hero מרשים (spotlight/panel, עדיף backgroundType="image" עם query יצירתי, או gradient נועז; height "tall").',
+    'גוון בלוקים — richText עשיר, cards, accordion, quote, quiz/image — לא רק פסקאות דלות.',
+    'עטוף 1-2 סקשנים ב-settings:{ background }. העדף ערכות נועזות (vivid, sunset, midnight, forest) על clean כשמתאים.',
   ].join('\n'),
   allowedBlocks: ALL_BLOCKS,
   example: GENERIC_EXAMPLE,
@@ -978,100 +1132,110 @@ const GENERIC_MODULE: FormatModule = {
 
 const FORMAT_MODULES: Record<string, FormatModule> = {
   onePager: {
-    role: 'אתה עורך תוכן שמזקק חומר ארוך ל-One Pager — עמוד יחיד, סרוק וברור. המטרה: שהקורא יבין את המסר המרכזי במבט אחד.',
+    role:
+      'אתה עורך תוכן שמזקק חומר ל-One Pager חד ובלתי נשכח: עמוד אחד שסורקים מהר — ' +
+      'אבל כל שורה נושאת משקל. תמצית חדה, לא דף ריק.',
     interview: [
-      '- זהה את המסר המרכזי האחד של התוכן.',
-      '- חלץ בדיוק 3 או 4 נקודות מפתח תומכות (לא 5) — כדי שרשת הכרטיסים תהיה אחידה.',
-      '- נסח משפט "לקחת הביתה" אחד וחד.',
-      '- זרוק פרטים משניים — One Pager הוא תמצית, לא סיכום מלא.',
+      '- זהה את המסר המרכזי האחד, והניסוח הכי מדויק שלו (לא סיסמה גנרית).',
+      '- חלץ בדיוק 3 או 4 נקודות מפתח — לכל אחת תובנה חדה + פרט/דוגמה מהמקור.',
+      '- נסח משפט "לקחת הביתה" אחד שממשיכים לצטט אחרי הקריאה.',
+      '- זרוק רעש — אבל אל תרוקן: תמצית איכותית עמוקה יותר מרשימת כותרות.',
     ].join('\n'),
     skeleton: [
       'פרק יחיד בלבד, בלי פרקים נוספים.',
-      'פתח ב-hero מרשים — עדיף backgroundType="image" עם query (רקע חזק), אחרת גרדיאנט נועז; height "tall".',
-      'אחריו richText קצר (פתיח/תמצית). cards לנקודות המפתח: 3 או 4 בלבד, variant "numbered" או "gradient", ולכל כרטיס icon מהרשימה.',
-      'סיים ב-callout מסוג "takeaway" עם המסר לקחת הביתה. אפשר quote אחד אם יש ייחוס אמיתי במקור.',
+      'פתח ב-hero מרשים — עדיף backgroundType="image" עם query יצירתי וייחודי לנושא; height "tall".',
+      'אחריו richText פתיח (2–3 משפטים חדים שממקמים את הבעיה/ההזדמנות).',
+      'cards: 3 או 4, variant "numbered"/"gradient", לכל כרטיס icon + טקסט עם תובנה מוחשית.',
+      'סיים ב-callout "takeaway". quote רק אם יש ייחוס אמיתי במקור.',
     ].join('\n'),
     allowedBlocks: ['hero', 'richText', 'cards', 'callout', 'quote', 'image', 'divider'],
     example: ONE_PAGER_EXAMPLE,
   },
   process: {
-    role: 'אתה מעצב הדרכה שהופך נוהל או תהליך עבודה למדריך שלבים ברור לפי הסדר.',
+    role:
+      'אתה מעצב הדרכה שהופך נוהל לתהליך שאפשר לבצע בעיניים עצומות: שלבים ברורים, ' +
+      'עם הקשר למה זה חשוב ומתי נכשלים.',
     interview: [
-      '- זהה את השלבים לפי הרצף הנכון לביצוע.',
-      '- לכל שלב: הפעולה, מי מבצע, הטריגר להתחלה, והתוצאה.',
-      '- אם השלבים לא מסודרים בתוכן — הסק את הסדר ההגיוני.',
-      '- הפרד אזהרה או נקודה קריטית ל-callout נפרד.',
+      '- זהה את השלבים לפי רצף הביצוע; אם חסר סדר — הסק אותו מההגיון.',
+      '- לכל שלב: הפעולה, מי, הטריגר, והתוצאה הצפויה — בניסוח חי, לא טלגרפי מדי.',
+      '- הוסף פתיח שמסביר למה התהליך קיים ומה קורה כשמדלגים.',
+      '- הפרד אזהרה/נקודה קריטית ל-callout עם ניסוח שמבהיר את הסיכון.',
     ].join('\n'),
     skeleton: [
-      'פרק יחיד בלבד, בלי פרקים נוספים.',
-      'פתח ב-hero מרשים — עדיף backgroundType="image" עם query, אחרת גרדיאנט נועז; height "tall".',
-      'richText קצר שמסביר את מטרת התהליך. בלוק steps אחד עם כל השלבים (items:[{title, text}]).',
-      'אם יש נקודה קריטית — callout מסוג "warning" או "info" (icon מהרשימה).',
+      'פרק יחיד בלבד.',
+      'פתח ב-hero — עדיף image עם query יצירתי, אחרת gradient; height "tall".',
+      'richText פתיח (2–3 משפטים: מטרה + מחיר הטעות). בלוק steps עם כל השלבים (items עשירים).',
+      'callout warning/info לנקודה קריטית אם יש.',
     ].join('\n'),
     allowedBlocks: ['hero', 'richText', 'steps', 'callout', 'image', 'divider'],
     example: PROCESS_EXAMPLE,
   },
   checklist: {
-    role: 'אתה מומחה תהליך וציות שהופך דרישות או שלבים לצ׳ק-ליסט ברור לאימות.',
+    role:
+      'אתה מומחה תהליך שהופך דרישות לצ׳ק-ליסט שמרגיש כמו כלי עבודה אמיתי — ' +
+      'ברור, חד, ומונע טעויות נפוצות.',
     interview: [
-      '- זהה פריטים אטומיים ובני-אימות — כל פריט פעולה אחת שאפשר לסמן "בוצע".',
-      '- נסח כל פריט קצר ובלשון פעולה.',
-      '- הוסף description קצר רק כשצריך הבהרה; אחרת השאר ריק.',
+      '- פריטים אטומיים ובני-אימות: פעולה אחת לסמן "בוצע".',
+      '- ניסוח בלשון פעולה; description כשיש מלכודת/הבהרה חשובה (אל תשאיר הכל ריק סתם).',
+      '- פתיח שמסביר מתי משתמשים ברשימה ולמה היא קיימת.',
       '- אל תמזג כמה פעולות לפריט אחד.',
     ].join('\n'),
     skeleton: [
-      'פרק יחיד בלבד, בלי פרקים נוספים.',
-      'פתח ב-hero. richText קצר שמסביר מתי ולמה משתמשים ברשימה.',
-      'בלוק checklist אחד עם כל הפריטים (showCount=true). callout אופציונלי לטיפ או אזהרה.',
+      'פרק יחיד.',
+      'פתח ב-hero (עדיף image עם query ייחודי לנושא). richText שמסביר מתי/למה.',
+      'checklist אחד (showCount=true) עם פריטים חדים. callout אופציונלי לטיפ/אזהרה.',
     ].join('\n'),
     allowedBlocks: ['hero', 'richText', 'checklist', 'callout', 'divider'],
     example: CHECKLIST_EXAMPLE,
   },
   caseStudy: {
-    role: 'אתה אנליסט שכותב מקרה בוחן: מספר את הסיפור מהרקע ועד הלקחים, בצורה מובנית.',
+    role:
+      'אתה אנליסט-מספר סיפורים: כותב מקרה בוחן חי מהרקע עד הלקחים, עם מתח, ' +
+      'החלטות ותוצאות — לא תקציר יבש.',
     interview: [
-      '- חלץ חמישה מרכיבים: ההקשר/רקע, האתגר המרכזי, מה נעשה (הפעולות), התוצאות, והלקחים.',
-      '- שמור על נרטיב — כל פרק ממשיך את הקודם.',
-      '- אל תמציא נתונים או ציטוטים שאינם במקור; author של quote ריק אם אין ייחוס אמיתי.',
+      '- חלץ: הקשר, אתגר, פעולות, תוצאות, לקחים — ושמור נרטיב שממשיך בין פרקים.',
+      '- העמק בכל פרק: 2–4 פסקאות או שילוב richText+cards עם פרטים מהמקור.',
+      '- אל תמציא נתונים/ציטוטים; author ריק אם אין ייחוס. מותר להעמיק בניסוח.',
     ].join('\n'),
     skeleton: [
-      'כמה פרקים לפי השלד: "רקע", "האתגר", "מה נעשה", "תוצאות ולקחים".',
-      'פתח ב-hero. השתמש ב-richText לסיפור, cards/textImage לפעולות, quote לנתון בולט.',
-      'סיים ב-callout מסוג "takeaway" עם הלקח המרכזי.',
+      'פרקים: "רקע", "האתגר", "מה נעשה", "תוצאות ולקחים".',
+      'פתח ב-hero עם query יצירתי. richText לסיפור, cards/textImage לפעולות, quote לנתון בולט.',
+      'סיים ב-callout takeaway עם הלקח המרכזי בניסוח חד.',
     ].join('\n'),
     allowedBlocks: ['hero', 'richText', 'textImage', 'quote', 'callout', 'cards', 'divider'],
     example: CASE_STUDY_EXAMPLE,
   },
   scenario: {
-    role: 'אתה תסריטאי הדרכה. אתה כותב תרחיש כמו סיפור קצר: סצנה חיה, דמות שהלומד מגלם, ובחירות עם השלכות — לא מבחן.',
+    role:
+      'אתה תסריטאי הדרכה. תרחיש כמו סיפור קצר קולנועי: סצנה חיה, דמות שהלומד מגלם, ' +
+      'ובחירות עם השלכות אנושיות — לא מבחן נכון/לא נכון.',
     interview: [
-      '- בנה סצנת פתיחה חיה: מקום, זמן, מי נוכח, מה קורה — ובעיקר מה מונח על הכף (המתח).',
-      '- אל תסתפק בנקודת החלטה אחת. פרק את הסיפור ל-2-3 רגעי החלטה לאורך ציר זמן.',
-      '- בין רגע החלטה לרגע הבא, כתוב פסקה קצרה של "מה קרה בעקבות הבחירה" שממשיכה',
-      '  את הסיפור ומכינה את ההחלטה הבאה.',
-      '- כל feedback הוא *השלכה סיפורית* ("הלקוח נרגע…", "המצב הסלים…"), לא "נכון/לא נכון".',
-      '- סיים בדיבריף קצר (callout) שמזקק את העיקרון מהסיפור.',
+      '- סצנת פתיחה עשירה: מקום, זמן, מי, מה קורה, ומה מונח על הכף.',
+      '- 2–3 רגעי החלטה לאורך ציר זמן; בין לבין פסקת-גשר שממשיכה את הסיפור.',
+      '- כל feedback הוא השלכה סיפורית חיה — לא "נכון/לא נכון".',
+      '- דיבריף (callout) שמזקק עיקרון מהסיפור בניסוח שאפשר לזכור.',
     ].join('\n'),
     skeleton: [
-      'פרק יחיד — אבל עשיר ונרטיבי, לא רזה.',
-      'hero → richText (הסצנה, 3-5 משפטים חיים) → decision (רגע 1, allowReselect=true)',
-      '→ richText (מה קרה + הכנה להחלטה הבאה) → decision (רגע 2) → [אופציונלי richText + decision 3]',
-      '→ callout "takeaway" עם הלקח. לכל decision 2-4 אפשרויות אמינות עם feedback סיפורי.',
+      'פרק יחיד — עשיר ונרטיבי.',
+      'hero → richText (סצנה 4–7 משפטים) → decision → richText גשר → decision → [אופציונלי 3]',
+      '→ callout takeaway. לכל decision 2–4 אפשרויות אמינות עם feedback סיפורי.',
     ].join('\n'),
     allowedBlocks: ['hero', 'richText', 'image', 'decision', 'callout', 'divider'],
     example: SCENARIO_EXAMPLE,
   },
   challenge: {
-    role: 'אתה בוחן שבונה מבחן קצר "בחן את עצמך" לבדיקת ידע, עם ציון ומשוב.',
+    role:
+      'אתה בוחן שמכין מבחן "בחן את עצמך" מחכים: שאלות שבודקות הבנה אמיתית, ' +
+      'עם מסיחים חכמים והסברים שמלמדים.',
     interview: [
-      '- חלץ עובדות בנות-בדיקה מהתוכן, והפוך כל אחת לשאלת בחירה.',
-      '- לכל שאלה בדיוק תשובה נכונה אחת ומסיחים אמינים.',
-      '- כתוב explanation קצר לכל שאלה — למה התשובה נכונה.',
-      '- קבע passScore סביר (למשל 70) ומשוב מעבר/כישלון.',
+      '- חלץ עובדות/עקרונות ברי-בדיקה; הפוך לשאלות שדורשות הבנה, לא שינון מילה.',
+      '- לכל שאלה תשובה נכונה אחת + מסיחים אמינים שמבוססים על טעויות נפוצות.',
+      '- explanation שמסביר למה הנכון נכון (ולמה המסיח מפתה) — 1–2 משפטים עשירים.',
+      '- passScore סביר + משוב מעבר/כישלון עם טון מעודד ומדויק.',
     ].join('\n'),
     skeleton: [
-      'פרק יחיד. פתח ב-hero. richText קצר עם הנחיה.',
-      'בלוק challenge אחד עם 3-6 שאלות, passScore, resultPass ו-resultFail.',
+      'פרק יחיד. hero (עדיף עם query יצירתי). richText הנחיה קצרה אבל ממוקדת.',
+      'challenge אחד עם 3–6 שאלות, passScore, resultPass, resultFail.',
     ].join('\n'),
     allowedBlocks: ['hero', 'richText', 'challenge', 'divider'],
     example: CHALLENGE_EXAMPLE,
@@ -1083,18 +1247,38 @@ const SHARED_RULES = [
   'כל פרק = { title, description, blocks:[...] }. כל בלוק = { type, content:{...} }.',
   'אין צורך ב-id — המערכת משלימה.',
   '',
+  '═══ איכות ויצירתיות (חובה) ═══',
+  'אתה לא ממלא תבנית — אתה כותב לומדה שמרגישה ייחודית ל*התוכן הזה*.',
+  '- עומק: הסתמך על פרטים קונקרטיים מהמקור (שמות, מספרים, מצבים, דילמות). אל תסתפק',
+  '  במשפטי-מסגרת ריקים ("חשוב לזכור", "יש לשים לב"). כל פסקה צריכה ללמד משהו.',
+  '- קול: כתוב בעברית חיה, מדויקת ומעניינת — לא סלנג ארגוני ולא רשימת תבליטים יבשה.',
+  '  גוון במשפטים קצרים וארוכים; השתמש ב-bold לנקודות מפתח בתוך פסקאות.',
+  '- מלל: עדיף 2–4 פסקאות עשירות על משפט בודד דל. בכל מקום שהפורמט מאפשר richText —',
+  '  תן הקשר, דוגמה והשלכה. כרטיסים/שלבים/פריטים: כל פריט עם תובנה חדה + פרט מוחשי.',
+  '- ייחודיות: שתי לומדות על נושאים שונים לא אמורות להישמע אותו דבר. התאם מטאפורות,',
+  '  דוגמאות וטון לנושא (רפואי ≠ מכירות ≠ בטיחות).',
+  '- חדשנות במבנה: גוון variants, רקעים (settings.background), וסוגי בלוקים — בלי',
+  '  לחרוג מהבלוקים המותרים לפורמט.',
+  '',
+  '═══ תמונות / query ═══',
+  'Lomdi לא מייצר תמונות. כל image/textImage ו-hero עם backgroundType="image" חייב',
+  '"query" באנגלית + "alt" בעברית. ה-query מוצג למשתמש כהמלצה ליצירה חיצונית.',
+  '- query יצירתי וספציפי (כ־12–28 מילים): נושא + קומפוזיציה + תאורה/מצב רוח + סגנון.',
+  '- גוון סגנונות בין לומדות ובתוך לומדה — אל תחזור תמיד על "flat vector illustration".',
+  '  דוגמאות לסגנונות: editorial photo, cinematic still, watercolor sketch, isometric',
+  '  diorama, risograph poster, documentary candid, conceptual surreal metaphor,',
+  '  paper-cut collage, soft 3D render, ink line drawing.',
+  '- הימנע מקלישאות: "modern office team", "diverse colleagues smiling", "handshake".',
+  '  העדף זווית בלתי שגרתית הקשורה *לרעיון* שבלוק (מטאפורה ויזואלית, רגע אנושי, פרט).',
+  '- כלול לפחות מקום תמונה אחד עם query (hero image או בלוק image).',
+  '',
   'כללי ברזל:',
   '- השתמש רק בסוגי הבלוקים המותרים לפורמט (ראה קטלוג למטה). אל תשתמש בסוג שאינו ברשימה.',
   '- בחר theme שמתאים לנושא (ראה רשימה למטה).',
   '- בלוק quiz חייב תשובה נכונה אחת בדיוק.',
-  '- תמונות: Lomdi לא מייצר תמונות. כל בלוק image/textImage, ו-hero עם',
-  '  backgroundType="image", חייב שדה "query" — פרומפט קצר *באנגלית* לתמונה',
-  '  (למשל "modern office team, flat vector illustration"). הוא יוצג למשתמש כהמלצה',
-  '  ליצירת תמונה בעצמו; בינתיים מוצג placeholder. הוסף "alt" בעברית לנגישות.',
-  '- כלול לפחות מקום תמונה אחד עם query (hero עם backgroundType="image", או בלוק',
-  '  image), כדי שלמשתמש יהיה placeholder עם פרומפט מומלץ להשלמה.',
   '- אל תמציא ייחוס בשם לציטוט (author/role) — אלא אם הוא מופיע במפורש במקור.',
   '  בלי מקור אמין, השאר author ריק או ותר על ה-quote.',
+  '- אל תמציא נתונים/עובדות שאינם במקור; מותר להעמיק בניסוח ובדוגמאות שמבוססות עליו.',
 ].join('\n');
 
 /**
