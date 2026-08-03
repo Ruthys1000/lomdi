@@ -231,7 +231,7 @@ describe('ברירות מחדל לפי סוג בלוק', () => {
     const text = createBlock('richText');
 
     expect(text.settings.width).toBe('normal');
-    expect(text.settings.spacingTop).toBe('medium');
+    expect(text.settings.spacingTop).toBe('small');
   });
 
   it('הגדרות שנמסרו במפורש גוברות על ברירות המחדל של הסוג', () => {
