@@ -134,11 +134,23 @@ describe('api/generate handler', () => {
 
     const res = await runHandler(postRequest('תוכן'));
 
-    expect(res.lines().find((line) => line.type === 'result')?.course).toEqual({
+    const lines = res.lines();
+    expect(lines.find((line) => line.type === 'result')?.course).toEqual({
       title: 'קורס',
       chapters: [],
     });
+    expect(lines.some((line) => line.type === 'progress' && line.stage === 'retrying')).toBe(true);
     expect(sdk.streamCalls).toBe(2);
+  });
+
+  it('מסמנת את דופק ההתחלה כ-stage started', async () => {
+    sdk.scripted = [textMessage('{"title":"בטיחות","chapters":[]}')];
+
+    const res = await runHandler(postRequest('תוכן'));
+
+    expect(res.lines().some((line) => line.type === 'progress' && line.stage === 'started')).toBe(
+      true,
+    );
   });
 
   it('מחזיר הודעת דחייה כששני הניסיונות נדחו על ידי הבטיחות', async () => {
