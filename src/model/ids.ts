@@ -19,7 +19,8 @@ export type IdPrefix =
   | 'card'
   | 'option'
   | 'stat'
-  | 'step';
+  | 'step'
+  | 'checklistItem';
 
 export function createId(prefix: IdPrefix): string {
   return `${prefix}-${generate()}`;

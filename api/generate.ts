@@ -360,6 +360,7 @@ const BLOCK_LINES: Record<string, string> = {
   divider: '- divider — מפריד. style(space|line|icon|gradient), icon, height.',
   callout: '- callout — מסר מרכזי בולט. variant(takeaway|info|success|warning), icon(שם lucide, למשל Lightbulb/AlertTriangle), title, text.',
   steps: '- steps — רצף שלבים ממוספר. variant(numbered|arrow), items:[{title, text}].',
+  checklist: '- checklist — פריטים לסימון. items:[{text, description}] (description קצר ואופציונלי), showCount(bool).',
 };
 
 const SETTINGS_NOTE =
@@ -517,7 +518,7 @@ const ONE_PAGER_EXAMPLE = {
             items: [
               { icon: 'Target', title: 'תעדוף', text: 'התחילו מהמשימה בעלת ההשפעה הגדולה ביותר.' },
               { icon: 'Clock', title: 'חסימת זמן', text: 'הקצו בלוקים קבועים למשימות עומק.' },
-              { icon: 'Ban', title: 'הסחות', text: 'כבו התראות בזמן עבודה ממוקדת.' },
+              { icon: 'Zap', title: 'הסחות', text: 'כבו התראות בזמן עבודה ממוקדת.' },
             ],
           },
         },
@@ -604,6 +605,170 @@ const PROCESS_EXAMPLE = {
 };
 
 /**
+ * דוגמת Checklist — פרק יחיד, פתיח קצר ובלוק checklist עם הפריטים.
+ */
+const CHECKLIST_EXAMPLE = {
+  title: 'לפני שמפרסמים פוסט',
+  subtitle: 'צ׳ק-ליסט קצר',
+  theme: 'clean',
+  chapters: [
+    {
+      title: 'הרשימה',
+      blocks: [
+        {
+          type: 'hero',
+          content: {
+            variant: 'panel',
+            title: 'לפני שמפרסמים פוסט',
+            subtitle: 'בדיקה אחרונה לפני פרסום',
+            backgroundType: 'gradient',
+            gradientFrom: '#2563eb',
+            gradientTo: '#7c3aed',
+            height: 'medium',
+            fullBleed: true,
+          },
+        },
+        {
+          type: 'richText',
+          content: {
+            doc: {
+              type: 'doc',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [{ type: 'text', text: 'עברו על הרשימה לפני כל פרסום, כדי לא לפספס שלב.' }],
+                },
+              ],
+            },
+          },
+        },
+        {
+          type: 'checklist',
+          content: {
+            showCount: true,
+            items: [
+              { text: 'הגהה', description: 'קראו שוב את הטקסט לאיתור שגיאות.' },
+              { text: 'תמונה ראשית', description: 'ודאו שיש תמונה באיכות טובה.' },
+              { text: 'קישורים', description: 'בדקו שכל הקישורים עובדים.' },
+              { text: 'תיוג', description: 'הוסיפו תגיות רלוונטיות.' },
+            ],
+          },
+        },
+        {
+          type: 'callout',
+          content: {
+            variant: 'info',
+            icon: 'Info',
+            title: 'טיפ',
+            text: 'שמרו את הרשימה כתבנית קבועה לכל פרסום.',
+          },
+        },
+      ],
+    },
+  ],
+};
+
+/**
+ * דוגמת Case Study — כמה פרקים לפי השלד רקע→אתגר→פעולה→תוצאות/לקחים.
+ */
+const CASE_STUDY_EXAMPLE = {
+  title: 'איך חברת X קיצרה זמני תגובה',
+  subtitle: 'מקרה בוחן',
+  theme: 'midnight',
+  chapters: [
+    {
+      title: 'רקע',
+      blocks: [
+        {
+          type: 'hero',
+          content: {
+            variant: 'panel',
+            title: 'איך חברת X קיצרה זמני תגובה',
+            subtitle: 'מקרה בוחן בשירות לקוחות',
+            backgroundType: 'image',
+            query: 'customer support team collaborating in a modern office, flat vector illustration',
+            alt: 'צוות שירות לקוחות',
+            gradientFrom: '#0f172a',
+            gradientTo: '#334155',
+            height: 'tall',
+            fullBleed: true,
+          },
+        },
+        {
+          type: 'richText',
+          content: {
+            doc: {
+              type: 'doc',
+              content: [
+                { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'ההקשר' }] },
+                {
+                  type: 'paragraph',
+                  content: [{ type: 'text', text: 'חברת X היא ספקית שירות עם אלפי פניות ביום.' }],
+                },
+              ],
+            },
+          },
+        },
+      ],
+    },
+    {
+      title: 'האתגר',
+      blocks: [
+        {
+          type: 'richText',
+          content: {
+            doc: {
+              type: 'doc',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [{ type: 'text', text: 'זמני התגובה הגיעו ל-48 שעות, והלקוחות התלוננו.' }],
+                },
+              ],
+            },
+          },
+        },
+      ],
+    },
+    {
+      title: 'מה נעשה',
+      blocks: [
+        {
+          type: 'cards',
+          content: {
+            variant: 'numbered',
+            columns: 3,
+            items: [
+              { icon: 'Route', title: 'ניתוב חכם', text: 'פניות נותבו אוטומטית לצוות המתאים.' },
+              { icon: 'BookOpen', title: 'בסיס ידע', text: 'תשובות נפוצות רוכזו למאגר אחד.' },
+              { icon: 'Clock', title: 'יעדי זמן', text: 'הוגדרו יעדי תגובה ברורים.' },
+            ],
+          },
+        },
+      ],
+    },
+    {
+      title: 'תוצאות ולקחים',
+      blocks: [
+        {
+          type: 'quote',
+          content: { variant: 'band', text: 'זמן התגובה ירד מ-48 שעות לארבע.', author: '' },
+        },
+        {
+          type: 'callout',
+          content: {
+            variant: 'takeaway',
+            icon: 'Lightbulb',
+            title: 'הלקח',
+            text: 'שיפור תהליך הניתוב היה בעל ההשפעה הגדולה ביותר.',
+          },
+        },
+      ],
+    },
+  ],
+};
+
+/**
  * מודול פורמט — ה"אישיות" של הפורמט בצד ה-AI.
  *
  * מסונכרן ידנית עם `src/formats/index.ts` (allowedBlocks תואם ל-allowedBlockTypes).
@@ -673,6 +838,37 @@ const FORMAT_MODULES: Record<string, FormatModule> = {
     ].join('\n'),
     allowedBlocks: ['hero', 'richText', 'steps', 'callout', 'image', 'divider'],
     example: PROCESS_EXAMPLE,
+  },
+  checklist: {
+    role: 'אתה מומחה תהליך וציות שהופך דרישות או שלבים לצ׳ק-ליסט ברור לאימות.',
+    interview: [
+      '- זהה פריטים אטומיים ובני-אימות — כל פריט פעולה אחת שאפשר לסמן "בוצע".',
+      '- נסח כל פריט קצר ובלשון פעולה.',
+      '- הוסף description קצר רק כשצריך הבהרה; אחרת השאר ריק.',
+      '- אל תמזג כמה פעולות לפריט אחד.',
+    ].join('\n'),
+    skeleton: [
+      'פרק יחיד בלבד, בלי פרקים נוספים.',
+      'פתח ב-hero. richText קצר שמסביר מתי ולמה משתמשים ברשימה.',
+      'בלוק checklist אחד עם כל הפריטים (showCount=true). callout אופציונלי לטיפ או אזהרה.',
+    ].join('\n'),
+    allowedBlocks: ['hero', 'richText', 'checklist', 'callout', 'divider'],
+    example: CHECKLIST_EXAMPLE,
+  },
+  caseStudy: {
+    role: 'אתה אנליסט שכותב מקרה בוחן: מספר את הסיפור מהרקע ועד הלקחים, בצורה מובנית.',
+    interview: [
+      '- חלץ חמישה מרכיבים: ההקשר/רקע, האתגר המרכזי, מה נעשה (הפעולות), התוצאות, והלקחים.',
+      '- שמור על נרטיב — כל פרק ממשיך את הקודם.',
+      '- אל תמציא נתונים או ציטוטים שאינם במקור; author של quote ריק אם אין ייחוס אמיתי.',
+    ].join('\n'),
+    skeleton: [
+      'כמה פרקים לפי השלד: "רקע", "האתגר", "מה נעשה", "תוצאות ולקחים".',
+      'פתח ב-hero. השתמש ב-richText לסיפור, cards/textImage לפעולות, quote לנתון בולט.',
+      'סיים ב-callout מסוג "takeaway" עם הלקח המרכזי.',
+    ].join('\n'),
+    allowedBlocks: ['hero', 'richText', 'textImage', 'quote', 'callout', 'cards', 'divider'],
+    example: CASE_STUDY_EXAMPLE,
   },
 };
 

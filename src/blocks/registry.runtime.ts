@@ -12,6 +12,7 @@ import { QuizRenderer } from './quiz/Renderer';
 import { QuoteRenderer } from './quote/Renderer';
 import { CalloutRenderer } from './callout/Renderer';
 import { StepsRenderer } from './steps/Renderer';
+import { ChecklistRenderer } from './checklist/Renderer';
 
 /**
  * רגיסטרי ה-Renderers — הצד שנארז לתוך הלומדה המיוצאת.
@@ -40,6 +41,7 @@ const registry = {
   quote: QuoteRenderer,
   callout: CalloutRenderer,
   steps: StepsRenderer,
+  checklist: ChecklistRenderer,
 } as unknown as Record<string, BlockRendererComponent>;
 
 export const rendererRegistry = registry;

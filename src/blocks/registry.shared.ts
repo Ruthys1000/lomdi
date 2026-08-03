@@ -13,6 +13,7 @@ import { dividerContentSchema, createDividerContent, dividerAssetIds } from './d
 import { quoteContentSchema, createQuoteContent, quoteAssetIds } from './quote/content';
 import { calloutContentSchema, createCalloutContent, calloutAssetIds } from './callout/content';
 import { stepsContentSchema, createStepsContent, stepsAssetIds } from './steps/content';
+import { checklistContentSchema, createChecklistContent, checklistAssetIds } from './checklist/content';
 
 /**
  * הרגיסטרי המשותף — הצד של הבלוקים שאין בו React.
@@ -163,6 +164,15 @@ export const sharedBlockRegistry: Record<string, SharedBlockDefinition<unknown>>
     schema: stepsContentSchema,
     createContent: createStepsContent,
     usedAssetIds: stepsAssetIds,
+  }),
+  checklist: define({
+    type: 'checklist',
+    label: blockLabels.checklist,
+    description: 'פריטים ניתנים-לסימון, עם מונה השלמה.',
+    category: 'interaction',
+    schema: checklistContentSchema,
+    createContent: createChecklistContent,
+    usedAssetIds: checklistAssetIds,
   }),
 };
 
