@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { estimateProgressPercent } from './GenerateForm';
+import { estimateProgressPercent, formatElapsed, statusLineFor } from './generateWait';
 
-describe('estimateProgressPercent', () => {
-  it('מתחילה מאפס ולא מגיעה ל־100% גם אחרי זמן ארוך', () => {
+describe('generateWait helpers', () => {
+  it('מעריכה התקדמות שמתחילה מאפס ולא מגיעה ל־100%', () => {
     expect(estimateProgressPercent(0)).toBe(0);
     expect(estimateProgressPercent(150)).toBe(90);
     expect(estimateProgressPercent(600)).toBe(90);
@@ -16,5 +16,14 @@ describe('estimateProgressPercent', () => {
     expect(mid).toBeGreaterThan(early);
     expect(late).toBeGreaterThan(mid);
     expect(late).toBeLessThanOrEqual(90);
+  });
+
+  it('מעצבת זמן כ־m:ss', () => {
+    expect(formatElapsed(0)).toBe('0:00');
+    expect(formatElapsed(75)).toBe('1:15');
+  });
+
+  it('מחליפה הודעה בניסיון חוזר', () => {
+    expect(statusLineFor(10, 'retrying')).toContain('מנסים שוב');
   });
 });
