@@ -1,91 +1,63 @@
-import { useState } from 'react';
-import { Check } from 'lucide-react';
-import { getFormat, type FormatDefinition, type FormatId } from '@/formats';
-import { FormatGallery } from './FormatGallery';
-import { GenerateForm } from './GenerateForm';
+import { ArrowDown, Sparkles } from 'lucide-react';
+import { APP_NAME } from '@/version';
+import { CoursePreview } from './CoursePreview';
 
 /**
- * ה-Hero של מסך הפתיחה — ובחירת הפורמט עצמה.
+ * Hero הנחיתה — קומפוזיציה אחת.
  *
- * שתי החלטות עיצוב:
- *
- * 1. **ה-Hero הוא הפס הכהה.** הכלי הוא "פס עליון כהה מעל אזור עבודה בהיר";
- *    כאן הפס נמתח למסך שלם, והגוף שמתחתיו חוזר לבהיר. זו זהות המוצר.
- * 2. **הבחירה קודמת לתוכן.** מאז הפיבוט לפורמטים, הפעולה הראשונה היא *לבחור
- *    סוג של דף* — ורק אז להדביק תוכן. הגלריה יושבת בלב ה-Hero; בחירת פורמט
- *    מחליפה אותה בטופס היצירה המותאם. בניית דף ריק נשארת כפעולה משנית.
+ * המותג הוא האות הראשית (לא רק כיתוב ב-nav). מתחתיו משפט אחד, CTA ראשי
+ * ליצירה עם AI, ו-CTA משני לדף ריק. מימין/מתחת — ויזואל תוצר מלא, בלי
+ * כרטיסי פורמט, בלי proof pills, ובלי תגיות צפות על התמונה.
  */
 
-const PROOF = ['בלי התקנה', 'העריכה נשמרת בדפדפן', 'מוכן ל-Moodle'];
-
 interface HeroProps {
-  /** בונה דף ריק (תבנית blank) — הפעולה המשנית */
+  /** גולל לגלריית הפורמטים — הפעולה הראשית */
+  onCreateAi: () => void;
+  /** בונה דף ריק — הפעולה המשנית */
   onBuild: () => void;
 }
 
-export function Hero({ onBuild }: HeroProps) {
-  const [selected, setSelected] = useState<FormatDefinition | null>(null);
-
-  const pick = (id: FormatId) => setSelected(getFormat(id) ?? null);
-
+export function Hero({ onCreateAi, onBuild }: HeroProps) {
   return (
-    <section className="relative z-[2] overflow-hidden bg-shell text-shell-fg shadow-[0_22px_40px_-26px_rgba(9,11,15,0.55)]">
-      {/* זוהר הדגש */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -bottom-1/4 start-[-12%] size-[640px] rounded-full bg-volt/20 blur-3xl"
-      />
+    <section className="lc-landing-hero relative overflow-hidden bg-shell text-shell-fg">
+      <div aria-hidden className="lc-landing-hero__atmosphere" />
 
-      <div className="relative mx-auto max-w-5xl px-6 py-14 md:py-20">
-        <div className="max-w-2xl">
-          <p className="text-xs font-bold tracking-[0.08em] text-volt uppercase">
-            lomdiAI · פיצוח תוכן ללמידה
-          </p>
+      <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-6 py-14 md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] md:gap-12 md:py-16 lg:py-20">
+        <div className="lc-landing-hero__copy relative z-[1] max-w-xl">
+          <p className="lc-landing-brand">{APP_NAME}</p>
 
-          <h1 className="mt-4 text-4xl leading-[1.06] font-extrabold tracking-tight text-balance md:text-5xl">
-            בחרו <span className="text-volt">פורמט</span>, והדביקו תוכן.
+          <h1 className="mt-4 text-3xl leading-[1.08] font-extrabold tracking-tight text-balance sm:text-4xl md:text-[2.75rem] lg:text-5xl">
+            מטקסט ארוך — ללומדה מוכנה.
           </h1>
 
-          <p className="mt-4 max-w-[46ch] leading-relaxed text-shell-muted md:text-lg">
-            לא עוד "עמוד גנרי". בוחרים איזה סוג של דף רוצים ליצור, וה‑AI מפצח את התוכן ובונה טיוטה
-            מותאמת. אחר כך עורכים הכול.
+          <p className="mt-4 max-w-[38ch] text-base leading-relaxed text-shell-muted md:text-lg">
+            בוחרים פורמט, מדביקים תוכן, וה‑AI בונה טיוטה שאפשר לערוך מיד.
           </p>
 
-          <ul className="mt-6 flex flex-wrap gap-2.5">
-            {PROOF.map((text) => (
-              <li
-                key={text}
-                className="inline-flex items-center gap-1.5 rounded-full border border-shell-edge bg-shell-2 px-3 py-1.5 text-xs font-semibold"
-              >
-                <Check className="size-3.5 text-volt" aria-hidden />
-                {text}
-              </li>
-            ))}
-          </ul>
-        </div>
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={onCreateAi}
+              className="inline-flex items-center gap-2 rounded-xl bg-volt px-5 py-3 text-sm font-extrabold text-on-volt transition hover:bg-volt-bright sm:px-6 sm:text-base"
+            >
+              <Sparkles className="size-4.5" aria-hidden />
+              צרו עם AI
+              <ArrowDown className="size-4 opacity-80" aria-hidden />
+            </button>
 
-        <div className="mt-10">
-          {selected ? (
-            <div className="mx-auto max-w-2xl">
-              <GenerateForm format={selected} onBack={() => setSelected(null)} tone="dark" />
-            </div>
-          ) : (
-            <FormatGallery onSelect={pick} />
-          )}
-        </div>
-
-        {!selected && (
-          <p className="mt-8 text-sm text-shell-muted">
-            מעדיפים לבנות ידנית?{' '}
             <button
               type="button"
               onClick={onBuild}
-              className="font-bold text-volt underline-offset-4 transition hover:underline"
+              className="rounded-xl border border-shell-edge px-5 py-3 text-sm font-semibold text-shell-fg transition hover:border-volt-dim hover:text-volt sm:text-base"
             >
               התחילו מדף ריק
             </button>
-          </p>
-        )}
+          </div>
+        </div>
+
+        <div className="lc-landing-hero__visual relative z-[1] min-w-0">
+          <CoursePreview />
+        </div>
       </div>
     </section>
   );

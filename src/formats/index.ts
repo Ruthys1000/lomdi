@@ -41,9 +41,11 @@ export interface FormatDefinition {
   id: FormatId;
   /** שם קצר בעברית — הכותרת בכרטיס הגלריה */
   label: string;
+  /** שם באנגלית לתיוג משני (אופציונלי) */
+  labelEn?: string;
   /** משפט אחד שממחיש למה משמש הפורמט */
   tagline: string;
-  /** תיאור מלא יותר, מוצג בכרטיס */
+  /** תיאור מלא יותר */
   description: string;
   /**
    * 'ready' — נבנה ומופעל. 'soon' — מופיע בגלריה מושבת, כדי לתקשר את
@@ -71,7 +73,8 @@ const SHARED_STRUCTURE = ['hero', 'richText', 'divider'];
 export const formatRegistry: Record<FormatId, FormatDefinition> = {
   onePager: {
     id: 'onePager',
-    label: 'One Pager',
+    label: 'עמוד אחד',
+    labelEn: 'One Pager',
     tagline: 'עמוד אחד סרוק וברור — המסר המרכזי במבט אחד.',
     description:
       'מזקק תוכן ארוך לעמוד יחיד: כותרת, תמצית, נקודות מפתח והמסר לקחת הביתה. בלי פרקים, בלי ניווט — הכול נגלל.',
@@ -80,12 +83,13 @@ export const formatRegistry: Record<FormatId, FormatDefinition> = {
     allowChapters: false,
     defaultNavigation: 'scroll',
     entryPlaceholder:
-      'הדביקו כאן תוכן — מאמר, סיכום, מסמך — ונבנה ממנו One Pager סרוק וברור…',
+      'הדביקו כאן תוכן — מאמר, סיכום, מסמך — ונבנה ממנו עמוד אחד סרוק וברור…',
     preview: ['hero', 'text', 'cards', 'callout'],
   },
   process: {
     id: 'process',
-    label: 'Process',
+    label: 'תהליך',
+    labelEn: 'Process',
     tagline: 'נוהל או תהליך, מפורק לשלבים ברורים לפי הסדר.',
     description:
       'הופך נוהל, תהליך עבודה או מדריך הפעלה לרצף שלבים ממוספרים — כל שלב עם הפעולה, מי מבצע והתוצאה.',
@@ -99,7 +103,8 @@ export const formatRegistry: Record<FormatId, FormatDefinition> = {
   },
   checklist: {
     id: 'checklist',
-    label: 'Checklist',
+    label: 'צ׳ק-ליסט',
+    labelEn: 'Checklist',
     tagline: 'רשימת פעולות לאימות — לפני, אחרי, או תוך כדי.',
     description: 'רשימת פריטים ניתנים-לסימון: ציות, בקרת איכות, "לפני שמתחילים".',
     status: 'ready',
@@ -111,7 +116,8 @@ export const formatRegistry: Record<FormatId, FormatDefinition> = {
   },
   scenario: {
     id: 'scenario',
-    label: 'Scenario',
+    label: 'תרחיש',
+    labelEn: 'Scenario',
     tagline: 'מצב מהשטח, החלטה, והשלכה — למידה מתוך התנסות.',
     description: 'תרחיש ליניארי: מצב ריאלי, נקודת החלטה, ומשוב לכל בחירה.',
     status: 'ready',
@@ -123,7 +129,8 @@ export const formatRegistry: Record<FormatId, FormatDefinition> = {
   },
   challenge: {
     id: 'challenge',
-    label: 'Challenge',
+    label: 'אתגר',
+    labelEn: 'Challenge',
     tagline: 'בחן את עצמך — סדרת שאלות עם ציון ומשוב.',
     description: 'מיני-הערכה: סדרת שאלות עם הסבר לכל תשובה, ציון בסוף ומשוב מעבר/כישלון.',
     status: 'ready',
@@ -135,14 +142,15 @@ export const formatRegistry: Record<FormatId, FormatDefinition> = {
   },
   caseStudy: {
     id: 'caseStudy',
-    label: 'Case Study',
+    label: 'חקר מקרה',
+    labelEn: 'Case Study',
     tagline: 'רקע, אתגר, מה נעשה, תוצאות ולקחים.',
     description: 'ניתוח מקרה נרטיבי לפי שלד קבוע: הקשר, האתגר, הפעולה, התוצאות והלקחים.',
     status: 'ready',
     allowedBlockTypes: [...SHARED_STRUCTURE, 'textImage', 'quote', 'callout', 'cards'],
     allowChapters: true,
     defaultNavigation: 'chapters',
-    entryPlaceholder: 'הדביקו כאן את המקרה — ונבנה ממנו Case Study מובנה…',
+    entryPlaceholder: 'הדביקו כאן את המקרה — ונבנה ממנו חקר מקרה מובנה…',
     preview: ['hero', 'text', 'quote', 'callout'],
   },
 };
