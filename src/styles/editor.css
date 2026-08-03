@@ -176,50 +176,209 @@
 }
 
 /*
- * ─── מסך הפתיחה: אנימציית ה-Hero ("מיני-לומדי") ───
+ * ─── מסך הפתיחה ───────────────────────────────────────────────
  *
- * חי כאן ולא ב-Tailwind כי keyframes אינם utility. השאר (פריסה, צבע)
- * נשאר ב-Tailwind בקומפוננטה. הלולאה מספרת את הליבה: בונים מבלוקים (שכבת
- * "עריכה") → הבזק → מקבלים אתר מעוצב (שכבת "מיוצא"), ובחזרה.
+ * Hero + תצוגת תוצר + תנועות כניסה. חי כאן ולא ב-Tailwind כי keyframes
+ * ואיור ה-preview דורשים CSS מפורש. מכבד prefers-reduced-motion.
  */
 
-/* במה מוערמת: שתי השכבות + ההבזק יושבים באותו תא רשת */
-.lc-stage { display: grid; }
-.lc-stage > * { grid-area: 1 / 1; }
-
-/* מצב מנוחה (וגם ברירת המחדל למי שאין לו no-preference): מראים עריכה */
-.lc-hero-export,
-.lc-status-export,
-.lc-flash,
-.lc-filechip { opacity: 0; }
-
-@media (prefers-reduced-motion: no-preference) {
-  .lc-hero-edit     { animation: lc-edit 6.5s ease-in-out infinite; }
-  .lc-hero-export   { animation: lc-export 6.5s ease-in-out infinite; }
-  .lc-status-edit   { animation: lc-edit 6.5s ease-in-out infinite; }
-  .lc-status-export { animation: lc-export 6.5s ease-in-out infinite; }
-  .lc-flash         { animation: lc-flash 6.5s ease-in-out infinite; }
-  .lc-filechip      { animation: lc-chip 6.5s ease-in-out infinite; }
-  .lc-blk-1 { animation: lc-b1 6.5s ease-in-out infinite; }
-  .lc-blk-2 { animation: lc-b2 6.5s ease-in-out infinite; }
-  .lc-blk-3 { animation: lc-b3 6.5s ease-in-out infinite; }
-  .lc-insert { animation: lc-pulse 6.5s ease-in-out infinite; }
+.lc-landing-hero__atmosphere {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(90% 70% at 12% -10%, rgb(45 225 194 / 0.22), transparent 55%),
+    radial-gradient(70% 55% at 100% 20%, rgb(45 225 194 / 0.08), transparent 50%),
+    linear-gradient(160deg, #0e1218 0%, #161b22 55%, #10141a 100%);
+  pointer-events: none;
 }
 
-@keyframes lc-b1 { 0% { opacity: 0; transform: translateY(12px); } 9%, 100% { opacity: 1; transform: none; } }
-@keyframes lc-b2 { 0%, 10% { opacity: 0; transform: translateY(12px); } 20%, 100% { opacity: 1; transform: none; } }
-@keyframes lc-b3 { 0%, 22% { opacity: 0; transform: translateY(12px); } 32%, 100% { opacity: 1; transform: none; } }
-@keyframes lc-pulse { 0%, 30% { opacity: 0; } 38% { opacity: 1; } 46%, 100% { opacity: 0; } }
-@keyframes lc-edit { 0% { opacity: 1; } 46% { opacity: 1; } 53% { opacity: 0; } 93% { opacity: 0; } 100% { opacity: 1; } }
-@keyframes lc-export { 0% { opacity: 0; } 46% { opacity: 0; } 53% { opacity: 1; } 93% { opacity: 1; } 100% { opacity: 0; } }
-@keyframes lc-flash { 0%, 44% { opacity: 0; } 49% { opacity: 0.85; } 58%, 100% { opacity: 0; } }
-@keyframes lc-chip { 0%, 52% { opacity: 0; transform: translateY(6px); } 60% { opacity: 1; transform: none; } 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
+.lc-landing-brand {
+  font-size: clamp(2.6rem, 8vw, 4.4rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+}
 
-/* מצב מופחת-תנועה: מקפיאים על הפריים ה"מיוצא" (התוצאה) */
-@media (prefers-reduced-motion: reduce) {
-  .lc-hero-edit { opacity: 0; }
-  .lc-hero-export { opacity: 1; }
-  .lc-status-edit { opacity: 0; }
-  .lc-status-export { opacity: 1; }
-  .lc-filechip { opacity: 1; }
+.lc-landing-preview {
+  position: relative;
+  isolation: isolate;
+}
+
+.lc-landing-preview::before {
+  content: '';
+  position: absolute;
+  inset: 12% -8% -10% 18%;
+  z-index: -1;
+  border-radius: 28px;
+  background: linear-gradient(145deg, rgb(45 225 194 / 0.28), rgb(45 225 194 / 0.04));
+  transform: rotate(-3deg);
+}
+
+.lc-landing-preview__sheet {
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 20px;
+  background: #f7f8fa;
+  color: #14181d;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.08) inset,
+    0 24px 48px -28px rgb(0 0 0 / 0.65);
+}
+
+.lc-landing-preview__hero {
+  padding: 1.35rem 1.4rem 1.2rem;
+  background: linear-gradient(125deg, #1a4a42 0%, #0f1c28 58%, #2a1c14 100%);
+  color: #ffffff;
+}
+
+.lc-landing-preview__eyebrow {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  opacity: 0.78;
+}
+
+.lc-landing-preview__title {
+  margin: 0.45rem 0 0;
+  font-size: 1.45rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.lc-landing-preview__sub {
+  margin: 0.35rem 0 0;
+  max-inline-size: 28ch;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  opacity: 0.88;
+}
+
+.lc-landing-preview__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0.35rem 0 0.9rem;
+}
+
+.lc-landing-preview__row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.7rem 1.15rem;
+  border-block-end: 1px solid #e4e7ec;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.lc-landing-preview__row strong {
+  display: block;
+  font-weight: 700;
+}
+
+.lc-landing-preview__row em {
+  display: block;
+  margin-block-start: 0.1rem;
+  color: #667081;
+  font-style: normal;
+  font-size: 0.74rem;
+}
+
+.lc-landing-preview__row[data-done] strong {
+  color: #667081;
+  text-decoration: line-through;
+  text-decoration-color: rgb(102 112 129 / 0.55);
+}
+
+.lc-landing-preview__check {
+  flex: none;
+  inline-size: 1.05rem;
+  block-size: 1.05rem;
+  margin-block-start: 0.1rem;
+  border: 1.5px solid #9aa3b2;
+  border-radius: 0.28rem;
+  background: #ffffff;
+}
+
+.lc-landing-preview__row[data-done] .lc-landing-preview__check {
+  border-color: #0b6b5e;
+  background:
+    linear-gradient(to bottom right, transparent 42%, #fff 42%, #fff 58%, transparent 58%) center /
+      0.45rem 0.28rem no-repeat,
+    #0b6b5e;
+}
+
+.lc-landing-preview__callout {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  margin: 0.75rem 1rem 0;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid rgb(11 107 94 / 0.18);
+  border-inline-start: 3px solid #17bfa6;
+  border-radius: 12px;
+  background: #e8f8f4;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: #3f4854;
+}
+
+.lc-landing-preview__callout strong {
+  display: block;
+  margin-block-end: 0.15rem;
+  color: #14181d;
+  font-weight: 700;
+}
+
+.lc-landing-preview__callout-mark {
+  flex: none;
+  inline-size: 0.55rem;
+  block-size: 0.55rem;
+  margin-block-start: 0.35rem;
+  border-radius: 999px;
+  background: #17bfa6;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .lc-landing-hero__copy {
+    animation: lc-landing-rise 0.7s ease both;
+  }
+
+  .lc-landing-hero__visual {
+    animation: lc-landing-rise 0.85s 0.12s ease both;
+  }
+
+  .lc-landing-preview__sheet {
+    animation: lc-landing-float 5.5s ease-in-out infinite;
+  }
+}
+
+@keyframes lc-landing-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes lc-landing-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@media (max-width: 767px) {
+  .lc-landing-preview::before {
+    inset: 8% 4% -6% 8%;
+    transform: rotate(-2deg);
+  }
 }

@@ -76,12 +76,12 @@ describe('מסך הפתיחה', () => {
   it('גלריית הפורמטים מציגה את הפורמטים המוכנים כלחיצים', async () => {
     await setup();
 
-    // כל ששת הפורמטים מוכנים — כרטיסים לחיצים, בלי "בקרוב"
-    const onePager = screen.getByRole('button', { name: /One Pager/ });
+    // כל ששת הפורמטים מוכנים — כרטיסים לחיצים בעברית, בלי "בקרוב"
+    const onePager = screen.getByRole('button', { name: /עמוד אחד/ });
     expect(onePager).toBeInTheDocument();
     expect(onePager).not.toBeDisabled();
 
-    expect(screen.getByRole('button', { name: /Process/ })).not.toBeDisabled();
+    expect(screen.getByRole('button', { name: /תהליך/ })).not.toBeDisabled();
     expect(screen.queryByText(/בקרוב/)).not.toBeInTheDocument();
   });
 
@@ -98,8 +98,9 @@ describe('מסך הפתיחה', () => {
     await setup();
 
     // שתי הדרכים להתחיל, שתיהן על הנחיתה
-    expect(screen.getByRole('heading', { name: /בחרו/ })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /מטקסט ארוך/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'התחילו מדף ריק' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /צרו עם AI/ })).toBeInTheDocument();
 
     // אין כרטיס "ממשיכים" בנחיתה
     expect(screen.queryByText(/ממשיכים/)).not.toBeInTheDocument();
@@ -107,14 +108,14 @@ describe('מסך הפתיחה', () => {
     // הלומדה השמורה קיימת ב-DOM (המגירה מורכבת תמיד) אך אינה נראית: הגישה
     // אליה עוברת דרך הכפתור בפס העליון, ולא דרך הנחיתה
     expect(screen.getByText(/קליטת חייל חדש/)).not.toBeVisible();
-    expect(screen.getByRole('button', { name: 'הלומדות שלי' })).toBeVisible();
+    expect(screen.getByRole('button', { name: /הלומדות שלי/ })).toBeVisible();
   });
 
   it('הנחיתה (ה-Hero) מוצגת תמיד — גם למבקר חדש וגם עם לומדות שמורות', async () => {
     await setup();
-    expect(screen.getByRole('heading', { name: /בחרו/ })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /מטקסט ארוך/ })).toBeInTheDocument();
     // בלי לומדות שמורות אין כפתור "הלומדות שלי"
-    expect(screen.queryByRole('button', { name: 'הלומדות שלי' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /הלומדות שלי/ })).not.toBeInTheDocument();
 
     cleanup();
     projects = [project('a', 'לומדה', '2026-03-01T10:00:00.000Z')];
@@ -122,8 +123,8 @@ describe('מסך הפתיחה', () => {
     await setup();
 
     // הנחיתה נשארת זהה, ונוסף כפתור הגישה ללומדות השמורות
-    expect(screen.getByRole('heading', { name: /בחרו/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'הלומדות שלי' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /מטקסט ארוך/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /הלומדות שלי/ })).toBeInTheDocument();
   });
 
   it('כפתור "הלומדות שלי" פותח מגירה עם הלומדות השמורות', async () => {
@@ -132,7 +133,7 @@ describe('מסך הפתיחה', () => {
     await setup();
 
     // לא על הנחיתה עצמה — נפתח מהפס העליון
-    fireEvent.click(screen.getByRole('button', { name: 'הלומדות שלי' }));
+    fireEvent.click(screen.getByRole('button', { name: /הלומדות שלי/ }));
 
     const drawer = screen.getByRole('dialog', { name: 'הלומדות שלי' });
     expect(drawer).toBeInTheDocument();
@@ -149,7 +150,7 @@ describe('מסך הפתיחה', () => {
     lastProjectId = 'a';
 
     await setup();
-    fireEvent.click(screen.getByRole('button', { name: 'הלומדות שלי' }));
+    fireEvent.click(screen.getByRole('button', { name: /הלומדות שלי/ }));
 
     // מחפשים בתוך המגירה בלבד: לכרטיסי הגלריה יש גם הם "פרקים" בתיאור
     const drawer = screen.getByRole('dialog', { name: 'הלומדות שלי' });
@@ -165,7 +166,7 @@ describe('מסך הפתיחה', () => {
     lastProjectId = 'p0';
 
     await setup();
-    fireEvent.click(screen.getByRole('button', { name: 'הלומדות שלי' }));
+    fireEvent.click(screen.getByRole('button', { name: /הלומדות שלי/ }));
 
     // המגירה מציגה את *כל* הלומדות: ארבע גלויות, ושש מאחורי "עוד"
     const more = screen.getByRole('button', { name: /עוד 6 לומדות/ });
@@ -219,7 +220,7 @@ describe('מסך הפתיחה', () => {
     );
 
     const { onOpened } = await setup();
-    fireEvent.click(screen.getByRole('button', { name: 'הלומדות שלי' }));
+    fireEvent.click(screen.getByRole('button', { name: /הלומדות שלי/ }));
 
     // לפי /פרקים/ ולא לפי השם: כפתור המחיקה נושא גם הוא את שם הלומדה
     const drawer = screen.getByRole('dialog', { name: 'הלומדות שלי' });
@@ -245,7 +246,7 @@ describe('מסך הפתיחה', () => {
     );
 
     await setup();
-    fireEvent.click(screen.getByRole('button', { name: 'הלומדות שלי' }));
+    fireEvent.click(screen.getByRole('button', { name: /הלומדות שלי/ }));
 
     const drawer = screen.getByRole('dialog', { name: 'הלומדות שלי' });
     await act(async () => {
