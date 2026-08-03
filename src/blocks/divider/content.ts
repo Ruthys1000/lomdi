@@ -13,7 +13,9 @@ export type DividerContent = z.infer<typeof dividerContentSchema>;
 export const createDividerContent = (overrides: Partial<DividerContent> = {}): DividerContent => ({
   style: 'line',
   icon: 'Sparkle',
-  height: 'medium',
+  /* small ולא medium: מפריד medium הוסיף 48px ריקים מעל ומתחת לקו — במובייל
+     זה נראה כמו חור לבן גדול בין בלוקים. מי שרוצה אוויר יכול להעלות בפאנל. */
+  height: 'small',
   lineWidth: 'full',
   ...overrides,
 });

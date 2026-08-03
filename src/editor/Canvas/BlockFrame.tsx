@@ -56,9 +56,9 @@ export function BlockFrame({ block, selected, onSelect, children }: BlockFramePr
 
       <span
         className={cn(
-          // -top-6 מציב את התווית בתוך המרזב שה-pt-7 של SortableBlock פותח,
+          // -top-5 מציב את התווית בתוך המרזב שה-pt-6 של SortableBlock פותח,
           // בקצה הנגדי לסרגל הפעולות
-          'absolute -top-6 end-2 z-20 rounded-md px-1.5 py-0.5 text-[11px] font-semibold transition',
+          'absolute -top-5 end-2 z-20 rounded-md px-1.5 py-0.5 text-[11px] font-semibold transition',
           selected
             ? 'bg-volt text-on-volt opacity-100'
             : 'bg-panel text-fg opacity-0 group-hover:opacity-100',

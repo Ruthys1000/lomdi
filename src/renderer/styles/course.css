@@ -252,31 +252,32 @@
  * medium+medium בין שני בלוקים סמוכים היה 5+5 יחידות (~80px) — רווח לבן
  * גדול מדי במובייל, במיוחד בין צ׳ק-ליסט לקריאה. הערכים כאן שומרים על
  * הבחנה בין small/medium/large אבל מורידים את הצפיפות הכללית בחצי בערך.
+ * במובייל יש כיווץ נוסף ב-@media למטה.
  */
 .lc-block--pt-none {
   padding-block-start: 0;
 }
 .lc-block--pt-small {
-  padding-block-start: calc(var(--lc-space-unit) * 1.5);
+  padding-block-start: calc(var(--lc-space-unit) * 1.25);
 }
 .lc-block--pt-medium {
-  padding-block-start: calc(var(--lc-space-unit) * 2.5);
+  padding-block-start: calc(var(--lc-space-unit) * 2);
 }
 .lc-block--pt-large {
-  padding-block-start: calc(var(--lc-space-unit) * 5);
+  padding-block-start: calc(var(--lc-space-unit) * 4);
 }
 
 .lc-block--pb-none {
   padding-block-end: 0;
 }
 .lc-block--pb-small {
-  padding-block-end: calc(var(--lc-space-unit) * 1.5);
+  padding-block-end: calc(var(--lc-space-unit) * 1.25);
 }
 .lc-block--pb-medium {
-  padding-block-end: calc(var(--lc-space-unit) * 2.5);
+  padding-block-end: calc(var(--lc-space-unit) * 2);
 }
 .lc-block--pb-large {
-  padding-block-end: calc(var(--lc-space-unit) * 5);
+  padding-block-end: calc(var(--lc-space-unit) * 4);
 }
 
 /* ─────────────────────── כפתורים ─────────────────────── */
@@ -622,6 +623,38 @@
     inline-size: calc(100vw - var(--lc-space-unit) * 4);
     min-inline-size: 0;
   }
+
+  /* כיווץ נוסף במובייל — רווח לבן בין בלוקים עדיין הרגיש רחב אחרי גל 1 */
+  .lc-block--pt-small {
+    padding-block-start: calc(var(--lc-space-unit) * 1);
+  }
+  .lc-block--pt-medium {
+    padding-block-start: calc(var(--lc-space-unit) * 1.5);
+  }
+  .lc-block--pt-large {
+    padding-block-start: calc(var(--lc-space-unit) * 3);
+  }
+  .lc-block--pb-small {
+    padding-block-end: calc(var(--lc-space-unit) * 1);
+  }
+  .lc-block--pb-medium {
+    padding-block-end: calc(var(--lc-space-unit) * 1.5);
+  }
+  .lc-block--pb-large {
+    padding-block-end: calc(var(--lc-space-unit) * 3);
+  }
+
+  .lc-hero__inner {
+    padding-block: calc(var(--lc-space-unit) * 2.75);
+    gap: calc(var(--lc-space-unit) * 1);
+  }
+
+  .lc-divider--h-medium {
+    padding-block: calc(var(--lc-space-unit) * 1.5);
+  }
+  .lc-divider--h-large {
+    padding-block: calc(var(--lc-space-unit) * 2.5);
+  }
 }
 
 /* ═══════════════════════ בלוקים ═══════════════════════ */
@@ -764,7 +797,7 @@
   display: flex;
   flex-direction: column;
   gap: calc(var(--lc-space-unit) * 1.25);
-  padding-block: calc(var(--lc-space-unit) * 4.5);
+  padding-block: calc(var(--lc-space-unit) * 3.5);
 }
 
 .lc-hero--align-start .lc-hero__inner {
@@ -984,13 +1017,13 @@
 }
 
 .lc-divider--h-small {
-  padding-block: calc(var(--lc-space-unit) * 1);
+  padding-block: calc(var(--lc-space-unit) * 0.75);
 }
 .lc-divider--h-medium {
-  padding-block: calc(var(--lc-space-unit) * 3);
+  padding-block: calc(var(--lc-space-unit) * 2);
 }
 .lc-divider--h-large {
-  padding-block: calc(var(--lc-space-unit) * 6);
+  padding-block: calc(var(--lc-space-unit) * 3.5);
 }
 
 .lc-divider__rule {

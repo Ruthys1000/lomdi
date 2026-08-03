@@ -33,6 +33,7 @@ import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { IconButton } from '../ui/IconButton';
 import { SaveIndicator } from './SaveIndicator';
 import { ShortcutsHelp } from './ShortcutsHelp';
+import { TopBarOverflowMenu } from './TopBarOverflowMenu';
 
 const viewports: { id: Viewport; label: string; icon: typeof Monitor }[] = [
   { id: 'desktop', label: 'מחשב', icon: Monitor },
@@ -47,6 +48,9 @@ const viewports: { id: Viewport; label: string; icon: typeof Monitor }[] = [
  * קובץ פרויקט" מורידה `.course.zip` להעברה בין מחשבים או לגיבוי. מחוון
  * המצב לצדן הוא מה שהופך את ההפרדה למובנת — בלעדיו "שמירה" נראית כמו
  * פעולה שהמשתמש חייב לזכור לבצע.
+ *
+ * במובייל הסרגל צפוף: Preview ו-Save נשארים תמיד גלויים, ופעולות משניות
+ * עוברות לתפריט ״עוד״ כדי שלא ייחתכו מחוץ למסך אחרי טעינת דוגמה.
  */
 export function TopBar() {
   const course = useCourseStore((state) => state.course);
@@ -107,33 +111,40 @@ export function TopBar() {
     toast('הפרויקט נטען', { tone: 'success' });
   };
 
+  const openAssets = () => setAssetsOpen(true);
+  const openExport = () => setExportOpen(true);
+  const openFilePicker = () => fileInputRef.current?.click();
+  const openHelp = () => setHelpOpen(true);
+
   return (
-    <header className="lc-shell flex h-14 shrink-0 items-center gap-3 border-b border-shell-edge bg-shell px-4">
+    <header className="lc-shell flex h-14 shrink-0 items-center gap-1 border-b border-shell-edge bg-shell px-2 sm:gap-2 sm:px-3 lg:gap-3 lg:px-4">
       {/* הלוגו הוא הדרך לחזור לדף הבית מכל מקום בעורך */}
       <button
         type="button"
         onClick={() => void handleGoHome()}
         title="חזרה לדף הבית"
         aria-label="חזרה לדף הבית"
-        className="group flex items-center gap-2 rounded-lg px-1 py-1 transition hover:bg-shell-2 focus-visible:outline-2 focus-visible:outline-volt"
+        className="group flex shrink-0 items-center gap-2 rounded-lg px-1 py-1 transition hover:bg-shell-2 focus-visible:outline-2 focus-visible:outline-volt"
       >
         <span className="flex size-8 items-center justify-center rounded-lg bg-volt text-on-volt">
           <BookOpen className="size-4" aria-hidden />
         </span>
-        <span className="hidden text-sm font-bold tracking-tight text-shell-fg sm:inline">
+        <span className="hidden text-sm font-bold tracking-tight text-shell-fg lg:inline">
           {APP_NAME}
         </span>
       </button>
 
       {/* פותחי המגירות. מוסתרים מ-lg ומעלה, שם שני הפאנלים בגריד ממילא */}
-      <div className="flex items-center gap-1 lg:hidden">
-        <IconButton tone="shell"
+      <div className="flex shrink-0 items-center gap-0.5 lg:hidden">
+        <IconButton
+          tone="shell"
           icon={PanelRight}
           label="מבנה הלומדה"
           active={isOutlineOpen}
           onClick={() => setOutlineOpen(!isOutlineOpen)}
         />
-        <IconButton tone="shell"
+        <IconButton
+          tone="shell"
           icon={PanelLeft}
           label="הגדרות"
           active={isInspectorOpen}
@@ -141,15 +152,15 @@ export function TopBar() {
         />
       </div>
 
-      <div className="mx-1 hidden h-6 w-px bg-shell-edge sm:block" />
+      <div className="mx-0.5 hidden h-6 w-px shrink-0 bg-shell-edge sm:block" />
 
-      <label className="min-w-0 flex-1">
+      <label className="min-w-0 flex-1 basis-0">
         <span className="sr-only">שם הפרויקט</span>
         <input
           value={course.title}
           onChange={(event) => updateCourse({ title: event.target.value })}
           placeholder="שם הלומדה"
-          className="w-full min-w-24 max-w-xs truncate rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-sm font-semibold text-shell-fg placeholder:text-shell-muted hover:border-shell-edge focus:border-volt focus:bg-shell-2 focus:outline-none"
+          className="w-full min-w-0 max-w-[9rem] truncate rounded-lg border border-transparent bg-transparent px-1.5 py-1.5 text-sm font-semibold text-shell-fg placeholder:text-shell-muted hover:border-shell-edge focus:border-volt focus:bg-shell-2 focus:outline-none sm:max-w-[12rem] sm:px-2 md:max-w-xs lg:max-w-sm"
         />
       </label>
 
@@ -159,14 +170,16 @@ export function TopBar() {
         בלי טוסט: הביטול משנה את הקנבס מול העיניים, ומצב הכפתורים מראה מה
         אפשר. טוסט על כל ביטול הציף את התור והסתיר הודעות שאסור לפספס
       */}
-      <div className="flex items-center gap-1">
-        <IconButton tone="shell"
+      <div className="flex shrink-0 items-center gap-0.5">
+        <IconButton
+          tone="shell"
           icon={Undo2}
           label="ביטול (Ctrl+Z)"
           disabled={!canUndo}
           onClick={() => courseHistory.undo()}
         />
-        <IconButton tone="shell"
+        <IconButton
+          tone="shell"
           icon={Redo2}
           label="ביצוע מחדש (Ctrl+Shift+Z)"
           disabled={!canRedo}
@@ -174,15 +187,16 @@ export function TopBar() {
         />
       </div>
 
-      <div className="mx-1 h-6 w-px bg-shell-edge" />
+      <div className="mx-0.5 hidden h-6 w-px shrink-0 bg-shell-edge lg:block" />
 
       <div
-        className="hidden items-center gap-0.5 rounded-lg bg-shell-2 p-0.5 lg:flex"
+        className="hidden shrink-0 items-center gap-0.5 rounded-lg bg-shell-2 p-0.5 lg:flex"
         role="group"
         aria-label="תצוגה לפי מכשיר"
       >
         {viewports.map(({ id, label, icon }) => (
-          <IconButton tone="shell"
+          <IconButton
+            tone="shell"
             key={id}
             icon={icon}
             label={label}
@@ -192,32 +206,62 @@ export function TopBar() {
         ))}
       </div>
 
-      <div className="mx-1 h-6 w-px bg-shell-edge" />
+      <div className="mx-0.5 hidden h-6 w-px shrink-0 bg-shell-edge lg:block" />
 
-      <div className="flex items-center gap-1">
-        <IconButton tone="shell" icon={Images} label="ספריית הנכסים" onClick={() => setAssetsOpen(true)} />
-        <IconButton tone="shell" icon={Eye} label="תצוגה מקדימה" onClick={() => setPreviewOpen(true)} />
-        <IconButton tone="shell"
+      {/*
+        Preview ו-Save תמיד גלויים — גם במובייל. שאר הפעולות עוברות לתפריט
+        ״עוד״ מתחת ל-lg, ובמסך רחב מוצגות בשורה כמו קודם.
+      */}
+      <div className="flex shrink-0 items-center gap-0.5">
+        <IconButton
+          tone="shell"
+          icon={Eye}
+          label="תצוגה מקדימה"
+          onClick={() => setPreviewOpen(true)}
+        />
+        <IconButton
+          tone="shell"
           icon={Save}
           label="שמירת קובץ פרויקט (‎.course.zip‎)"
           disabled={downloading}
           onClick={() => void handleDownload()}
         />
-        <IconButton tone="shell"
-          icon={FolderOpen}
-          label="פתיחת קובץ פרויקט"
-          onClick={() => fileInputRef.current?.click()}
-        />
-        <IconButton tone="shell"
-          icon={Download}
-          label="ייצוא לומדה עצמאית (ZIP)"
-          onClick={() => setExportOpen(true)}
-        />
-        <IconButton tone="shell"
-          icon={HelpCircle}
-          label="קיצורי מקלדת ועזרה"
-          active={isHelpOpen}
-          onClick={() => setHelpOpen(true)}
+
+        <div className="hidden items-center gap-0.5 lg:flex">
+          <IconButton tone="shell" icon={Images} label="ספריית הנכסים" onClick={openAssets} />
+          <IconButton
+            tone="shell"
+            icon={FolderOpen}
+            label="פתיחת קובץ פרויקט"
+            onClick={openFilePicker}
+          />
+          <IconButton
+            tone="shell"
+            icon={Download}
+            label="ייצוא לומדה עצמאית (ZIP)"
+            onClick={openExport}
+          />
+          <IconButton
+            tone="shell"
+            icon={HelpCircle}
+            label="קיצורי מקלדת ועזרה"
+            active={isHelpOpen}
+            onClick={openHelp}
+          />
+        </div>
+
+        <TopBarOverflowMenu
+          actions={[
+            { id: 'assets', icon: Images, label: 'ספריית הנכסים', onClick: openAssets },
+            { id: 'open', icon: FolderOpen, label: 'פתיחת קובץ פרויקט', onClick: openFilePicker },
+            { id: 'export', icon: Download, label: 'ייצוא לומדה עצמאית (ZIP)', onClick: openExport },
+            {
+              id: 'help',
+              icon: HelpCircle,
+              label: 'קיצורי מקלדת ועזרה',
+              onClick: openHelp,
+            },
+          ]}
         />
       </div>
 

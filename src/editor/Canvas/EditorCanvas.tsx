@@ -162,7 +162,7 @@ export function EditorCanvas() {
 
   return (
     <section
-      className="min-h-0 overflow-y-auto bg-panel-2 p-6"
+      className="min-h-0 overflow-y-auto bg-panel-2 p-2.5 sm:p-4 lg:p-6"
       aria-label="אזור העריכה"
       onClick={(event) => {
         if (event.target === event.currentTarget) clearSelection();

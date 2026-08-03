@@ -48,7 +48,7 @@ export function SortableBlock({
       ref={setNodeRef}
       style={{ transform: CSS.Translate.toString(transform), transition }}
       /*
-       * ה-pt-5 הוא מרזב הצ'רום.
+       * ה-pt-6 הוא מרזב הצ'רום.
        *
        * קודם לכן התווית וסרגל הפעולות נתלו *מעל* הבלוק (top שלילי), ומכאן
        * שני באגים: בבלוק הראשון הם נחתכו על ידי ה-overflow-hidden של גיליון
@@ -56,10 +56,11 @@ export function SortableBlock({
        * פותר את שניהם בלי להזיז את הצ'רום לתוך הבלוק, ששם הוא היה מכסה
        * טקסט גרוע יותר.
        *
-       * המחיר הוא 20 פיקסלים בין בלוקים שאינם קיימים בתוצר המיוצא. זו
-       * סטייה מכוונת מ-WYSIWYG: הרווח שייך לכלי, לא ללומדה.
+       * המחיר הוא ~24 פיקסלים בין בלוקים שאינם קיימים בתוצר המיוצא. זו
+       * סטייה מכוונת מ-WYSIWYG: הרווח שייך לכלי, לא ללומדה. pt-7 היה רחב
+       * מדי במובייל ליד מפרידים ובלוקים קצרים.
        */
-      className={cn('relative pt-7', isDragging && 'z-40 opacity-40')}
+      className={cn('relative pt-6', isDragging && 'z-40 opacity-40')}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
