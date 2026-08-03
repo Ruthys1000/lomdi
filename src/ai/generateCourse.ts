@@ -10,10 +10,17 @@ import { importGeneratedCourse, type GeneratedCourse } from './importGenerated';
 
 const ENDPOINT = '/api/generate';
 
+/** שלבי התקדמות שמגיעים בדופק מהשרת — לחיווי המתנה ארוך. */
+export type GenerateProgressStage = 'started' | 'working' | 'retrying';
+
+export interface GenerateProgressInfo {
+  stage?: GenerateProgressStage;
+}
+
 export interface GenerateCourseOptions {
   signal?: AbortSignal;
   /** נקרא על כל פעימת התקדמות מהשרת — שימושי לחיווי "עדיין עובד" */
-  onProgress?: () => void;
+  onProgress?: (info?: GenerateProgressInfo) => void;
   /** מזהה הפורמט שנבחר — נשלח לשרת (לבחירת ה"אישיות") ומוזרק ל-Course.format */
   format?: string;
 }
@@ -24,9 +31,14 @@ export interface GenerateCourseOptions {
  * כך שחיבור ארוך לא "נשתק" ונחתך על ידי הדפדפן ("Failed to fetch").
  */
 type StreamLine =
-  | { type: 'progress' }
+  | { type: 'progress'; stage?: string }
   | { type: 'result'; course?: unknown }
   | { type: 'error'; error?: unknown };
+
+function asProgressStage(value: unknown): GenerateProgressStage | undefined {
+  if (value === 'started' || value === 'working' || value === 'retrying') return value;
+  return undefined;
+}
 
 export async function generateCourseFromText(
   text: string,
@@ -56,7 +68,7 @@ export async function generateCourseFromText(
 
   const handle = (line: StreamLine): GeneratedCourse | undefined => {
     if (line.type === 'progress') {
-      options.onProgress?.();
+      options.onProgress?.({ stage: asProgressStage(line.stage) });
       return undefined;
     }
     if (line.type === 'error') {

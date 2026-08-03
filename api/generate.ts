@@ -100,9 +100,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   };
 
   // דופק ראשון מיידי + כל 10 שניות: שומר את החיבור חי לאורך *כל* הניסיונות,
-  // בזמן שהמודל חושב וכותב.
-  writeLine({ type: 'progress' });
-  const heartbeat = setInterval(() => writeLine({ type: 'progress' }), 10_000);
+  // בזמן שהמודל חושב וכותב. `stage` מאפשר לחיווי בלקוח להראות איפה אנחנו.
+  writeLine({ type: 'progress', stage: 'started' });
+  const heartbeat = setInterval(() => writeLine({ type: 'progress', stage: 'working' }), 10_000);
 
   // אם הלקוח מתנתק — עוצרים את הניסיון הפעיל ומפסיקים לכתוב, כדי לא לשרוף זמן
   // ריצה לחינם.
@@ -120,6 +120,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     let message = await attemptGenerate();
     let course = extractCourseJson(message);
     if (!course && open) {
+      writeLine({ type: 'progress', stage: 'retrying' });
       message = await attemptGenerate();
       course = extractCourseJson(message);
     }

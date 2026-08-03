@@ -43,16 +43,37 @@ describe('generateCourseFromText', () => {
       title: 'בטיחות',
       chapters: [{ blocks: [{ type: 'richText', content: {} }] }],
     };
-    mockStream([{ type: 'progress' }, { type: 'result', course: rawCourse }]);
+    mockStream([
+      { type: 'progress', stage: 'started' },
+      { type: 'progress', stage: 'working' },
+      { type: 'result', course: rawCourse },
+    ]);
     const onProgress = vi.fn();
 
     const result = await generateCourseFromText('תוכן כלשהו', { onProgress });
 
     expect(fetch).toHaveBeenCalledWith('/api/generate', expect.objectContaining({ method: 'POST' }));
-    expect(onProgress).toHaveBeenCalled();
+    expect(onProgress).toHaveBeenCalledWith({ stage: 'started' });
+    expect(onProgress).toHaveBeenCalledWith({ stage: 'working' });
     expect(result.course.title).toBe('בטיחות');
     // refine הוסיף מסך פתיחה — סימן שהפלט עבר את importGeneratedCourse
     expect(result.course.chapters[0].blocks[0].type).toBe('hero');
+  });
+
+  it('מעבירה שלב retrying כשמגיע מהזרם', async () => {
+    const rawCourse = {
+      title: 'בטיחות',
+      chapters: [{ blocks: [{ type: 'richText', content: {} }] }],
+    };
+    mockStream([
+      { type: 'progress', stage: 'retrying' },
+      { type: 'result', course: rawCourse },
+    ]);
+    const onProgress = vi.fn();
+
+    await generateCourseFromText('תוכן', { onProgress });
+
+    expect(onProgress).toHaveBeenCalledWith({ stage: 'retrying' });
   });
 
   it('מרפאת פלט פגום במקום לזרוק', async () => {
