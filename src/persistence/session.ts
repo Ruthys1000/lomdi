@@ -111,7 +111,7 @@ function validateStoredCourse(stored: StoredProject): Course {
   if (validation.ok) return validation.project.course;
 
   console.warn('הלומדה השמורה נטענה עם בעיות תקינות:', validation.errors);
-  toast('הלומדה נטענה, אך נמצאו בה בעיות תקינות. מומלץ לשמור קובץ גיבוי.', { tone: 'error' });
+  toast('הלומדה נטענה, אך נמצאו בה בעיות תקינות. מומלץ לשמור קובץ גיבוי.', { tone: 'warning' });
   return stored.course;
 }
 

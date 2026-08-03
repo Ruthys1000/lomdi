@@ -1,16 +1,18 @@
-import { AlertCircle, CheckCircle2, Info, X } from 'lucide-react';
+import { AlertCircle, AlertTriangle, CheckCircle2, Info, X } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { useToastStore, type ToastTone } from '@/state/toastStore';
 
 const icons: Record<ToastTone, typeof Info> = {
   info: Info,
   success: CheckCircle2,
+  warning: AlertTriangle,
   error: AlertCircle,
 };
 
 const tones: Record<ToastTone, string> = {
   info: 'text-fg-muted',
   success: 'text-ok',
+  warning: 'text-warn',
   error: 'text-danger',
 };
 
