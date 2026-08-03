@@ -246,30 +246,37 @@
   border-radius: var(--lc-radius);
 }
 
+/*
+ * סקאלת מרווח בין בלוקים.
+ *
+ * medium+medium בין שני בלוקים סמוכים היה 5+5 יחידות (~80px) — רווח לבן
+ * גדול מדי במובייל, במיוחד בין צ׳ק-ליסט לקריאה. הערכים כאן שומרים על
+ * הבחנה בין small/medium/large אבל מורידים את הצפיפות הכללית בחצי בערך.
+ */
 .lc-block--pt-none {
   padding-block-start: 0;
 }
 .lc-block--pt-small {
-  padding-block-start: calc(var(--lc-space-unit) * 2);
+  padding-block-start: calc(var(--lc-space-unit) * 1.5);
 }
 .lc-block--pt-medium {
-  padding-block-start: calc(var(--lc-space-unit) * 5);
+  padding-block-start: calc(var(--lc-space-unit) * 2.5);
 }
 .lc-block--pt-large {
-  padding-block-start: calc(var(--lc-space-unit) * 9);
+  padding-block-start: calc(var(--lc-space-unit) * 5);
 }
 
 .lc-block--pb-none {
   padding-block-end: 0;
 }
 .lc-block--pb-small {
-  padding-block-end: calc(var(--lc-space-unit) * 2);
+  padding-block-end: calc(var(--lc-space-unit) * 1.5);
 }
 .lc-block--pb-medium {
-  padding-block-end: calc(var(--lc-space-unit) * 5);
+  padding-block-end: calc(var(--lc-space-unit) * 2.5);
 }
 .lc-block--pb-large {
-  padding-block-end: calc(var(--lc-space-unit) * 9);
+  padding-block-end: calc(var(--lc-space-unit) * 5);
 }
 
 /* ─────────────────────── כפתורים ─────────────────────── */
@@ -622,21 +629,21 @@
 /* ─────────────────────── טקסט עשיר ─────────────────────── */
 
 .lc-prose > * + * {
-  margin-block-start: calc(var(--lc-space-unit) * 2);
+  margin-block-start: calc(var(--lc-space-unit) * 1.5);
 }
 
 .lc-prose h2 {
-  margin-block-start: calc(var(--lc-space-unit) * 4);
+  margin-block-start: calc(var(--lc-space-unit) * 3);
   font-size: 1.55em;
 }
 
 .lc-prose h3 {
-  margin-block-start: calc(var(--lc-space-unit) * 3.5);
+  margin-block-start: calc(var(--lc-space-unit) * 2.5);
   font-size: 1.25em;
 }
 
 .lc-prose h4 {
-  margin-block-start: calc(var(--lc-space-unit) * 3);
+  margin-block-start: calc(var(--lc-space-unit) * 2);
   font-size: 1.08em;
 }
 
@@ -730,13 +737,13 @@
 }
 
 .lc-hero--h-compact {
-  min-block-size: 220px;
+  min-block-size: 180px;
 }
 .lc-hero--h-medium {
-  min-block-size: 340px;
+  min-block-size: 280px;
 }
 .lc-hero--h-tall {
-  min-block-size: 460px;
+  min-block-size: 380px;
 }
 .lc-hero--h-screen {
   min-block-size: 82vh;
@@ -756,8 +763,8 @@
   z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: calc(var(--lc-space-unit) * 1.5);
-  padding-block: calc(var(--lc-space-unit) * 6);
+  gap: calc(var(--lc-space-unit) * 1.25);
+  padding-block: calc(var(--lc-space-unit) * 4.5);
 }
 
 .lc-hero--align-start .lc-hero__inner {
@@ -1137,9 +1144,10 @@
     grid-row: 2;
   }
 
+  .lc-hero--h-medium,
   .lc-hero--h-tall,
   .lc-hero--h-screen {
-    min-block-size: 320px;
+    min-block-size: 240px;
   }
 }
 
@@ -1193,7 +1201,7 @@
 /* ─── סגנון כרטיסים ─── */
 
 .lc-card {
-  padding: calc(var(--lc-space-unit) * 3);
+  padding: calc(var(--lc-space-unit) * 2.25);
   border-radius: var(--lc-radius);
   background: var(--lc-color-surface);
 }
@@ -1381,7 +1389,7 @@
 
 .lc-cards {
   display: grid;
-  gap: calc(var(--lc-space-unit) * 2.5);
+  gap: calc(var(--lc-space-unit) * 1.75);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1474,9 +1482,9 @@
 .lc-accordion__trigger {
   display: flex;
   align-items: center;
-  gap: calc(var(--lc-space-unit) * 1.75);
+  gap: calc(var(--lc-space-unit) * 1.5);
   inline-size: 100%;
-  padding: calc(var(--lc-space-unit) * 2.25) calc(var(--lc-space-unit) * 2.5);
+  padding: calc(var(--lc-space-unit) * 1.5) calc(var(--lc-space-unit) * 2);
   border: 0;
   background: transparent;
   color: inherit;
@@ -1545,8 +1553,8 @@
 }
 
 .lc-accordion__panel {
-  padding: 0 calc(var(--lc-space-unit) * 2.5) calc(var(--lc-space-unit) * 2.5);
-  padding-inline-start: calc(var(--lc-space-unit) * 5.5);
+  padding: 0 calc(var(--lc-space-unit) * 2) calc(var(--lc-space-unit) * 1.75);
+  padding-inline-start: calc(var(--lc-space-unit) * 4.5);
   color: var(--lc-color-text-muted);
 }
 
@@ -1588,7 +1596,7 @@
 /* ═══════════════════ שאלת בחירה ═══════════════════ */
 
 .lc-quiz {
-  padding: calc(var(--lc-space-unit) * 3);
+  padding: calc(var(--lc-space-unit) * 2.25);
   border: 1px solid var(--lc-color-border);
   border-radius: var(--lc-radius);
   background: var(--lc-color-surface);
@@ -1617,8 +1625,8 @@
 .lc-quiz__options {
   display: flex;
   flex-direction: column;
-  gap: calc(var(--lc-space-unit) * 1);
-  margin-block-start: calc(var(--lc-space-unit) * 2.5);
+  gap: calc(var(--lc-space-unit) * 0.75);
+  margin-block-start: calc(var(--lc-space-unit) * 1.75);
 }
 
 /* אפשרות = שורת בחירה, לא שדה קלט: מסגרת דו-פיקסלית שנצבעת בבחירה, ורקע
@@ -1626,8 +1634,8 @@
 .lc-quiz__option {
   display: flex;
   align-items: center;
-  gap: calc(var(--lc-space-unit) * 1.5);
-  padding: calc(var(--lc-space-unit) * 1.75) calc(var(--lc-space-unit) * 2);
+  gap: calc(var(--lc-space-unit) * 1.25);
+  padding: calc(var(--lc-space-unit) * 1.25) calc(var(--lc-space-unit) * 1.5);
   /* גוון מהטקסט ולא `--lc-color-border`: ב'נקי ובהיר' משטח הפאנל (#f8fafc)
      ורקע האפשרות (#ffffff) כמעט זהים, וגבול חיוור הפך את השורות לשדות קלט */
   border: 2px solid color-mix(in srgb, var(--lc-color-text) 12%, transparent);
@@ -1712,7 +1720,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: calc(var(--lc-space-unit) * 1);
-  margin-block-start: calc(var(--lc-space-unit) * 2.5);
+  margin-block-start: calc(var(--lc-space-unit) * 1.75);
 }
 
 .lc-quiz__feedback:empty {
@@ -2039,9 +2047,9 @@
 
 .lc-callout {
   display: flex;
-  gap: calc(var(--lc-space-unit) * 2);
+  gap: calc(var(--lc-space-unit) * 1.5);
   align-items: flex-start;
-  padding: calc(var(--lc-space-unit) * 2.5) calc(var(--lc-space-unit) * 3);
+  padding: calc(var(--lc-space-unit) * 1.75) calc(var(--lc-space-unit) * 2);
   border-radius: var(--lc-radius);
   border: 1px solid var(--lc-color-border);
   background: var(--lc-color-surface);
@@ -2069,8 +2077,8 @@
   display: grid;
   place-items: center;
   flex: none;
-  inline-size: 2.8em;
-  block-size: 2.8em;
+  inline-size: 2.35em;
+  block-size: 2.35em;
   border-radius: var(--lc-radius-small);
   background: color-mix(in srgb, var(--lc-color-primary) 12%, transparent);
   color: var(--lc-color-primary);
@@ -2106,7 +2114,7 @@
 .lc-steps {
   display: flex;
   flex-direction: column;
-  gap: calc(var(--lc-space-unit) * 2.5);
+  gap: calc(var(--lc-space-unit) * 1.75);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -2116,7 +2124,7 @@
 .lc-step {
   position: relative;
   display: flex;
-  gap: calc(var(--lc-space-unit) * 2);
+  gap: calc(var(--lc-space-unit) * 1.5);
   align-items: flex-start;
 }
 
@@ -2125,7 +2133,7 @@
   content: '';
   position: absolute;
   inset-block-start: 2.6em;
-  inset-block-end: calc(var(--lc-space-unit) * -2.5);
+  inset-block-end: calc(var(--lc-space-unit) * -1.75);
   inset-inline-start: 1.3em;
   inline-size: 2px;
   background: var(--lc-color-border);
@@ -2199,9 +2207,9 @@
 
 .lc-checklist__label {
   display: flex;
-  gap: calc(var(--lc-space-unit) * 1.75);
+  gap: calc(var(--lc-space-unit) * 1.25);
   align-items: flex-start;
-  padding: calc(var(--lc-space-unit) * 1.75) calc(var(--lc-space-unit) * 1);
+  padding: calc(var(--lc-space-unit) * 1.1) calc(var(--lc-space-unit) * 0.5);
   cursor: pointer;
 }
 
@@ -2231,8 +2239,8 @@
 .lc-checklist__count {
   display: inline-flex;
   align-items: center;
-  margin-block-start: calc(var(--lc-space-unit) * 2);
-  padding: calc(var(--lc-space-unit) * 0.75) calc(var(--lc-space-unit) * 1.75);
+  margin-block-start: calc(var(--lc-space-unit) * 1.25);
+  padding: calc(var(--lc-space-unit) * 0.5) calc(var(--lc-space-unit) * 1.5);
   border-radius: 999px;
   background: var(--lc-surface-primary);
   color: var(--lc-color-primary);
@@ -2246,7 +2254,7 @@
   border: 1px solid var(--lc-color-border);
   border-radius: var(--lc-radius);
   background: var(--lc-color-surface);
-  padding: calc(var(--lc-space-unit) * 3);
+  padding: calc(var(--lc-space-unit) * 2.25);
 }
 
 .lc-decision__prompt {
@@ -2254,7 +2262,7 @@
   font-size: var(--lc-size-block-title);
   font-weight: var(--lc-heading-weight);
   line-height: 1.35;
-  margin-block-end: calc(var(--lc-space-unit) * 2.5);
+  margin-block-end: calc(var(--lc-space-unit) * 1.75);
 }
 
 /*
@@ -2267,15 +2275,15 @@
 .lc-decision__options {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
-  gap: calc(var(--lc-space-unit) * 1.5);
+  gap: calc(var(--lc-space-unit) * 1.25);
 }
 
 .lc-decision__option {
   display: flex;
   align-items: center;
   text-align: start;
-  min-block-size: calc(var(--lc-space-unit) * 9);
-  padding: calc(var(--lc-space-unit) * 2) calc(var(--lc-space-unit) * 2.25);
+  min-block-size: calc(var(--lc-space-unit) * 7);
+  padding: calc(var(--lc-space-unit) * 1.5) calc(var(--lc-space-unit) * 1.75);
   border: 2px solid color-mix(in srgb, var(--lc-color-text) 12%, transparent);
   border-radius: var(--lc-radius);
   background: var(--lc-color-background);
@@ -2325,12 +2333,12 @@
   border: 1px solid var(--lc-color-border);
   border-radius: var(--lc-radius);
   background: var(--lc-color-surface);
-  padding: calc(var(--lc-space-unit) * 3);
+  padding: calc(var(--lc-space-unit) * 2.25);
 }
 
 .lc-challenge__intro {
   color: var(--lc-color-text-muted);
-  margin-block-end: calc(var(--lc-space-unit) * 2);
+  margin-block-end: calc(var(--lc-space-unit) * 1.5);
 }
 
 /* מבחן: כל שאלה היא יחידה מופרדת בקו שיער, כדי שרצף של חמש שאלות לא ייראה
@@ -2344,8 +2352,8 @@
 }
 
 .lc-challenge__question + .lc-challenge__question {
-  margin-block-start: calc(var(--lc-space-unit) * 3);
-  padding-block-start: calc(var(--lc-space-unit) * 3);
+  margin-block-start: calc(var(--lc-space-unit) * 2);
+  padding-block-start: calc(var(--lc-space-unit) * 2);
   border-block-start: 1px solid var(--lc-color-border);
 }
 
@@ -2356,7 +2364,7 @@
   font-size: var(--lc-size-item-title);
   font-weight: 700;
   line-height: 1.45;
-  margin-block-end: calc(var(--lc-space-unit) * 1.75);
+  margin-block-end: calc(var(--lc-space-unit) * 1.25);
 }
 .lc-challenge__num {
   flex: none;
@@ -2374,13 +2382,13 @@
 .lc-challenge__options {
   display: flex;
   flex-direction: column;
-  gap: calc(var(--lc-space-unit) * 1);
+  gap: calc(var(--lc-space-unit) * 0.75);
 }
 .lc-challenge__option {
   display: flex;
-  gap: calc(var(--lc-space-unit) * 1.25);
+  gap: calc(var(--lc-space-unit) * 1.15);
   align-items: center;
-  padding: calc(var(--lc-space-unit) * 1.25) calc(var(--lc-space-unit) * 1.75);
+  padding: calc(var(--lc-space-unit) * 1) calc(var(--lc-space-unit) * 1.35);
   border: 2px solid color-mix(in srgb, var(--lc-color-text) 12%, transparent);
   border-radius: var(--lc-radius-small);
   background: var(--lc-color-background);
@@ -2431,7 +2439,7 @@
 }
 
 .lc-challenge__actions {
-  margin-block-start: calc(var(--lc-space-unit) * 2.5);
+  margin-block-start: calc(var(--lc-space-unit) * 1.75);
 }
 
 .lc-challenge__result:not(:empty) {

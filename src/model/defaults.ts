@@ -4,8 +4,10 @@ export const defaultBlockSettings: BlockSettings = {
   width: 'normal',
   alignment: 'start',
   background: 'transparent',
-  spacingTop: 'medium',
-  spacingBottom: 'medium',
+  /* small ולא medium: medium+medium בין בלוקים סמוכים יצר רווח לבן גדול מדי
+     במובייל. מי שרוצה אוויר יכול להעלות ל-medium/large בפאנל. */
+  spacingTop: 'small',
+  spacingBottom: 'small',
 };
 
 export const defaultNavigation: NavigationSettings = {
