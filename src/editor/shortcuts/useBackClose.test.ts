@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { useBackClose } from './useBackClose';
+import { resetBackCloseStackForTests, useBackClose } from './useBackClose';
 
 /**
  * הבדיקה מכסה את שלושת הצירים של ה-hook: דחיפת רשומה בפתיחה, סגירה בלחיצת
@@ -10,6 +10,7 @@ import { useBackClose } from './useBackClose';
 describe('useBackClose', () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    resetBackCloseStackForTests();
   });
 
   it('לא דוחף רשומה כשלא פעיל', () => {
@@ -67,5 +68,47 @@ describe('useBackClose', () => {
 
     expect(outerClose).not.toHaveBeenCalled();
     expect(innerClose).toHaveBeenCalledTimes(1);
+  });
+
+  // רגרסיה: בורר קבצים בנייד דוחף רשומה זמנית ואז נוחת חזרה על רשומת המודאל.
+  // בלי מחסנית, מאזין העורך ראה current !== appId וסגר לדף הבית.
+  it('חזרה לרשומת השכבה הפנימית (אחרי בורר קבצים) לא סוגרת את החיצונית', () => {
+    const pushed: Array<{ lcOverlayId?: number }> = [];
+    vi.spyOn(window.history, 'pushState').mockImplementation((state) => {
+      pushed.push(state as { lcOverlayId?: number });
+    });
+
+    const outerClose = vi.fn();
+    const innerClose = vi.fn();
+    renderHook(() => useBackClose(true, outerClose));
+    renderHook(() => useBackClose(true, innerClose));
+
+    // מדמים חזרה מבורר הקבצים: נוחתים שוב על רשומת המודאל (השכבה הפנימית)
+    window.dispatchEvent(new PopStateEvent('popstate', { state: pushed[1] }));
+
+    expect(outerClose).not.toHaveBeenCalled();
+    expect(innerClose).not.toHaveBeenCalled();
+  });
+
+  it('סגירה פנימית של שכבה עליונה לא מפעילה את החיצונית ב-history.back', () => {
+    const pushed: Array<{ lcOverlayId?: number }> = [];
+    vi.spyOn(window.history, 'pushState').mockImplementation((state) => {
+      pushed.push(state as { lcOverlayId?: number });
+    });
+    vi.spyOn(window.history, 'back').mockImplementation(() => {
+      // מדמים popstate סינכרוני כמו בדפדפן אמיתי
+      window.dispatchEvent(new PopStateEvent('popstate', { state: pushed[0] }));
+    });
+
+    const outerClose = vi.fn();
+    const innerClose = vi.fn();
+    renderHook(() => useBackClose(true, outerClose));
+    const inner = renderHook(() => useBackClose(true, innerClose));
+
+    // סגירה בכפתור X — cleanup קורא ל-history.back
+    inner.unmount();
+
+    expect(innerClose).not.toHaveBeenCalled();
+    expect(outerClose).not.toHaveBeenCalled();
   });
 });

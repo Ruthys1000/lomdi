@@ -11,17 +11,25 @@ import { useEffect, useRef } from 'react';
  * כל שכבה מנהלת רשומה משלה, ולכן שכבות מוערמות נסגרות LIFO — בדיוק מה שהמשתמש
  * מצפה מ"חזרה". `onClose` נשמר ב-ref כדי שהאפקט לא יידחוף רשומה חדשה בכל רינדור.
  *
- * **בטיחות הערמה:** אירוע `popstate` מגיע ל*כל* המאזינים בכל ניווט, ולא רק
- * למאזין של הרשומה שנבלעה. בלי הגנה, סגירת שכבה פנימית (ה-`history.back()` שלה)
- * הייתה מפעילה בטעות גם את `onClose` של השכבה החיצונית — למשל הוספת בלוק דרך
- * הספרייה שהחזירה את המשתמש ממסך העריכה למסך הפתיחה. לכן כל רשומה מתויגת ב-id
- * ייחודי, ו-`onClose` נקרא רק כשהרשומה *שלנו* כבר אינה הנוכחית (כלומר אנחנו
- * נבלענו ב-back), ולא כששכבה שמעלינו נסגרה וחזרנו להיות הנוכחיים.
+ * **בטיחות הערמה (שתי הגנות):**
+ *
+ * 1. תיוג רשומה ב-id: `onClose` נקרא רק כשהרשומה *שלנו* כבר אינה הנוכחית.
+ * 2. מחסנית גלובלית: רק השכבה *העליונה* מגיבה ל-`popstate`. בלי זה, חזרה
+ *    מבורר קבצים בנייד (שדוחף רשומת היסטוריה זמנית ואז נוחת חזרה על רשומת
+ *    המודאל) הייתה מפעילה את מאזין העורך — `current !== appId` — ומחזירה
+ *    את המשתמש לדף הבית באמצע בחירת תמונה.
  */
 let overlayCounter = 0;
+const overlayStack: number[] = [];
 
 interface OverlayState {
   lcOverlayId?: number;
+}
+
+/** לטסטים בלבד — מאפס את מונה השכבות בין מקרי בדיקה */
+export function resetBackCloseStackForTests(): void {
+  overlayCounter = 0;
+  overlayStack.length = 0;
 }
 
 export function useBackClose(active: boolean, onClose: () => void): void {
@@ -33,21 +41,35 @@ export function useBackClose(active: boolean, onClose: () => void): void {
 
     const id = ++overlayCounter;
     window.history.pushState({ lcOverlayId: id } satisfies OverlayState, '');
+    overlayStack.push(id);
 
     let closedByBack = false;
+
+    const removeFromStack = () => {
+      const index = overlayStack.lastIndexOf(id);
+      if (index !== -1) overlayStack.splice(index, 1);
+    };
+
     const onPop = (event: PopStateEvent) => {
-      // אם הרשומה שלנו שוב הנוכחית — שכבה פנימית מעלינו נסגרה, לא אנחנו.
-      // מתעלמים, כדי שלא נסגור את עצמנו על סגירת שכבה אחרת.
+      // רק השכבה העליונה מגיבה. אחרת חזרה מבורר-קבצים (או מכל רשומה זמנית
+      // מעל המודאל) הייתה סוגרת גם את שכבת העורך שמתחת.
+      if (overlayStack[overlayStack.length - 1] !== id) return;
+
+      // אם הרשומה שלנו שוב הנוכחית — שכבה זמנית מעלינו נסגרה, לא אנחנו.
       const current = (event.state as OverlayState | null)?.lcOverlayId;
       if (current === id) return;
 
       closedByBack = true;
+      removeFromStack();
       onCloseRef.current();
     };
     window.addEventListener('popstate', onPop);
 
     return () => {
       window.removeEventListener('popstate', onPop);
+      // חייבים להסיר מהמחסנית *לפני* history.back(): ה-popstate סינכרוני,
+      // ואם נישאר בראש המחסנית נסגור את עצמנו בטעות על ניקוי פנימי.
+      removeFromStack();
       // נסגר מבפנים (לא ב"חזרה") → מסירים את הרשומה שדחפנו כדי לא להשאיר
       // "חזרה מתה" שרק מבטלת לחיצה אחת.
       if (!closedByBack) window.history.back();
