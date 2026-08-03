@@ -85,6 +85,31 @@ describe('מסך הפתיחה', () => {
     expect(screen.queryByText(/בקרוב/)).not.toBeInTheDocument();
   });
 
+  /*
+   * הכרעת המוצר שהמסך הזה מקבע: הנחיתה היא AI-first, עם בנייה מדף ריק
+   * כאפשרות משנית, ובלי מסלול "המשך מהמקום שבו הפסקת". לומדה שמורה נגישה
+   * מהמגירה בלבד. הבדיקה קיימת כדי שהחזרה לכרטיס המשך תהיה החלטה מפורשת
+   * ולא סחף.
+   */
+  it('גם עם עבודה שמורה, הנחיתה אינה מציעה המשך עבודה', async () => {
+    projects = [project('a', 'קליטת חייל חדש', '2026-03-01T10:00:00.000Z')];
+    lastProjectId = 'a';
+
+    await setup();
+
+    // שתי הדרכים להתחיל, שתיהן על הנחיתה
+    expect(screen.getByRole('heading', { name: /בחרו/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'התחילו מדף ריק' })).toBeInTheDocument();
+
+    // אין כרטיס "ממשיכים" בנחיתה
+    expect(screen.queryByText(/ממשיכים/)).not.toBeInTheDocument();
+
+    // הלומדה השמורה קיימת ב-DOM (המגירה מורכבת תמיד) אך אינה נראית: הגישה
+    // אליה עוברת דרך הכפתור בפס העליון, ולא דרך הנחיתה
+    expect(screen.getByText(/קליטת חייל חדש/)).not.toBeVisible();
+    expect(screen.getByRole('button', { name: 'הלומדות שלי' })).toBeVisible();
+  });
+
   it('הנחיתה (ה-Hero) מוצגת תמיד — גם למבקר חדש וגם עם לומדות שמורות', async () => {
     await setup();
     expect(screen.getByRole('heading', { name: /בחרו/ })).toBeInTheDocument();

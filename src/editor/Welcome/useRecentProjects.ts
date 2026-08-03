@@ -21,10 +21,14 @@ import { openStoredProject } from '@/persistence/session';
  */
 
 export interface RecentProjectsState {
-  /** הלומדה שנפתחה לאחרונה, לפס הפעולה העליון */
-  featured: ProjectSummary | null;
-  /** כל השאר, לרשימה שמתחת */
-  rest: ProjectSummary[];
+  /**
+   * כל הלומדות השמורות, האחרונה-שנפתחה ראשונה.
+   *
+   * רשימה אחת ולא פיצול ל"אחרונה" ו"שאר": הנחיתה היא AI-first ואינה מציעה
+   * המשך עבודה, ולכן אין יעד נפרד ללומדה האחרונה. המיון נשאר כי הוא מקצר
+   * את החיפוש בתוך המגירה.
+   */
+  projects: ProjectSummary[];
   error: string | null;
   /** הלומדה שנפתחת ברגע זה — פתיחה עם נכסים אינה מיידית */
   openingId: string | null;
@@ -88,8 +92,12 @@ export function useRecentProjects(onOpened: () => void): RecentProjectsState {
     }
   }, []);
 
-  const featured = projects.find((project) => project.id === lastId) ?? projects[0] ?? null;
-  const rest = featured ? projects.filter((project) => project.id !== featured.id) : [];
+  // האחרונה-שנפתחה עולה לראש הרשימה. `listProjects` ממוינת לפי זמן *שמירה*,
+  // וזו לא בהכרח אותה לומדה
+  const lastOpened = projects.find((project) => project.id === lastId);
+  const ordered = lastOpened
+    ? [lastOpened, ...projects.filter((project) => project.id !== lastOpened.id)]
+    : projects;
 
-  return { featured, rest, error, openingId, open, remove };
+  return { projects: ordered, error, openingId, open, remove };
 }

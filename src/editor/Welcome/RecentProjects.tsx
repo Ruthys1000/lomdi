@@ -4,12 +4,12 @@ import type { ProjectSummary } from '@/persistence/db';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 
 /**
- * "המשך מהמקום שבו הפסקת" (סעיף 12).
+ * רשימת הלומדות השמורות, בתוך מגירת "הלומדות שלי".
  *
- * שני רכיבים ולא אחד, מסיבה מבנית: הלומדה האחרונה צריכה לשבת בפס הפעולה
- * העליון לצד "לומדה חדשה", ואילו שאר הרשימה יושבת הרבה מתחתיו. רכיב אחד
- * שמרנדר את שניהם היה מכריח את "לומדה חדשה" לרדת אל מתחת לרשימה — ומי
- * שהתחיל עשר לומדות היה מגלגל כדי למצוא אותו.
+ * **הנחיתה היא AI-first ואינה מציעה "המשך מהמקום שבו הפסקת".** היו כאן שני
+ * רכיבים — כרטיס לומדה אחרונה ורשימה — והכרטיס נמחק עם ההכרעה הזו: הדף
+ * הראשי מציע יצירה מ-AI ובניית דף ריק, והעבודה השמורה נגישה מהמגירה בלבד.
+ * המיון (האחרונה-שנפתחה ראשונה) נשאר, כי הוא עדיין מקצר את החיפוש במגירה.
  *
  * הנתונים מגיעים מ-`useRecentProjects`.
  */
@@ -17,42 +17,7 @@ import { ConfirmDialog } from '../ui/ConfirmDialog';
 /** כמה לומדות מוצגות לפני "עוד" — רשימה ארוכה דוחפת את שאר המסך מטה */
 const COLLAPSED_COUNT = 4;
 
-/** כרטיס הלומדה האחרונה — הפעולה הסבירה ביותר של מי שכבר עבד כאן */
-export function FeaturedProject({
-  project,
-  onOpen,
-}: {
-  project: ProjectSummary;
-  onOpen: () => void;
-}) {
-  return (
-    <section
-      className="flex flex-col rounded-2xl border border-edge bg-panel p-5"
-      aria-labelledby="featured-heading"
-    >
-      <h2 id="featured-heading" className="text-xs font-bold tracking-wide text-fg-muted uppercase">
-        ממשיכים מאיפה שעצרתם
-      </h2>
-
-      <p className="mt-3 truncate text-lg font-bold text-fg">
-        {project.title || 'לומדה ללא שם'}
-      </p>
-      <p className="mt-1 text-sm text-fg-muted">
-        {project.chapterCount} פרקים · {project.blockCount} בלוקים · {formatSavedAt(project.savedAt)}
-      </p>
-
-      <button
-        type="button"
-        onClick={onOpen}
-        className="mt-4 self-start rounded-xl bg-volt px-5 py-2.5 text-sm font-semibold text-on-volt transition hover:bg-volt-bright"
-      >
-        ממשיכים
-      </button>
-    </section>
-  );
-}
-
-/** שאר הלומדות. מקופלת מעבר ל-COLLAPSED_COUNT כדי לא לדחוף את המסך */
+/** מקופלת מעבר ל-COLLAPSED_COUNT כדי לא לדחוף את המסך */
 export function ProjectList({
   projects,
   openingId = null,
