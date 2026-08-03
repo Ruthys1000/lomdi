@@ -249,35 +249,34 @@
 /*
  * סקאלת מרווח בין בלוקים.
  *
- * medium+medium בין שני בלוקים סמוכים היה 5+5 יחידות (~80px) — רווח לבן
- * גדול מדי במובייל, במיוחד בין צ׳ק-ליסט לקריאה. הערכים כאן שומרים על
- * הבחנה בין small/medium/large אבל מורידים את הצפיפות הכללית בחצי בערך.
- * במובייל יש כיווץ נוסף ב-@media למטה.
+ * איזון אחרי שני קיצונים: 5+5 יחידות (~80px) היה אוורירי מדי במובייל,
+ * ו-1+1 (~16px) אחרי כיווץ כפול הדביק בלוקים אינטראקטיביים זה לזה.
+ * small+small ≈ 28px — מספיק הפרדה בין כרטיסים בלי חור לבן גדול.
  */
 .lc-block--pt-none {
   padding-block-start: 0;
 }
 .lc-block--pt-small {
-  padding-block-start: calc(var(--lc-space-unit) * 1.25);
+  padding-block-start: calc(var(--lc-space-unit) * 1.75);
 }
 .lc-block--pt-medium {
-  padding-block-start: calc(var(--lc-space-unit) * 2);
+  padding-block-start: calc(var(--lc-space-unit) * 2.75);
 }
 .lc-block--pt-large {
-  padding-block-start: calc(var(--lc-space-unit) * 4);
+  padding-block-start: calc(var(--lc-space-unit) * 4.5);
 }
 
 .lc-block--pb-none {
   padding-block-end: 0;
 }
 .lc-block--pb-small {
-  padding-block-end: calc(var(--lc-space-unit) * 1.25);
+  padding-block-end: calc(var(--lc-space-unit) * 1.75);
 }
 .lc-block--pb-medium {
-  padding-block-end: calc(var(--lc-space-unit) * 2);
+  padding-block-end: calc(var(--lc-space-unit) * 2.75);
 }
 .lc-block--pb-large {
-  padding-block-end: calc(var(--lc-space-unit) * 4);
+  padding-block-end: calc(var(--lc-space-unit) * 4.5);
 }
 
 /* ─────────────────────── כפתורים ─────────────────────── */
@@ -624,36 +623,17 @@
     min-inline-size: 0;
   }
 
-  /* כיווץ נוסף במובייל — רווח לבן בין בלוקים עדיין הרגיש רחב אחרי גל 1 */
-  .lc-block--pt-small {
-    padding-block-start: calc(var(--lc-space-unit) * 1);
-  }
-  .lc-block--pt-medium {
-    padding-block-start: calc(var(--lc-space-unit) * 1.5);
-  }
-  .lc-block--pt-large {
-    padding-block-start: calc(var(--lc-space-unit) * 3);
-  }
-  .lc-block--pb-small {
-    padding-block-end: calc(var(--lc-space-unit) * 1);
-  }
-  .lc-block--pb-medium {
-    padding-block-end: calc(var(--lc-space-unit) * 1.5);
-  }
-  .lc-block--pb-large {
-    padding-block-end: calc(var(--lc-space-unit) * 3);
-  }
-
+  /* Hero/מפריד בלבד — בלי כיווץ נוסף למרווח בין בלוקים (הדביק כרטיסים) */
   .lc-hero__inner {
-    padding-block: calc(var(--lc-space-unit) * 2.75);
+    padding-block: calc(var(--lc-space-unit) * 3);
     gap: calc(var(--lc-space-unit) * 1);
   }
 
   .lc-divider--h-medium {
-    padding-block: calc(var(--lc-space-unit) * 1.5);
+    padding-block: calc(var(--lc-space-unit) * 1.75);
   }
   .lc-divider--h-large {
-    padding-block: calc(var(--lc-space-unit) * 2.5);
+    padding-block: calc(var(--lc-space-unit) * 3);
   }
 }
 
@@ -1017,13 +997,13 @@
 }
 
 .lc-divider--h-small {
-  padding-block: calc(var(--lc-space-unit) * 0.75);
+  padding-block: calc(var(--lc-space-unit) * 1);
 }
 .lc-divider--h-medium {
-  padding-block: calc(var(--lc-space-unit) * 2);
+  padding-block: calc(var(--lc-space-unit) * 2.25);
 }
 .lc-divider--h-large {
-  padding-block: calc(var(--lc-space-unit) * 3.5);
+  padding-block: calc(var(--lc-space-unit) * 4);
 }
 
 .lc-divider__rule {
