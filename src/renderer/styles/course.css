@@ -1180,7 +1180,11 @@
   .lc-hero--h-medium,
   .lc-hero--h-tall,
   .lc-hero--h-screen {
-    min-block-size: 240px;
+    min-block-size: 200px;
+  }
+
+  .lc-hero--h-compact {
+    min-block-size: 140px;
   }
 }
 
