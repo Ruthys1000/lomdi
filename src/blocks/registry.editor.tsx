@@ -5,6 +5,7 @@ import {
   Image as ImageIcon,
   LayoutGrid,
   Lightbulb,
+  ListChecks,
   ListCollapse,
   ListOrdered,
   Minus,
@@ -37,6 +38,8 @@ import { CalloutEditor } from './callout/Editor';
 import { CalloutSettings } from './callout/Settings';
 import { StepsEditor } from './steps/Editor';
 import { StepsSettings } from './steps/Settings';
+import { ChecklistEditor } from './checklist/Editor';
+import { ChecklistSettings } from './checklist/Settings';
 
 /**
  * הרגיסטרי של העורך — Editor, Settings ואייקונים.
@@ -89,6 +92,11 @@ const registrations: Record<string, Registration> = {
   quote: { icon: QuoteIcon, SettingsComponent: QuoteSettings },
   callout: { icon: Lightbulb, EditorComponent: CalloutEditor, SettingsComponent: CalloutSettings },
   steps: { icon: ListOrdered, EditorComponent: StepsEditor, SettingsComponent: StepsSettings },
+  checklist: {
+    icon: ListChecks,
+    EditorComponent: ChecklistEditor,
+    SettingsComponent: ChecklistSettings,
+  },
 };
 
 function build(type: string): EditorBlockDefinition | undefined {

@@ -4,6 +4,8 @@ import { createAccordionItem, type AccordionItem } from '@/blocks/accordion/cont
 import { createCard, type CardItem } from '@/blocks/cards/content';
 import type { QuizOption } from '@/blocks/quiz/content';
 import { createStep, type StepItem } from '@/blocks/steps/content';
+import { createChecklistItem, type ChecklistItem } from '@/blocks/checklist/content';
+import { getFormat } from '@/formats';
 import { courseIconNames } from '@/renderer/icons';
 import { createBlockSettings, defaultNavigation } from '@/model/defaults';
 import { createChapter, createCourse } from '@/model/factory';
@@ -171,6 +173,14 @@ function repairItemArrays(type: string, content: Record<string, unknown>, ctx: C
       if (typeof record.title === 'string') overrides.title = record.title;
       if (typeof record.text === 'string') overrides.text = record.text;
       return createStep(overrides);
+    });
+  } else if (type === 'checklist') {
+    content.items = raw.map((item): ChecklistItem => {
+      const record = isRecord(item) ? item : {};
+      const overrides: Partial<ChecklistItem> = {};
+      if (typeof record.text === 'string') overrides.text = record.text;
+      if (typeof record.description === 'string') overrides.description = record.description;
+      return createChecklistItem(overrides);
     });
   }
 }
@@ -349,6 +359,10 @@ export function coerceGeneratedCourse(raw: unknown, format?: string): CoerceResu
   const direction: Direction = root.direction === 'ltr' ? 'ltr' : 'rtl';
   const language = typeof root.language === 'string' && root.language.length >= 2 ? root.language : 'he';
   const mode = root.navigation && isRecord(root.navigation) ? root.navigation.mode : undefined;
+  // מצב הניווט נקבע לפי הפורמט (caseStudy = פרקים, השאר = גלילה); בלי פורמט
+  // (legacy) נשען על מה שהמודל ביקש, אחרת גלילה.
+  const navMode =
+    getFormat(format)?.defaultNavigation ?? (mode === 'chapters' ? 'chapters' : 'scroll');
 
   const course = createCourse({
     title: asString(root.title) ?? 'לומדה חדשה',
@@ -360,7 +374,7 @@ export function coerceGeneratedCourse(raw: unknown, format?: string): CoerceResu
     direction,
     language,
     theme: coerceTheme(root.theme),
-    navigation: { ...defaultNavigation, mode: mode === 'scroll' ? 'scroll' : defaultNavigation.mode },
+    navigation: { ...defaultNavigation, mode: navMode },
     chapters,
   });
 

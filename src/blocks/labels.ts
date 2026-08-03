@@ -19,6 +19,7 @@ export const blockLabels: Record<string, string> = {
   quote: 'ציטוט',
   callout: 'מסר מרכזי',
   steps: 'שלבים',
+  checklist: 'צ׳ק-ליסט',
 };
 
 export function blockLabel(type: string): string {
