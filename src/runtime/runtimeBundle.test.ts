@@ -2,6 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { JSDOM, VirtualConsole } from 'jsdom';
 import { beforeAll, describe, expect, it } from 'vitest';
+import { rendererRegistry } from '@/blocks/registry.runtime';
 import { defaultNavigation } from '@/model/defaults';
 import { defaultTheme } from '@/model/themes';
 
@@ -123,19 +124,14 @@ describe('גבול חבילת ה-runtime', () => {
     expect(styles).toContain('--lc-color-primary');
   });
 
-  it('מכילה Renderer לכל תשעת סוגי הבלוקים', () => {
-    for (const type of [
-      'hero',
-      'richText',
-      'image',
-      'textImage',
-      'divider',
-      'cards',
-      'accordion',
-      'video',
-      'quiz',
-    ]) {
-      expect(bundle).toContain(type);
+  // הרשימה נגזרת מהרגיסטרי ולא נכתבת ביד: הגרסה הידנית קפאה על תשעה בלוקים
+  // בזמן שנרשמו חמישה-עשר, ובלוק חדש שלא היה נכנס לחבילה לא היה מפיל כלום
+  it('מכילה Renderer לכל סוג בלוק שרשום בחבילת הריצה', () => {
+    const types = Object.keys(rendererRegistry);
+    expect(types.length).toBeGreaterThan(0);
+
+    for (const type of types) {
+      expect(bundle, `הרנדרר של "${type}" חסר בחבילת הריצה`).toContain(type);
     }
   });
 

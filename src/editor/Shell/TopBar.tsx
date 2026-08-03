@@ -102,7 +102,8 @@ export function TopBar() {
       return;
     }
 
-    for (const warning of result.warnings) toast(warning, { tone: 'error' });
+    // אזהרה ולא שגיאה: הפרויקט נטען בהצלחה, ומשהו בו דרש התאמה
+    for (const warning of result.warnings) toast(warning, { tone: 'warning' });
     toast('הפרויקט נטען', { tone: 'success' });
   };
 
@@ -154,24 +155,22 @@ export function TopBar() {
 
       <SaveIndicator />
 
+      {/*
+        בלי טוסט: הביטול משנה את הקנבס מול העיניים, ומצב הכפתורים מראה מה
+        אפשר. טוסט על כל ביטול הציף את התור והסתיר הודעות שאסור לפספס
+      */}
       <div className="flex items-center gap-1">
         <IconButton tone="shell"
           icon={Undo2}
           label="ביטול (Ctrl+Z)"
           disabled={!canUndo}
-          onClick={() => {
-            courseHistory.undo();
-            toast('הפעולה בוטלה');
-          }}
+          onClick={() => courseHistory.undo()}
         />
         <IconButton tone="shell"
           icon={Redo2}
           label="ביצוע מחדש (Ctrl+Shift+Z)"
           disabled={!canRedo}
-          onClick={() => {
-            courseHistory.redo();
-            toast('בוצע מחדש');
-          }}
+          onClick={() => courseHistory.redo()}
         />
       </div>
 

@@ -1,15 +1,15 @@
 import { useState } from 'react';
-import { ChevronDown, Trash2 } from 'lucide-react';
+import { ChevronDown, Loader2, Trash2 } from 'lucide-react';
 import type { ProjectSummary } from '@/persistence/db';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 
 /**
- * "המשך מהמקום שבו הפסקת" (סעיף 12).
+ * רשימת הלומדות השמורות, בתוך מגירת "הלומדות שלי".
  *
- * שני רכיבים ולא אחד, מסיבה מבנית: הלומדה האחרונה צריכה לשבת בפס הפעולה
- * העליון לצד "לומדה חדשה", ואילו שאר הרשימה יושבת הרבה מתחתיו. רכיב אחד
- * שמרנדר את שניהם היה מכריח את "לומדה חדשה" לרדת אל מתחת לרשימה — ומי
- * שהתחיל עשר לומדות היה מגלגל כדי למצוא אותו.
+ * **הנחיתה היא AI-first ואינה מציעה "המשך מהמקום שבו הפסקת".** היו כאן שני
+ * רכיבים — כרטיס לומדה אחרונה ורשימה — והכרטיס נמחק עם ההכרעה הזו: הדף
+ * הראשי מציע יצירה מ-AI ובניית דף ריק, והעבודה השמורה נגישה מהמגירה בלבד.
+ * המיון (האחרונה-שנפתחה ראשונה) נשאר, כי הוא עדיין מקצר את החיפוש במגירה.
  *
  * הנתונים מגיעים מ-`useRecentProjects`.
  */
@@ -17,48 +17,16 @@ import { ConfirmDialog } from '../ui/ConfirmDialog';
 /** כמה לומדות מוצגות לפני "עוד" — רשימה ארוכה דוחפת את שאר המסך מטה */
 const COLLAPSED_COUNT = 4;
 
-/** כרטיס הלומדה האחרונה — הפעולה הסבירה ביותר של מי שכבר עבד כאן */
-export function FeaturedProject({
-  project,
-  onOpen,
-}: {
-  project: ProjectSummary;
-  onOpen: () => void;
-}) {
-  return (
-    <section
-      className="flex flex-col rounded-2xl border border-edge bg-panel p-5"
-      aria-labelledby="featured-heading"
-    >
-      <h2 id="featured-heading" className="text-xs font-bold tracking-wide text-fg-muted uppercase">
-        ממשיכים מאיפה שעצרתם
-      </h2>
-
-      <p className="mt-3 truncate text-lg font-bold text-fg">
-        {project.title || 'לומדה ללא שם'}
-      </p>
-      <p className="mt-1 text-sm text-fg-muted">
-        {project.chapterCount} פרקים · {project.blockCount} בלוקים · {formatSavedAt(project.savedAt)}
-      </p>
-
-      <button
-        type="button"
-        onClick={onOpen}
-        className="mt-4 self-start rounded-xl bg-volt px-5 py-2.5 text-sm font-semibold text-on-volt transition hover:bg-volt-bright"
-      >
-        ממשיכים
-      </button>
-    </section>
-  );
-}
-
-/** שאר הלומדות. מקופלת מעבר ל-COLLAPSED_COUNT כדי לא לדחוף את המסך */
+/** מקופלת מעבר ל-COLLAPSED_COUNT כדי לא לדחוף את המסך */
 export function ProjectList({
   projects,
+  openingId = null,
   onOpen,
   onRemove,
 }: {
   projects: ProjectSummary[];
+  /** הלומדה שנפתחת ברגע זה. פתיחה עם נכסים אינה מיידית */
+  openingId?: string | null;
   onOpen: (id: string) => void;
   onRemove: (project: ProjectSummary) => void;
 }) {
@@ -73,22 +41,41 @@ export function ProjectList({
   return (
     <section aria-label="הלומדות שלי">
       <ul className="overflow-hidden rounded-2xl border border-edge bg-panel">
-        {visible.map((project) => (
+        {visible.map((project) => {
+          const opening = openingId === project.id;
+
+          return (
           <li
             key={project.id}
             className="flex items-center gap-2 border-b border-edge ps-4 pe-2 last:border-b-0"
           >
+            {/*
+              נעול בזמן פתיחה, ולא רק בשורה שנלחצה: קריאת הנכסים מ-IndexedDB
+              אורכת זמן, ולחיצה שנייה על לומדה אחרת באמצע הייתה מחליפה את
+              הפרויקט שנטען באמצע הטעינה
+            */}
             <button
               type="button"
               onClick={() => onOpen(project.id)}
-              className="min-w-0 flex-1 py-3 text-start"
+              disabled={openingId !== null}
+              aria-busy={opening}
+              className="min-w-0 flex-1 py-3 text-start disabled:opacity-60"
             >
               <span className="block truncate text-sm font-semibold text-fg">
                 {project.title || 'לומדה ללא שם'}
               </span>
-              <span className="mt-0.5 block text-xs text-fg-muted">
-                {project.chapterCount} פרקים · {project.blockCount} בלוקים ·{' '}
-                {formatSavedAt(project.savedAt)}
+              <span className="mt-0.5 flex items-center gap-1.5 text-xs text-fg-muted">
+                {opening ? (
+                  <>
+                    <Loader2 className="size-3 shrink-0 animate-spin" aria-hidden />
+                    פותח…
+                  </>
+                ) : (
+                  <>
+                    {project.chapterCount} פרקים · {project.blockCount} בלוקים ·{' '}
+                    {formatSavedAt(project.savedAt)}
+                  </>
+                )}
               </span>
             </button>
 
@@ -100,14 +87,16 @@ export function ProjectList({
             <button
               type="button"
               onClick={() => setPendingDelete(project)}
+              disabled={openingId !== null}
               aria-label={`מחיקת ${project.title || 'הלומדה'}`}
               title="מחיקה"
-              className="rounded-lg p-2 text-fg-muted transition hover:bg-danger-soft hover:text-danger"
+              className="rounded-lg p-2 text-fg-muted transition hover:bg-danger-soft hover:text-danger disabled:opacity-40"
             >
               <Trash2 className="size-4" aria-hidden />
             </button>
           </li>
-        ))}
+          );
+        })}
       </ul>
 
       {hidden > 0 && (

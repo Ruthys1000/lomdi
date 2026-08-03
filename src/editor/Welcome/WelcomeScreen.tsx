@@ -4,6 +4,7 @@ import { openProjectFile } from '@/persistence/session';
 import { getTemplate } from '@/templates';
 import type { TemplateResult } from '@/templates';
 import { APP_NAME, APP_VERSION } from '@/version';
+import { Alert } from '../ui/Alert';
 import { Hero } from './Hero';
 import { MyCoursesDrawer } from './MyCoursesDrawer';
 import { useRecentProjects } from './useRecentProjects';
@@ -17,18 +18,21 @@ interface WelcomeScreenProps {
 /**
  * מסך הפתיחה — הדלת הראשית של הכלי.
  *
- * **נחיתה אחת לכולם.** אותו דף בדיוק למבקר חדש ולחוזר: Hero עם מחולל
- * הלומדות בלבו, ומתחתיו סוגר עם CTA וייבוא קובץ. הדף *הוא* ה-landing,
+ * **נחיתה אחת לכולם, AI-first.** אותו דף בדיוק למבקר חדש ולחוזר: Hero עם
+ * מחולל הלומדות בלבו, ולצדו בנייה מדף ריק כאפשרות משנית. הדף *הוא* ה-landing,
  * ואפשר לחזור אליו מהעורך גם אחרי שכבר נבנו לומדות.
  *
- * **הלומדות השמורות חיות בחוצץ נפרד** (MyCoursesDrawer) שנפתח מכפתור בפס
- * העליון — ולא כרצועה שדוחפת את הנחיתה מטה. הכפתור מופיע רק כשיש לומדות.
+ * **הנחיתה אינה מציעה "המשך מהמקום שבו הפסקת".** זו הכרעה ולא פספוס: היצירה
+ * היא הפעולה שהדף מוכר, וכרטיס המשך היה מתחרה בה על אותו מקום. הלומדות
+ * השמורות חיות בחוצץ נפרד (MyCoursesDrawer) שנפתח מכפתור בפס העליון, והכפתור
+ * מופיע רק כשיש לומדות — כך שמי שכבר עבד כאן מגיע אליהן בלחיצה, בלי שהנחיתה
+ * תשתנה מתחתיו.
  *
  * נשמר מהגרסה הקודמת: גרירת קובץ פרויקט על *כל* המסך עם שכבת יעד, כי
  * הגרירה תמיד תפסה את כל המסך אבל שום דבר לא הראה זאת.
  */
 export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
-  const { featured, rest, open, remove } = useRecentProjects(onOpened);
+  const { projects, error, openingId, open, remove } = useRecentProjects(onOpened);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileErrors, setFileErrors] = useState<string[]>([]);
@@ -36,9 +40,7 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
   const [dragging, setDragging] = useState(false);
   const [coursesOpen, setCoursesOpen] = useState(false);
 
-  // רשימה אחת של כל הלומדות, האחרונה-שנפתחה (featured) ראשונה
-  const allProjects = featured ? [featured, ...rest] : rest;
-  const hasProjects = featured != null;
+  const hasProjects = projects.length > 0;
 
   const handleFile = async (file: File) => {
     setLoading(true);
@@ -80,6 +82,16 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
     >
       <Header hasProjects={hasProjects} onOpenCourses={() => setCoursesOpen(true)} />
 
+      {/*
+        כשל אחסון מוצג כאן ולא נבלע: משתמשת שהעבודה שלה אינה מופיעה צריכה
+        לדעת שזו תקלת דפדפן ולא לומדה שנעלמה. מעל ה-Hero כדי שלא יפספסו אותו
+      */}
+      {error && !coursesOpen && (
+        <div className="mx-auto max-w-5xl px-6 pt-4">
+          <Alert messages={[error]} />
+        </div>
+      )}
+
       {/* נחיתה אחת לכולם — מוצגת תמיד, גם אחרי שנבנו לומדות */}
       <Hero onBuild={() => startTemplate('blank')} />
       <Closer loading={loading} fileErrors={fileErrors} onPickFile={pickFile} />
@@ -88,7 +100,9 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
       <MyCoursesDrawer
         open={coursesOpen}
         onClose={() => setCoursesOpen(false)}
-        projects={allProjects}
+        projects={projects}
+        openingId={openingId}
+        error={error}
         onOpen={(id) => void open(id)}
         onRemove={(project) => void remove(project)}
       />
@@ -202,11 +216,9 @@ function ImportRow({
       </div>
 
       {fileErrors.length > 0 && (
-        <ul className="mt-3 space-y-1 rounded-xl bg-warn-soft px-4 py-3 text-sm leading-relaxed text-warn">
-          {fileErrors.map((message) => (
-            <li key={message}>{message}</li>
-          ))}
-        </ul>
+        <div className="mt-3">
+          <Alert messages={fileErrors} />
+        </div>
       )}
     </section>
   );

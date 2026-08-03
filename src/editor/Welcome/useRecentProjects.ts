@@ -15,15 +15,23 @@ import { openStoredProject } from '@/persistence/session';
  * וזה נאכף ב-lint.
  *
  * נטען מ-IndexedDB ולא מהזיכרון, ולכן שורד רענון, סגירת לשונית וכיבוי
- * מחשב. אם האחסון חסום — הרשימה פשוט לא מוצגת, ומסך הפתיחה נשאר שמיש.
+ * מחשב. אם האחסון חסום — מסך הפתיחה נשאר שמיש (אפשר ליצור ולייבא), אבל
+ * ה-`error` מוצג: משתמשת שהעבודה שלה לא מופיעה חייבת לדעת שזו תקלת אחסון
+ * ולא לומדה שנעלמה.
  */
 
 export interface RecentProjectsState {
-  /** הלומדה שנפתחה לאחרונה, לפס הפעולה העליון */
-  featured: ProjectSummary | null;
-  /** כל השאר, לרשימה שמתחת */
-  rest: ProjectSummary[];
+  /**
+   * כל הלומדות השמורות, האחרונה-שנפתחה ראשונה.
+   *
+   * רשימה אחת ולא פיצול ל"אחרונה" ו"שאר": הנחיתה היא AI-first ואינה מציעה
+   * המשך עבודה, ולכן אין יעד נפרד ללומדה האחרונה. המיון נשאר כי הוא מקצר
+   * את החיפוש בתוך המגירה.
+   */
+  projects: ProjectSummary[];
   error: string | null;
+  /** הלומדה שנפתחת ברגע זה — פתיחה עם נכסים אינה מיידית */
+  openingId: string | null;
   open: (id: string) => Promise<void>;
   remove: (project: ProjectSummary) => Promise<void>;
 }
@@ -32,6 +40,7 @@ export function useRecentProjects(onOpened: () => void): RecentProjectsState {
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [lastId, setLastId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [openingId, setOpeningId] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -54,11 +63,22 @@ export function useRecentProjects(onOpened: () => void): RecentProjectsState {
     };
   }, []);
 
+  // הפתיחה קוראת נכסים מ-IndexedDB ולכן אורכת זמן מוחשי בפרויקט עם תמונות.
+  // בלי `openingId` הלחיצה נראית כאילו לא נרשמה, והמשתמש לוחץ שוב.
+  // בהצלחה הרכיב מתפרק (העורך מחליף את מסך הפתיחה), ולכן האיפוס בכשל בלבד.
   const open = useCallback(
     async (id: string) => {
+      setOpeningId(id);
+      setError(null);
+
       const result = await openStoredProject(id);
-      if (result.ok) onOpened();
-      else setError(result.errors[0]);
+      if (result.ok) {
+        onOpened();
+        return;
+      }
+
+      setOpeningId(null);
+      setError(result.errors[0]);
     },
     [onOpened],
   );
@@ -72,8 +92,12 @@ export function useRecentProjects(onOpened: () => void): RecentProjectsState {
     }
   }, []);
 
-  const featured = projects.find((project) => project.id === lastId) ?? projects[0] ?? null;
-  const rest = featured ? projects.filter((project) => project.id !== featured.id) : [];
+  // האחרונה-שנפתחה עולה לראש הרשימה. `listProjects` ממוינת לפי זמן *שמירה*,
+  // וזו לא בהכרח אותה לומדה
+  const lastOpened = projects.find((project) => project.id === lastId);
+  const ordered = lastOpened
+    ? [lastOpened, ...projects.filter((project) => project.id !== lastOpened.id)]
+    : projects;
 
-  return { featured, rest, error, open, remove };
+  return { projects: ordered, error, openingId, open, remove };
 }

@@ -7,7 +7,12 @@ import { create } from 'zustand';
  * לקובץ הפרויקט, ליצור רשומת undo או להפעיל שמירה אוטומטית.
  */
 
-export type ToastTone = 'info' | 'success' | 'error';
+/**
+ * `warning` נפרד מ-`error` בכוונה: פעולה שהצליחה עם הסתייגות (ייבוא שהשלים
+ * חלק מהנכסים, לומדה שנטענה עם בעיות תקינות) נראתה עד כה זהה לכשל מוחלט,
+ * והמשתמש חשב שהפעולה נכשלה. `error` נשמר למה שבאמת לא קרה.
+ */
+export type ToastTone = 'info' | 'success' | 'warning' | 'error';
 
 export interface Toast {
   id: number;

@@ -1,4 +1,4 @@
-import { useId, type ReactNode } from 'react';
+import { useId, useRef, type KeyboardEvent, type ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
 /** שדות הבקרה של פאנל ההגדרות. כולם עם label אמיתי (סעיף 18). */
@@ -98,6 +98,11 @@ export function SelectField<T extends string>({
 /**
  * בורר מקטעים. משתמש ב-radiogroup ולא בכפתורים, כדי שניווט במקלדת
  * יתנהג כמו בורר אמיתי ולא כרשימת כפתורים נפרדים.
+ *
+ * שתי ההתנהגויות שהופכות את זה לבורר ולא לשורת כפתורים: מקשי החצים מזיזים
+ * את הבחירה, ורק האפשרות הנבחרת נמצאת בסדר ה-Tab (roving tabindex) — כך
+ * שהמשתמשת יוצאת מהקבוצה ב-Tab אחד ולא עוברת אחת-אחת על כל האפשרויות.
+ * החצים עוקבים אחרי הפריסה: בממשק RTL חץ שמאלה מתקדם לאפשרות הבאה.
  */
 export function SegmentedField<T extends string>({
   label,
@@ -110,27 +115,69 @@ export function SegmentedField<T extends string>({
   options: Option<T>[];
   onChange: (value: T) => void;
 }) {
+  const buttons = useRef<(HTMLButtonElement | null)[]>([]);
+
+  // כשהערך אינו אחת האפשרויות (סחף סכמה, ערך שהוסר), roving tabindex תמים
+  // היה משאיר את כל הכפתורים מחוץ לסדר ה-Tab — כלומר בורר שאי אפשר להגיע
+  // אליו במקלדת. במצב הזה הראשון הוא נקודת הכניסה.
+  const checkedIndex = options.findIndex((option) => option.value === value);
+  const tabbableIndex = checkedIndex === -1 ? 0 : checkedIndex;
+
+  const move = (from: number, step: number) => {
+    // מעגלי: מהאפשרות האחרונה חוזרים לראשונה, כמו ב-radiogroup נייטיב
+    const next = (from + step + options.length) % options.length;
+    onChange(options[next].value);
+    // הפוקוס נודד עם הבחירה. בלעדיו הוא נשאר על אפשרות שיצאה מסדר ה-Tab,
+    // והחץ הבא היה נמדד ממנה — כלומר לחיצה שנייה לא הייתה מזיזה כלום
+    buttons.current[next]?.focus();
+  };
+
+  const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    // החצים עוקבים אחרי הפריסה ולא אחרי סדר ה-DOM: בממשק RTL האפשרות
+    // הראשונה היא הימנית, ולכן חץ *שמאלה* מתקדם לאפשרות הבאה.
+    // נקרא מהמאפיין ולא מ-getComputedStyle כי כיווניות נקבעת כאן ב-`<html
+    // dir="rtl">` — ו-`direction` המחושב אינו יורד בירושה בכל סביבה.
+    const declared = event.currentTarget.closest('[dir]')?.getAttribute('dir');
+    const rtl = (declared ?? document.documentElement.dir) === 'rtl';
+    const forward = rtl ? 'ArrowLeft' : 'ArrowRight';
+    const backward = rtl ? 'ArrowRight' : 'ArrowLeft';
+
+    if (event.key === forward || event.key === 'ArrowDown') move(index, 1);
+    else if (event.key === backward || event.key === 'ArrowUp') move(index, -1);
+    else return;
+
+    // מונע גלילת העמוד בחצי מעלה/מטה בתוך הבורר
+    event.preventDefault();
+  };
+
   return (
     <div>
       <span className="mb-1 block text-xs font-medium text-fg-soft">{label}</span>
       <div role="radiogroup" aria-label={label} className="flex gap-0.5 rounded-lg bg-panel-2 p-0.5">
-        {options.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            role="radio"
-            aria-checked={value === option.value}
-            onClick={() => onChange(option.value)}
-            className={cn(
-              'flex-1 rounded-md px-2 py-1 text-xs font-medium transition',
-              value === option.value
-                ? 'bg-panel text-fg shadow-sm'
-                : 'text-fg-muted hover:text-fg',
-            )}
-          >
-            {option.label}
-          </button>
-        ))}
+        {options.map((option, index) => {
+          const checked = value === option.value;
+
+          return (
+            <button
+              key={option.value}
+              ref={(node) => {
+                buttons.current[index] = node;
+              }}
+              type="button"
+              role="radio"
+              aria-checked={checked}
+              tabIndex={index === tabbableIndex ? 0 : -1}
+              onKeyDown={(event) => onKeyDown(event, index)}
+              onClick={() => onChange(option.value)}
+              className={cn(
+                'flex-1 rounded-md px-2 py-1 text-xs font-medium transition',
+                checked ? 'bg-panel text-fg shadow-sm' : 'text-fg-muted hover:text-fg',
+              )}
+            >
+              {option.label}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
