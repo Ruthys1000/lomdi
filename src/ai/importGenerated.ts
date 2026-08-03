@@ -3,9 +3,7 @@ import type { Course } from '@/model/types';
 import { validateProjectFile } from '@/model/validate';
 import { APP_NAME, APP_VERSION } from '@/version';
 import { coerceGeneratedCourse } from './coerceCourse';
-import type { ImageIntent } from './imageIntent';
 import { refineCourse } from './refineCourse';
-import type { VisualStyle } from './visualStyle';
 
 /**
  * הצינור המלא: JSON גולמי מ-AI → לומדה תקינה, ערוכה ומאומתת.
@@ -14,26 +12,28 @@ import type { VisualStyle } from './visualStyle';
  * טעם עריכה (`refineCourse`), ורשת ביטחון (`validateProjectFile`, אותו
  * אימות שרץ בטעינת קובץ פרויקט) — ומאחד את כל האזהרות למקבץ אחד להצגה
  * למשתמש. אין כאן קריאת LLM: הקלט הוא כבר ה-JSON שהמודל החזיר.
+ *
+ * תמונות אינן נפתרות: כל בלוק תמונה נשאר עם placeholder ופרומפט מומלץ
+ * (`imagePrompt`) שהמשתמש יכול להעתיק למחולל תמונות משלו.
  */
 
 export interface GeneratedCourse {
   course: Course;
-  imageIntents: ImageIntent[];
-  /** ה-art direction ללומדה — מוזרק ל-resolver כדי לייצר סט תמונות קוהרנטי */
-  visualStyle: VisualStyle;
   warnings: string[];
 }
 
 export interface ImportGeneratedOptions {
   /** ברירת מחדל true. כבה כדי לקבל את הפלט המרוּפא בלי הוספות עריכה */
   refine?: boolean;
+  /** מזהה הפורמט שנבחר בצד הלקוח — מוזרק ל-`Course.format` */
+  format?: string;
 }
 
 export function importGeneratedCourse(
   raw: unknown,
   options: ImportGeneratedOptions = {},
 ): GeneratedCourse {
-  const coerced = coerceGeneratedCourse(raw);
+  const coerced = coerceGeneratedCourse(raw, options.format);
   const warnings = [...coerced.warnings];
   let course = coerced.course;
 
@@ -54,5 +54,5 @@ export function importGeneratedCourse(
     warnings.push(`אימות סופי מצא בעיה בלתי צפויה: ${validation.errors[0]}`);
   }
 
-  return { course, imageIntents: coerced.imageIntents, visualStyle: coerced.visualStyle, warnings };
+  return { course, warnings };
 }

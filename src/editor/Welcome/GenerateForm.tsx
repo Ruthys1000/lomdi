@@ -1,40 +1,31 @@
 import { useEffect, useState } from 'react';
-import { ImageIcon, Loader2, Palette, Sparkles } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
 import { generateCourseFromText } from '@/ai/generateCourse';
-import { resolveImageIntents } from '@/ai/images';
-import { createGeneratedImageResolver, endpointImageResolver } from '@/ai/imageResolver';
+import type { FormatDefinition } from '@/formats';
 import { cn } from '@/lib/cn';
 import { openCourse } from '@/persistence/session';
 import { toast } from '@/state/toastStore';
+import { BackToGallery } from './FormatGallery';
 import { useWakeLock } from './useWakeLock';
 
 /**
- * טופס היצירה מ‑AI — הדבקת תוכן → לומדה שלמה שנפתחת בעורך.
+ * טופס היצירה מ‑AI — הדבקת תוכן → דף בפורמט שנבחר, שנפתח בעורך.
  *
- * הלוגיקה מנצלת את כל שכבת ה‑AI: הפונקציה המאובטחת מחזירה JSON גולמי,
- * `generateCourseFromText` מריצה אותו דרך הריפוי והליטוש, ואז כוונות התמונה
- * נפתרות — או לצילומי סטוק (Pexels) או לאיורים שנוצרים ב‑AI לפי ה‑`visualStyle`
- * של הלומדה — ו‑`openCourse` טוען הכול לעורך. שינוי ה‑course ב‑store הוא
- * שמחליף את מסך הפתיחה בעורך.
+ * הפורמט (שנבחר בגלריה) נשלח לשרת כדי לבחור את "האישיות" של הפרומפט,
+ * ומוזרק ל‑`Course.format` כדי שהעורך יחיל את אילוצי הפורמט. תמונות אינן
+ * נוצרות: כל בלוק תמונה נשאר עם placeholder ופרומפט מומלץ להעתקה.
  *
- * מקור התמונות הוא בחירה של המשתמש: "איורים ב‑AI" (ברירת מחדל) מייצר סט
- * קוהרנטי ללומדה; "צילומי סטוק" חוזר ל‑Pexels. שני המסלולים נצרבים כ‑Blob,
- * ולכן הלומדה המיוצאת נשארת אופליין בשני המקרים.
- *
- * `tone` קובע רק סגנון: `dark` לשילוב בתוך ה‑Hero הכהה, `light` לרקע בהיר.
+ * `tone` קובע רק סגנון: `dark` לשילוב ברקע כהה, `light` לרקע בהיר.
  */
 interface GenerateFormProps {
+  format: FormatDefinition;
+  onBack: () => void;
   tone?: 'dark' | 'light';
 }
 
-type ImageSource = 'ai' | 'stock';
-type Phase = 'writing' | 'illustrating';
-
-export function GenerateForm({ tone = 'light' }: GenerateFormProps) {
+export function GenerateForm({ format, onBack, tone = 'light' }: GenerateFormProps) {
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
-  const [phase, setPhase] = useState<Phase>('writing');
-  const [imageSource, setImageSource] = useState<ImageSource>('ai');
   const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const dark = tone === 'dark';
@@ -56,48 +47,20 @@ export function GenerateForm({ tone = 'light' }: GenerateFormProps) {
     if (!trimmed || loading) return;
 
     setLoading(true);
-    setPhase('writing');
     setError(null);
 
     try {
-      const { course, imageIntents, visualStyle, warnings } = await generateCourseFromText(trimmed);
-
-      // התמונות נפתרות אחרי שהטקסט מוכן — מסמנים שלב כדי שהחיווי יסביר את
-      // ההמתנה (יצירת איורים ב‑AI אורכת יותר מחיפוש סטוק).
-      setPhase('illustrating');
-
-      // משמיטים כתובות שהמודל אולי נתן כדי שלא נפנה לרשת חיצונית ישירות; כל
-      // תמונה נפתרת דרך ה‑endpoint שנבחר. כשל → איור מציב‑מקום.
-      const intents = imageIntents.map((intent) => ({ ...intent, url: undefined }));
-      const resolver =
-        imageSource === 'ai' ? createGeneratedImageResolver(visualStyle) : endpointImageResolver;
-      const { course: withImages, assets, providerError } = await resolveImageIntents(
-        course,
-        intents,
-        { resolver },
-      );
+      const { course, warnings } = await generateCourseFromText(trimmed, { format: format.id });
 
       // openCourse מחליף את מסך הפתיחה בעורך — הרכיב הזה יתפרק, ולכן אין setState אחריו
-      await openCourse(withImages, assets);
+      await openCourse(course);
 
-      // רק כשל אקציוני (מפתח שגוי/חסר, חריגת מכסה, ספק לא זמין) מצדיק התראה
-      // בולטת ומתמשכת — שם באמת יש מה לתקן. תמונה בודדת ש"לא נמצאה" מקבלת
-      // placeholder מכובד ולא מדליקה באנר אדום מבהיל על לא-כלום.
-      if (providerError) {
-        toast(`הלומדה נוצרה, אך התמונות לא נטענו: ${providerError}`, {
-          tone: 'error',
-          durable: true,
-        });
-      } else {
-        toast(
-          warnings.length
-            ? `הלומדה נוצרה, עם ${warnings.length} התאמות אוטומטיות.`
-            : 'הלומדה נוצרה.',
-          { tone: 'success' },
-        );
-      }
+      toast(
+        warnings.length ? `הדף נוצר, עם ${warnings.length} התאמות אוטומטיות.` : 'הדף נוצר.',
+        { tone: 'success' },
+      );
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'יצירת הלומדה נכשלה.');
+      setError(err instanceof Error ? err.message : 'יצירת הדף נכשלה.');
       setLoading(false);
     }
   };
@@ -109,8 +72,20 @@ export function GenerateForm({ tone = 'light' }: GenerateFormProps) {
         dark ? 'border-shell-edge bg-shell-2' : 'border-edge-strong bg-panel md:p-6',
       )}
     >
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className={cn('text-xs font-semibold', dark ? 'text-volt' : 'text-volt-ink')}>
+            פורמט נבחר
+          </p>
+          <p className={cn('truncate text-sm font-bold', dark ? 'text-shell-fg' : 'text-fg')}>
+            {format.label}
+          </p>
+        </div>
+        {!loading && <BackToGallery onBack={onBack} />}
+      </div>
+
       <label htmlFor="generate-input" className="sr-only">
-        התוכן שממנו תיווצר הלומדה
+        התוכן שממנו ייווצר הדף
       </label>
       <textarea
         id="generate-input"
@@ -119,7 +94,7 @@ export function GenerateForm({ tone = 'light' }: GenerateFormProps) {
         disabled={loading}
         rows={6}
         dir="auto"
-        placeholder="הדביקו כאן תוכן — נוהל, מאמר, סיכום — והמערכת תחולל ממנו לומדה…"
+        placeholder={format.entryPlaceholder}
         className={cn(
           'w-full resize-y rounded-xl border p-4 text-sm leading-relaxed focus:outline-none disabled:opacity-60',
           dark
@@ -127,56 +102,6 @@ export function GenerateForm({ tone = 'light' }: GenerateFormProps) {
             : 'border-edge-strong bg-app text-fg placeholder:text-fg-muted focus:border-volt-dim',
         )}
       />
-
-      <div className="mt-4">
-        <span
-          id="image-source-label"
-          className={cn('mb-2 block text-xs font-semibold', dark ? 'text-shell-muted' : 'text-fg-muted')}
-        >
-          מקור התמונות
-        </span>
-        <div
-          role="radiogroup"
-          aria-labelledby="image-source-label"
-          className={cn(
-            'inline-flex gap-1 rounded-xl border p-1',
-            dark ? 'border-shell-edge bg-shell' : 'border-edge-strong bg-app',
-          )}
-        >
-          {([
-            { id: 'ai', label: 'איורים ב‑AI', Icon: Palette },
-            { id: 'stock', label: 'צילומי סטוק', Icon: ImageIcon },
-          ] as const).map(({ id, label, Icon }) => {
-            const active = imageSource === id;
-            return (
-              <button
-                key={id}
-                type="button"
-                role="radio"
-                aria-checked={active}
-                onClick={() => setImageSource(id)}
-                disabled={loading}
-                className={cn(
-                  'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition disabled:opacity-60',
-                  active
-                    ? 'bg-volt text-on-volt'
-                    : dark
-                      ? 'text-shell-muted hover:text-shell-fg'
-                      : 'text-fg-muted hover:text-fg',
-                )}
-              >
-                <Icon className="size-4" aria-hidden />
-                {label}
-              </button>
-            );
-          })}
-        </div>
-        <p className={cn('mt-1.5 text-xs', dark ? 'text-shell-muted' : 'text-fg-muted')}>
-          {imageSource === 'ai'
-            ? 'סט איורים ייחודי שנוצר ללומדה — קוהרנטי ותואם לערכה. איטי יותר מסטוק.'
-            : 'צילומי מלאי אמיתיים מ‑Pexels — מהיר יותר.'}
-        </p>
-      </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <button
@@ -190,7 +115,7 @@ export function GenerateForm({ tone = 'light' }: GenerateFormProps) {
           ) : (
             <Sparkles className="size-4.5" aria-hidden />
           )}
-          {loading ? 'מחולל לומדה…' : 'צרו לומדה'}
+          {loading ? 'מחולל דף…' : `צרו ${format.label}`}
         </button>
         {loading && (
           <p
@@ -202,17 +127,13 @@ export function GenerateForm({ tone = 'light' }: GenerateFormProps) {
             aria-live="polite"
           >
             <Loader2 className="size-4 animate-spin" aria-hidden />
-            {phase === 'writing' ? 'ה‑AI כותב את הלומדה' : 'ה‑AI מאייר את הלומדה'} —{' '}
-            {elapsed > 0 ? `כבר ${elapsed} שניות…` : 'רגע…'}
+            ה‑AI מפצח את התוכן — {elapsed > 0 ? `כבר ${elapsed} שניות…` : 'רגע…'}
           </p>
         )}
       </div>
 
       {loading && (
-        <p
-          className={cn('mt-3 text-xs', dark ? 'text-shell-muted' : 'text-fg-muted')}
-          role="note"
-        >
+        <p className={cn('mt-3 text-xs', dark ? 'text-shell-muted' : 'text-fg-muted')} role="note">
           היצירה עשויה להימשך עד כדקה. כדאי להשאיר את המסך פתוח — יציאה מהמסך עלולה לנתק.
         </p>
       )}

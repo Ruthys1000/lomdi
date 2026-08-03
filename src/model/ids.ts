@@ -18,7 +18,8 @@ export type IdPrefix =
   | 'item'
   | 'card'
   | 'option'
-  | 'stat';
+  | 'stat'
+  | 'step';
 
 export function createId(prefix: IdPrefix): string {
   return `${prefix}-${generate()}`;

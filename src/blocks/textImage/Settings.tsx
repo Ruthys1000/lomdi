@@ -11,6 +11,7 @@ import {
 } from '@/editor/controls/Field';
 import { Schematic, VariantField, type VariantOption } from '@/editor/controls/VariantField';
 import { AssetField } from '@/editor/Assets/AssetField';
+import { ImagePromptField } from '@/editor/Assets/ImagePromptField';
 import type { TextImageContent } from './content';
 
 const variantOptions: VariantOption<TextImageContent['variant']>[] = [
@@ -116,6 +117,12 @@ export function TextImageSettings({
           assetId={content.imageAssetId}
           onChange={(imageAssetId) => update({ imageAssetId })}
         />
+        {!content.imageAssetId && (
+          <ImagePromptField
+            value={content.imagePrompt}
+            onChange={(imagePrompt) => update({ imagePrompt })}
+          />
+        )}
         <TextField
           label="טקסט חלופי"
           placeholder="מה רואים בתמונה"

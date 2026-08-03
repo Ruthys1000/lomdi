@@ -48,31 +48,36 @@ async function setup() {
 }
 
 describe('מסך הפתיחה', () => {
-  it('מציג פעולה משנית "התחילו מלומדה ריקה"', async () => {
+  it('מציג פעולה משנית "התחילו מדף ריק"', async () => {
     await setup();
 
-    expect(screen.getByRole('button', { name: 'התחילו מלומדה ריקה' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'התחילו מדף ריק' })).toBeInTheDocument();
   });
 
-  it('לחיצה על "התחילו מלומדה ריקה" מחזירה לומדה עם פרק, ולא רק שם תבנית', async () => {
+  it('לחיצה על "התחילו מדף ריק" מחזירה לומדה עם פרק, ולא רק שם תבנית', async () => {
     const { onStart } = await setup();
 
-    fireEvent.click(screen.getByRole('button', { name: 'התחילו מלומדה ריקה' }));
+    fireEvent.click(screen.getByRole('button', { name: 'התחילו מדף ריק' }));
 
     expect(onStart).toHaveBeenCalledTimes(1);
     expect(onStart.mock.calls[0][0].course.chapters.length).toBeGreaterThan(0);
   });
 
-  it('התבניות שטרם מומשו אינן מוצגות כלל', async () => {
+  it('גלריית הפורמטים מציגה פורמט מוכן כלחיץ ופורמט עתידי כמושבת', async () => {
     await setup();
 
-    expect(screen.queryByText(/בקרוב/)).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /נוהל או מדיניות/ })).not.toBeInTheDocument();
+    // פורמט מוכן — כרטיס לחיץ
+    const onePager = screen.getByRole('button', { name: /One Pager/ });
+    expect(onePager).toBeInTheDocument();
+    expect(onePager).not.toBeDisabled();
+
+    // פורמט 'soon' מוצג עם "בקרוב" ומושבת
+    expect(screen.getAllByText(/בקרוב/).length).toBeGreaterThan(0);
   });
 
   it('הנחיתה (ה-Hero) מוצגת תמיד — גם למבקר חדש וגם עם לומדות שמורות', async () => {
     await setup();
-    expect(screen.getByRole('heading', { name: /הפכו כל טקסט/ })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /בחרו/ })).toBeInTheDocument();
     // בלי לומדות שמורות אין כפתור "הלומדות שלי"
     expect(screen.queryByRole('button', { name: 'הלומדות שלי' })).not.toBeInTheDocument();
 
@@ -82,7 +87,7 @@ describe('מסך הפתיחה', () => {
     await setup();
 
     // הנחיתה נשארת זהה, ונוסף כפתור הגישה ללומדות השמורות
-    expect(screen.getByRole('heading', { name: /הפכו כל טקסט/ })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /בחרו/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'הלומדות שלי' })).toBeInTheDocument();
   });
 

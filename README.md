@@ -219,28 +219,22 @@ lomdi-safety-2026-07-25.zip
 הדבקת תוכן במסך הפתיחה מחוללת לומדה שלמה. מפתח ה‑API של Anthropic חי **רק
 בשרת** ולעולם לא מגיע לדפדפן:
 
-- **`api/generate.ts`** — פונקציית serverless של Vercel. מקבלת `POST { text }`,
-  בונה את הפרומפט מ‑`buildGenerationContract()` (`src/ai/contract.ts`), קוראת
-  ל‑Claude בסטרימינג, ומחזירה JSON גולמי של לומדה. היא חד‑תכליתית בכוונה — רק
-  טקסט→לומדה — כדי לא להפוך לממסר פתוח שמריץ כל פרומפט על חשבון המפתח.
-- **הלקוח** (`src/ai/generateCourse.ts`) מריץ את הפלט הגולמי דרך
-  `importGeneratedCourse` (ריפוי + ליטוש + אימות), פותר כוונות תמונה לאיורי
-  מציב‑מקום, ומעביר ל‑`openCourse`. שכבת ה‑AI כולה יושבת בצד העורך ולא נכנסת
-  לחבילת ה‑runtime.
-- **תמונות** (`api/image.ts`) — Claude מייצר תיאור תמונה (`query`), לא תמונה.
-  ה‑endpoint מחפש ב‑**Pexels**, מושך את בייטי התמונה בצד השרת, ומחזיר אותם
-  מאותו origin — כך `importAssetFromUrl` מטמיע אותם כ‑Blob ללא CORS, והלומדה
-  עובדת אופליין. הבחירה בספק חיה מאחורי ה‑`ImageResolver` (`src/ai/imageResolver.ts`);
-  החלפה ל‑AI‑generated בעתיד היא שינוי ב‑endpoint בלבד. בכל כשל (אין מפתח, אין
-  תוצאה) נופלים חזרה לאיורי מציב‑מקום.
-- **משתני סביבה** — `ANTHROPIC_API_KEY` (יצירה) ו‑`PEXELS_API_KEY` (תמונות)
-  נקבעים ב‑Vercel → Project → Settings → Environment Variables (Production +
-  Preview), לעולם לא בריפו. לפיתוח מקומי: `.env` (ב‑gitignore, ראה
-  `.env.example`) והרצה עם `vercel dev`.
-  **חשוב:** משתנה סביבה חדש נכנס לתוקף רק אחרי **redeploy**, וחייב להיות מסומן
-  לסביבת **Production**. "הגדרתי `PEXELS_API_KEY` ועדיין אין תמונות" הוא כמעט תמיד
-  אחד מהשניים. כשל בטעינת תמונה כבר אינו שקט — הודעת ה‑toast אחרי היצירה מציגה
-  את הסיבה (מפתח שגוי, חריגת מכסה, אין תוצאה).
+- **`api/generate.ts`** — פונקציית serverless של Vercel. מקבלת `POST { text, format }`,
+  בונה את פרומפט המערכת לפי הפורמט (`buildSystemPrompt` — מצע משותף + מודול-פורמט
+  עם role/interview/skeleton + קטלוג בלוקים מסונן), קוראת ל‑Claude בסטרימינג,
+  ומחזירה JSON גולמי של דף. חד‑תכליתית בכוונה — רק טקסט→דף — כדי לא להפוך
+  לממסר פתוח שמריץ כל פרומפט על חשבון המפתח.
+- **הלקוח** (`src/ai/generateCourse.ts`) שולח את הפורמט הנבחר, מריץ את הפלט הגולמי
+  דרך `importGeneratedCourse` (ריפוי + ליטוש + אימות), ומעביר ל‑`openCourse`.
+  שכבת ה‑AI כולה יושבת בצד העורך ולא נכנסת לחבילת ה‑runtime.
+- **תמונות** — Lomdi לא מייצר תמונות. Claude מייצר תיאור (`query`), ושכבת הריפוי
+  שומרת אותו כ‑`imagePrompt` בתוכן הבלוק — פרומפט מומלץ (באנגלית) שהמשתמש יכול
+  להעתיק למחולל תמונות משלו ולהעלות את התוצאה. עד אז מוצג placeholder.
+- **משתני סביבה** — `ANTHROPIC_API_KEY` (יצירה) הוא המפתח היחיד שנדרש. נקבע
+  ב‑Vercel → Project → Settings → Environment Variables (Production + Preview),
+  לעולם לא בריפו. לפיתוח מקומי: `.env` (ב‑gitignore, ראה `.env.example`) והרצה
+  עם `vercel dev`. **חשוב:** משתנה סביבה חדש נכנס לתוקף רק אחרי **redeploy**,
+  וחייב להיות מסומן לסביבת **Production**.
 
 > **IndexedDB הוא לפי origin.** פרויקט שנשמר אוטומטית ב-`localhost` לא יופיע
 > בכתובת הפרוסה, ומכיוון שלכל preview deployment יש כתובת משלו — גם לא יעבור
@@ -280,10 +274,15 @@ src/
   - [x] תשתית `src/ai/`: חוזה יצירה, שכבת ריפוי, ליטוש, תפר תמונות
   - [x] פרוסה אנכית: פונקציית `api/generate` מאובטחת + פאנל יצירה במסך הפתיחה
   - [x] דף בית AI-first (היצירה כ-CTA הראשי ב-Hero) + קופי שיווקי
-  - [x] ספק תמונות: Pexels דרך `ImageResolver` + `api/image`
-  - [x] אופציה ל-AI-generated images: סט איורים קוהרנטי לפי `visualStyle` של
-    הלומדה (Claude מכוון art direction, `api/generate-image` מרנדר ב-Recraft),
-    בורר מקור תמונות בטופס היצירה. נצרב כ-Blob — הלומדה נשארת אופליין.
+- [ ] **שלב 10** — פיבוט לפורמטים: המשתמש בוחר סוג של דף (One Pager, Process…)
+  וה-AI מפצח את התוכן לתוך המבנה של הפורמט. התוצר נשאר HTML סטטי ונערך חופשית.
+  - [x] תשתית פורמטים: שדה `Course.format`, `src/formats/`, מודולי פרומפט
+    לכל פורמט (`buildSystemPrompt`), גלריית בחירה במסך הפתיחה, סינון ספריית
+    הבלוקים לפי הפורמט
+  - [x] בלוקים חדשים: מסר מרכזי (callout), שלבים (steps)
+  - [x] הסרת יצירת תמונות ב-AI — placeholder + פרומפט מומלץ להעתקה
+  - [x] פורמטים ראשונים: One Pager, Process
+  - [ ] פורמטים נוספים: Checklist, Case Study, Scenario, Challenge
 
 ### איך שלב מתנהל
 

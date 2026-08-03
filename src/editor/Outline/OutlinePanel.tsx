@@ -15,6 +15,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { Plus } from 'lucide-react';
+import { getFormat } from '@/formats';
 import { useCourseStore } from '@/state/courseStore';
 import { useEditorStore } from '@/state/editorStore';
 import { toast } from '@/state/toastStore';
@@ -90,15 +91,18 @@ export function OutlinePanel() {
     <aside className="flex min-h-0 flex-col bg-panel" aria-label="מבנה הלומדה">
       <div className="flex items-center justify-between border-b border-edge px-4 py-3">
         <h2 className="text-xs font-bold tracking-wide text-fg-muted uppercase">מבנה הלומדה</h2>
-        <button
-          type="button"
-          onClick={handleAddChapter}
-          title="הוספת פרק"
-          className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-volt-ink transition hover:bg-volt-soft"
-        >
-          <Plus className="size-3.5" aria-hidden />
-          פרק
-        </button>
+        {/* פורמט חד-עמודי (One Pager, Process…) לא מאפשר פרקים נוספים */}
+        {getFormat(course?.format)?.allowChapters !== false && (
+          <button
+            type="button"
+            onClick={handleAddChapter}
+            title="הוספת פרק"
+            className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-volt-ink transition hover:bg-volt-soft"
+          >
+            <Plus className="size-3.5" aria-hidden />
+            פרק
+          </button>
+        )}
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto p-2">

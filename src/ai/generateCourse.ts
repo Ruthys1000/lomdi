@@ -14,6 +14,8 @@ export interface GenerateCourseOptions {
   signal?: AbortSignal;
   /** נקרא על כל פעימת התקדמות מהשרת — שימושי לחיווי "עדיין עובד" */
   onProgress?: () => void;
+  /** מזהה הפורמט שנבחר — נשלח לשרת (לבחירת ה"אישיות") ומוזרק ל-Course.format */
+  format?: string;
 }
 
 /**
@@ -33,7 +35,7 @@ export async function generateCourseFromText(
   const response = await fetch(ENDPOINT, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ text }),
+    body: JSON.stringify({ text, ...(options.format ? { format: options.format } : {}) }),
     ...(options.signal ? { signal: options.signal } : {}),
   });
 
@@ -45,7 +47,7 @@ export async function generateCourseFromText(
   // תאימות לאחור: אם אין גוף מוזרם (למשל בסביבת בדיקה ישנה) — קוראים JSON יחיד.
   if (!response.body) {
     const data = (await response.json()) as { course?: unknown };
-    return importGeneratedCourse(data.course);
+    return importGeneratedCourse(data.course, { format: options.format });
   }
 
   const reader = response.body.getReader();
@@ -61,7 +63,7 @@ export async function generateCourseFromText(
       const message = typeof line.error === 'string' && line.error ? line.error : undefined;
       throw new Error(message ?? 'יצירת הלומדה נכשלה.');
     }
-    return importGeneratedCourse(line.course);
+    return importGeneratedCourse(line.course, { format: options.format });
   };
 
   // שורה שאינה JSON תקין (דופק שנחתך באמצע, הזרקת פרוקסי) — מדלגים עליה במקום

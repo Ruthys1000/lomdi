@@ -12,6 +12,7 @@ import {
 } from '@/editor/controls/Field';
 import { Schematic, VariantField, type VariantOption } from '@/editor/controls/VariantField';
 import { AssetField } from '@/editor/Assets/AssetField';
+import { ImagePromptField } from '@/editor/Assets/ImagePromptField';
 import { contrastRatio } from '@/renderer/theme/themeToCssVars';
 import type { HeroContent } from './content';
 
@@ -149,6 +150,12 @@ export function HeroSettings({ block, onChange }: SettingsProps) {
               assetId={content.imageAssetId}
               onChange={(imageAssetId) => update({ imageAssetId })}
             />
+            {!content.imageAssetId && (
+              <ImagePromptField
+                value={content.imagePrompt}
+                onChange={(imagePrompt) => update({ imagePrompt })}
+              />
+            )}
             <SliderField
               label="כהות שכבת הכיסוי"
               value={Math.round(content.overlayOpacity * 100)}

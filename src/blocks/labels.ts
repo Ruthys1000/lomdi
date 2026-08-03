@@ -17,6 +17,8 @@ export const blockLabels: Record<string, string> = {
   quiz: 'שאלת בחירה',
   divider: 'מפריד',
   quote: 'ציטוט',
+  callout: 'מסר מרכזי',
+  steps: 'שלבים',
 };
 
 export function blockLabel(type: string): string {
