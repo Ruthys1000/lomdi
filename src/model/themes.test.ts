@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { contrastRatio, readableTextOn } from '@/renderer/theme/themeToCssVars';
+import {
+  contrastRatio,
+  darkenForHeroText,
+  heroGradientStops,
+  readableTextOn,
+} from '@/renderer/theme/themeToCssVars';
 import { themeSchema } from './schema';
 import { defaultTheme, getThemePreset, themePresets } from './themes';
 
@@ -31,6 +36,13 @@ describe('ערכות העיצוב המוכנות', () => {
     ).toBeGreaterThanOrEqual(4.5);
   });
 
+  it.each(themePresets)('$name — טקסט לבן על עצירות גרדיאנט ה-hero קריא', ({ theme }) => {
+    const [stop0, stop1, stop2] = heroGradientStops(theme.colors.primary, theme.colors.accent);
+    for (const stop of [stop0, stop1, stop2]) {
+      expect(contrastRatio('#ffffff', stop)).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
   it.each(themePresets)('$name — עוברת את סכמת האימות של קובץ הפרויקט', ({ theme }) => {
     expect(themeSchema.safeParse(theme).success).toBe(true);
   });
@@ -55,5 +67,20 @@ describe('ערכות העיצוב המוכנות', () => {
   it('ברירת המחדל היא הערכה הראשונה, בגופן שנארז לתוצר', () => {
     expect(defaultTheme).toBe(themePresets[0].theme);
     expect(defaultTheme.typography.fontFamily).toBe('heebo');
+  });
+
+  it('כהה ואלגנטי מחשיך primary בהיר ל-hero קריא', () => {
+    const primary = getThemePreset('darkElegant')!.theme.colors.primary;
+    // בלי ההחשכה: ערבוב רדוד היה משאיר ~2:1 בין לבן ל-primary הבהיר
+    expect(contrastRatio('#ffffff', primary)).toBeLessThan(4.5);
+    expect(contrastRatio('#ffffff', darkenForHeroText(primary))).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('ערכות כהות נבדלות זו מזו בצורת כפתור/כרטיס', () => {
+    const elegant = getThemePreset('darkElegant')!.theme;
+    const midnight = getThemePreset('midnight')!.theme;
+
+    expect(elegant.shape.buttonStyle).not.toBe(midnight.shape.buttonStyle);
+    expect(elegant.shape.cardStyle).not.toBe(midnight.shape.cardStyle);
   });
 });

@@ -204,7 +204,34 @@ export function ThemePanel({ theme }: { theme: Theme }) {
               label="משפחת גופן"
               value={theme.typography.fontFamily}
               options={fontOptions}
-              onChange={(fontFamily) => patch({ typography: { ...theme.typography, fontFamily } })}
+              onChange={(fontFamily) =>
+                patch({
+                  typography: {
+                    ...theme.typography,
+                    fontFamily,
+                    // כשבוחרים גופן גוף חדש ולא הוגדר גופן כותרות — משאירים
+                    // את pairing הקיים; אם headingFamily זהה לישן, מאפסים כדי
+                    // לא לגרור pairing ישן בשקט
+                    ...(theme.typography.headingFamily === theme.typography.fontFamily
+                      ? { headingFamily: undefined }
+                      : {}),
+                  },
+                })
+              }
+            />
+            <SelectField
+              label="גופן כותרות"
+              value={theme.typography.headingFamily ?? theme.typography.fontFamily}
+              options={fontOptions}
+              onChange={(headingFamily) =>
+                patch({
+                  typography: {
+                    ...theme.typography,
+                    headingFamily:
+                      headingFamily === theme.typography.fontFamily ? undefined : headingFamily,
+                  },
+                })
+              }
             />
             <SliderField
               label="גודל טקסט בסיסי"

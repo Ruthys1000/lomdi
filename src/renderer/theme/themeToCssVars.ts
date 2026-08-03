@@ -23,11 +23,26 @@ const FONT_STACKS: Record<Theme['typography']['fontFamily'], string> = {
   rubik: `'Rubik Variable', Rubik, system-ui, -apple-system, 'Segoe UI', 'Noto Sans Hebrew', Arial, sans-serif`,
 };
 
-const SHADOWS: Record<Theme['shape']['shadow'], string> = {
+const SHADOWS_LIGHT: Record<Theme['shape']['shadow'], string> = {
   none: 'none',
   soft: '0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px rgb(15 23 42 / 0.06)',
   medium: '0 2px 4px rgb(15 23 42 / 0.06), 0 16px 40px rgb(15 23 42 / 0.12)',
 };
+
+/** צללים על רקע כהה — הצל ה"בהיר" (slate) כמעט לא נראה על `#0a0f1e` */
+const SHADOWS_DARK: Record<Theme['shape']['shadow'], string> = {
+  none: 'none',
+  soft: '0 1px 2px rgb(0 0 0 / 0.45), 0 8px 28px rgb(0 0 0 / 0.55)',
+  medium: '0 2px 6px rgb(0 0 0 / 0.5), 0 16px 48px rgb(0 0 0 / 0.62)',
+};
+
+const SHADOW_CARD_LIGHT = '0 4px 12px rgb(15 23 42 / 0.05), 0 16px 36px rgb(15 23 42 / 0.07)';
+const SHADOW_CARD_DARK =
+  '0 0 0 1px rgb(255 255 255 / 0.06), 0 10px 32px rgb(0 0 0 / 0.55)';
+const SHADOW_LG_LIGHT = '0 10px 24px rgb(15 23 42 / 0.1), 0 28px 64px rgb(15 23 42 / 0.14)';
+const SHADOW_LG_DARK = '0 12px 28px rgb(0 0 0 / 0.5), 0 32px 72px rgb(0 0 0 / 0.6)';
+const SHADOW_HOVER_LIGHT = '0 12px 32px rgb(15 23 42 / 0.1)';
+const SHADOW_HOVER_DARK = '0 14px 36px rgb(0 0 0 / 0.55)';
 
 /** יחידת המרווח הבסיסית — כל המרווחים בלומדה נגזרים ממנה */
 const DENSITY_UNIT: Record<Theme['layout']['density'], number> = {
@@ -42,8 +57,16 @@ const LINE_HEIGHT: Record<Theme['layout']['density'], number> = {
   spacious: 1.85,
 };
 
+const HERO_INK = '#060a14';
+const HERO_TEXT = '#ffffff';
+/** יחס ניגודיות מינימלי לטקסט לבן על עצירת גרדיאנט ה-hero */
+const HERO_MIN_CONTRAST = 4.5;
+
 export function themeToCssVarMap(theme: Theme): Record<string, string> {
   const { colors, typography, shape, layout } = theme;
+  const dark = isDarkSurface(colors.background);
+  const shadows = dark ? SHADOWS_DARK : SHADOWS_LIGHT;
+  const [hero0, hero1, hero2] = heroGradientStops(colors.primary, colors.accent);
 
   return {
     '--lc-color-primary': colors.primary,
@@ -68,7 +91,12 @@ export function themeToCssVarMap(theme: Theme): Record<string, string> {
 
     '--lc-radius': `${shape.radius}px`,
     '--lc-radius-small': `${Math.round(shape.radius * 0.5)}px`,
-    '--lc-shadow': SHADOWS[shape.shadow],
+    '--lc-shadow': shadows[shape.shadow],
+    '--lc-shadow-card': dark ? SHADOW_CARD_DARK : SHADOW_CARD_LIGHT,
+    '--lc-shadow-lg': dark ? SHADOW_LG_DARK : SHADOW_LG_LIGHT,
+    '--lc-shadow-hover-extra': dark ? SHADOW_HOVER_DARK : SHADOW_HOVER_LIGHT,
+
+    '--lc-gradient-hero': `linear-gradient(135deg, ${hero0} 0%, ${hero1} 58%, ${hero2} 100%)`,
 
     '--lc-content-max-width': `${layout.contentMaxWidth}px`,
     '--lc-space-unit': `${DENSITY_UNIT[layout.density]}px`,
@@ -156,4 +184,51 @@ export function contrastRatio(a: string, b: string): number {
   const [light, dark] = lumA > lumB ? [lumA, lumB] : [lumB, lumA];
 
   return (light + 0.05) / (dark + 0.05);
+}
+
+function toHex([r, g, b]: [number, number, number]): string {
+  return `#${[r, g, b].map((channel) => channel.toString(16).padStart(2, '0')).join('')}`;
+}
+
+/**
+ * מערבבת צבע לכיוון דיו ה-hero.
+ *
+ * `colorPercent` = כמה מהצבע המקורי נשאר (100 = הצבע המלא, 0 = דיו בלבד).
+ */
+export function mixTowardInk(hex: string, colorPercent: number, ink = HERO_INK): string {
+  const color = hexToRgb(hex);
+  const inkRgb = hexToRgb(ink);
+  if (!color || !inkRgb) return ink;
+
+  const t = Math.min(100, Math.max(0, colorPercent)) / 100;
+  return toHex([
+    Math.round(color[0] * t + inkRgb[0] * (1 - t)),
+    Math.round(color[1] * t + inkRgb[1] * (1 - t)),
+    Math.round(color[2] * t + inkRgb[2] * (1 - t)),
+  ]);
+}
+
+/**
+ * מחשיכה צבע עד שטקסט לבן עליו עומד ב-AA.
+ *
+ * מתחילה מ-`startPercent` של הצבע ומורידה בצעדים — כך primary בהיר
+ * (כמו `#7dd3fc` של darkElegant) לא משאיר hero לא קריא.
+ */
+export function darkenForHeroText(hex: string, startPercent = 42): string {
+  let percent = startPercent;
+  let mixed = mixTowardInk(hex, percent);
+  while (percent > 4 && contrastRatio(HERO_TEXT, mixed) < HERO_MIN_CONTRAST) {
+    percent -= 4;
+    mixed = mixTowardInk(hex, percent);
+  }
+  return mixed;
+}
+
+/** שלוש עצירות גרדיאנט ה-hero — כולן מובטחות לניגודיות טקסט לבן */
+export function heroGradientStops(primary: string, accent: string): [string, string, string] {
+  return [
+    darkenForHeroText(primary, 44),
+    darkenForHeroText(primary, 30),
+    darkenForHeroText(accent, 24),
+  ];
 }

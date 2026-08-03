@@ -128,7 +128,9 @@ describe('מבנה ה-ZIP המיוצא', () => {
 
 describe('הגופן בארכיון', () => {
   const fonts = {
-    css: { path: 'fonts/heebo.css', content: '@font-face { src: url(heebo-hebrew.woff2); }' },
+    stylesheets: [
+      { path: 'fonts/heebo.css', content: '@font-face { src: url(heebo-hebrew.woff2); }' },
+    ],
     files: [{ path: 'fonts/heebo-hebrew.woff2', blob: new Blob([bytes]) }],
     license: 'SIL Open Font License 1.1',
   };

@@ -60,17 +60,16 @@
   /*
    * רקע ה-hero לפי הערכה.
    *
-   * כל העצירות מעורבבות עם כמעט-שחור, ולכן הרקע כהה בכל ערכה — כולל ערכות
-   * שה-primary שלהן בהיר (`darkElegant`) — והטקסט הלבן של ה-hero נשאר קריא
-   * בלי לבדוק ניגודיות בזמן עריכה. הגוון נשאר של הערכה, ולכן ה-hero מפסיק
-   * להיות אותו מלבן כחול-סגול בכל הערכות.
+   * ברירת מחדל כהה מספיק לטקסט לבן. themeToCssVars דורסת את המשתנה בערכים
+   * מחושבים שמובטחים לניגודיות ≥4.5:1 — חשוב לערכות עם primary בהיר
+   * (למשל darkElegant `#7dd3fc`), שבהן ערבוב 88% primary+ink נשאר בהיר מדי.
    */
   --lc-hero-ink: #060a14;
   --lc-gradient-hero: linear-gradient(
     135deg in oklab,
-    color-mix(in oklab, var(--lc-color-primary) 88%, var(--lc-hero-ink)) 0%,
-    color-mix(in oklab, var(--lc-color-primary) 52%, var(--lc-hero-ink)) 58%,
-    color-mix(in oklab, var(--lc-color-accent) 34%, var(--lc-hero-ink)) 100%
+    color-mix(in oklab, var(--lc-color-primary) 40%, var(--lc-hero-ink)) 0%,
+    color-mix(in oklab, var(--lc-color-primary) 26%, var(--lc-hero-ink)) 58%,
+    color-mix(in oklab, var(--lc-color-accent) 20%, var(--lc-hero-ink)) 100%
   );
   /* גרסה עדינה על רקע הלומדה — לרצועות סקשן שטקסט רגיל יושב עליהן */
   --lc-gradient-soft: linear-gradient(
@@ -87,6 +86,7 @@
   --lc-shadow-lg: 0 10px 24px rgb(15 23 42 / 0.1), 0 28px 64px rgb(15 23 42 / 0.14);
   /* צל מעודן לכרטיסים — רך ומפוזר, לא ה"בוטסטרפ" הכבד */
   --lc-shadow-card: 0 4px 12px rgb(15 23 42 / 0.05), 0 16px 36px rgb(15 23 42 / 0.07);
+  --lc-shadow-hover-extra: 0 12px 32px rgb(15 23 42 / 0.1);
 
   /* טבעת הדגשה עדינה סביב אלמנטים אינטראקטיביים */
   --lc-ring: color-mix(in srgb, var(--lc-color-primary) 22%, transparent);
@@ -124,12 +124,16 @@
   text-size-adjust: 100%;
 }
 
-/* ערכה כהה: הירוק והאדום הכהים נבלעים ברקע, ולכן עוברים לגרסאות בהירות */
+/* ערכה כהה: ירוק/אדום בהירים + צללים שנראים על רקע כמעט-שחור */
 .lc-course[data-scheme='dark'] {
   --lc-color-success: #4ade80;
   --lc-color-danger: #fca5a5;
   --lc-surface-success: color-mix(in srgb, var(--lc-color-success) 16%, var(--lc-color-background));
   --lc-surface-danger: color-mix(in srgb, var(--lc-color-danger) 16%, var(--lc-color-background));
+  --lc-shadow: 0 1px 2px rgb(0 0 0 / 0.45), 0 8px 28px rgb(0 0 0 / 0.55);
+  --lc-shadow-lg: 0 12px 28px rgb(0 0 0 / 0.5), 0 32px 72px rgb(0 0 0 / 0.6);
+  --lc-shadow-card: 0 0 0 1px rgb(255 255 255 / 0.06), 0 10px 32px rgb(0 0 0 / 0.55);
+  --lc-shadow-hover-extra: 0 14px 36px rgb(0 0 0 / 0.55);
 }
 
 .lc-course *,
@@ -1249,7 +1253,7 @@
 
   .lc-course[data-card-style='elevated'] .lc-card:hover {
     transform: translateY(-3px);
-    box-shadow: var(--lc-shadow), 0 12px 32px rgb(15 23 42 / 0.1);
+    box-shadow: var(--lc-shadow), var(--lc-shadow-hover-extra);
   }
 
   .lc-course[data-card-style='bordered'] .lc-card:hover {
