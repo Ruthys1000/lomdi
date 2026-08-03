@@ -5,19 +5,26 @@ import type { HeroContent } from './content';
 const heroGradient = (content: HeroContent) =>
   `linear-gradient(135deg, ${content.gradientFrom}, ${content.gradientTo})`;
 
-/** רקע הבלוק: צבע, גרדיאנט או תמונה עם שכבת כיסוי שמגנה על הקריאות */
+/**
+ * רקע הבלוק: לפי הערכה, צבע, גרדיאנט או תמונה עם שכבת כיסוי שמגנה על הקריאות.
+ *
+ * `theme` אינו מחזיר style כלל — הרקע מגיע מ-`--lc-gradient-hero` ב-CSS, ולכן
+ * הוא מתחלף עם הערכה בלי שהתוכן יישמר צבעים משלו.
+ */
 function backgroundStyle(content: HeroContent, imageUrl: string | undefined) {
   switch (content.backgroundType) {
+    case 'theme':
+      return undefined;
     case 'color':
       return { background: content.backgroundColor };
     case 'gradient':
       return { background: heroGradient(content) };
     case 'image':
-      // עם תמונה — היא הרקע. בלי תמונה (Lomdi לא מייצר) — נופלים לגרדיאנט
+      // עם תמונה — היא הרקע. בלי תמונה (Lomdi לא מייצר) — נופלים לרקע הערכה
       // ולא לצבע אחיד שטוח, כדי שה-hero לעולם לא ייראה קופסה ריקה.
       return imageUrl
         ? { backgroundImage: `url("${imageUrl}")`, backgroundSize: 'cover', backgroundPosition: 'center' }
-        : { background: heroGradient(content) };
+        : undefined;
   }
 }
 

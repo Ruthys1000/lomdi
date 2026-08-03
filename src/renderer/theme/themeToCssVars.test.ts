@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { themePresets } from '@/model/themes';
-import { contrastRatio, readableTextOn, themeToCssVarMap, themeToCssVars } from './themeToCssVars';
+import {
+  contrastRatio,
+  isDarkSurface,
+  readableTextOn,
+  themeToCssVarMap,
+  themeToCssVars,
+} from './themeToCssVars';
 
 describe('themeToCssVars', () => {
   it('מייצרת משתנה לכל צבע בערכה', () => {
@@ -57,5 +63,13 @@ describe('ניגודיות', () => {
   it.each(themePresets)('ערכת "$name" מייצרת כפתור ראשי קריא', ({ theme }) => {
     const onPrimary = readableTextOn(theme.colors.primary);
     expect(contrastRatio(onPrimary, theme.colors.primary)).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+describe('isDarkSurface', () => {
+  it('מזהה רקע כהה לצורך data-scheme', () => {
+    expect(isDarkSurface('#0a0f1e')).toBe(true);
+    expect(isDarkSurface('#ffffff')).toBe(false);
+    expect(isDarkSurface('לא-צבע')).toBe(false);
   });
 });

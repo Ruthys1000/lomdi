@@ -86,6 +86,7 @@ const alignOptions: Option<HeroContent['alignment']>[] = [
 ];
 
 const backgroundOptions: Option<HeroContent['backgroundType']>[] = [
+  { value: 'theme', label: 'לפי הערכה' },
   { value: 'color', label: 'צבע' },
   { value: 'gradient', label: 'גרדיאנט' },
   { value: 'image', label: 'תמונה' },
@@ -95,11 +96,14 @@ export function HeroSettings({ block, onChange }: SettingsProps) {
   const { content } = block;
   const update = (patch: Partial<HeroContent>) => onChange({ ...content, ...patch });
 
-  // הטקסט בהירו תמיד לבן, ולכן רקע בהיר מדי הופך אותו לבלתי קריא
+  // הטקסט בהירו תמיד לבן, ולכן רקע בהיר מדי הופך אותו לבלתי קריא.
+  // רקע "לפי הערכה" מוחרג: הוא נבנה מהערכה מעורבבת עם כמעט-שחור, ולכן כהה
+  // בהגדרה — ואין לו hex יחיד שאפשר למדוד כאן.
   const backgroundSample =
     content.backgroundType === 'gradient' ? content.gradientFrom : content.backgroundColor;
   const textContrast = contrastRatio('#ffffff', backgroundSample);
-  const lowContrast = content.backgroundType !== 'image' && textContrast < 4.5;
+  const measurable = content.backgroundType === 'color' || content.backgroundType === 'gradient';
+  const lowContrast = measurable && textContrast < 4.5;
 
   return (
     <>

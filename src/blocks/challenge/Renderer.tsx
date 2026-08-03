@@ -84,6 +84,7 @@ export function ChallengeRenderer({ block }: { block: BlockOf<ChallengeContent> 
                           }
                           className="lc-challenge__radio"
                         />
+                        <span className="lc-control lc-control--radio" aria-hidden />
                         <span className="lc-challenge__label">{option.text}</span>
                         {submitted && option.id === correctId && (
                           <courseIcons.Check className="lc-challenge__mark" aria-label="נכונה" />
