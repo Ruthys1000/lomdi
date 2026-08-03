@@ -25,6 +25,7 @@ function renderQuiz(overrides: Partial<QuizContent> = {}, isEditing = false) {
     direction: 'rtl',
     resolveAssetUrl: () => undefined,
     isEditing,
+    authoring: isEditing,
   };
 
   return render(

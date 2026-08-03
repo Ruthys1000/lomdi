@@ -4,6 +4,7 @@ import { createAccordionItem, type AccordionItem } from '@/blocks/accordion/cont
 import { createCard, type CardItem } from '@/blocks/cards/content';
 import type { QuizOption } from '@/blocks/quiz/content';
 import { createStep, type StepItem } from '@/blocks/steps/content';
+import { courseIconNames } from '@/renderer/icons';
 import { createBlockSettings, defaultNavigation } from '@/model/defaults';
 import { createChapter, createCourse } from '@/model/factory';
 import { createId } from '@/model/ids';
@@ -47,6 +48,16 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function asString(value: unknown): string | undefined {
   return typeof value === 'string' ? value : undefined;
+}
+
+/**
+ * שם האייקון חייב להיות מהרשימה הסגורה של `courseIcons` — כל שם אחר מרונדר
+ * כלום. המודל בוחר שמות lucide חופשי, ולכן שם לא-מוכר או ריק חוזר לברירת
+ * מחדל, כדי שלא ייווצרו כרטיסים "קירחים" בלי אייקון.
+ */
+const VALID_ICONS = new Set<string>(courseIconNames);
+function validIcon(name: unknown, fallback = 'Sparkles'): string {
+  return typeof name === 'string' && VALID_ICONS.has(name) ? name : fallback;
 }
 
 // ─────────────────────────── תוכן בלוק ───────────────────────────
@@ -133,8 +144,9 @@ function repairItemArrays(type: string, content: Record<string, unknown>, ctx: C
   if (type === 'cards') {
     content.items = raw.map((item): CardItem => {
       const record = isRecord(item) ? item : {};
-      const overrides: Partial<CardItem> = {};
-      if (typeof record.icon === 'string') overrides.icon = record.icon;
+      // תמיד אייקון תקין — שם לא-מוכר/ריק חוזר לברירת מחדל, כדי שכל הכרטיסים
+      // יהיו עקביים (לא חלקם עם אייקון וחלקם בלי)
+      const overrides: Partial<CardItem> = { icon: validIcon(record.icon) };
       if (typeof record.title === 'string') overrides.title = record.title;
       if (typeof record.text === 'string') overrides.text = record.text;
       if (typeof record.imageAssetId === 'string') overrides.imageAssetId = record.imageAssetId;
@@ -226,6 +238,8 @@ function coerceBlock(raw: unknown, ctx: Ctx): Block | null {
   }
 
   if (type === 'quiz') repairQuiz(provided, ctx);
+  // callout מחזיק אייקון בודד (לא במערך items) — מנרמלים אותו כאן לשם תקין
+  if (type === 'callout') provided.icon = validIcon(provided.icon, 'Lightbulb');
   repairItemArrays(type, provided, ctx);
   applyImagePrompt(type, provided);
 

@@ -88,7 +88,9 @@ export function PreviewOverlay() {
           className="mx-auto min-h-full overflow-hidden rounded-xl bg-white shadow-2xl transition-[max-width] duration-200"
           style={{ maxWidth: width ? `${width}px` : '1100px' }}
         >
-          <CourseRenderer course={course} resolveAssetUrl={resolveAssetUrl} />
+          {/* authoring: התצוגה המקדימה היא סביבת היוצר — מציגה placeholder
+              לתמונה עם הפרומפט המומלץ, שלא ייכנס לתוצר של הלומד */}
+          <CourseRenderer course={course} resolveAssetUrl={resolveAssetUrl} authoring />
         </div>
       </div>
     </div>

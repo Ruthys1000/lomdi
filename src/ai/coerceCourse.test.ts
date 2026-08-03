@@ -187,8 +187,9 @@ describe('coerceGeneratedCourse', () => {
               content: {
                 columns: 2,
                 items: [
-                  { icon: 'ShieldCheck', title: 'דיווח', text: 'מדווחים על מפגע.' },
-                  { icon: 'Flame', title: 'כיבוי אש', text: 'מכירים את המטפים.' },
+                  // Shield תקין (ברשימה הסגורה); ShieldCheck לא — ינורמל לברירת מחדל
+                  { icon: 'Shield', title: 'דיווח', text: 'מדווחים על מפגע.' },
+                  { icon: 'ShieldCheck', title: 'כיבוי אש', text: 'מכירים את המטפים.' },
                 ],
               },
             },
@@ -203,7 +204,9 @@ describe('coerceGeneratedCourse', () => {
     expect(content.items).toHaveLength(2);
     expect(content.items.map((i) => i.title)).toEqual(['דיווח', 'כיבוי אש']);
     expect(content.items[0].text).toBe('מדווחים על מפגע.');
-    expect(content.items[0].icon).toBe('ShieldCheck');
+    // אייקון תקין נשמר; אייקון לא-מוכר (ShieldCheck) חוזר לברירת מחדל
+    expect(content.items[0].icon).toBe('Shield');
+    expect(content.items[1].icon).toBe('Sparkles');
     expect(content.items.every((i) => i.id && i.button)).toBe(true);
     expect(new Set(content.items.map((i) => i.id)).size).toBe(2);
     expectValid(course);

@@ -22,6 +22,11 @@ export interface CourseRendererProps {
   resolveAssetUrl: (assetId: string) => string | undefined;
   /** true כשהרנדרר מוצג בתוך קנבס העריכה ולא בתצוגה מקדימה או בתוצר */
   isEditing?: boolean;
+  /**
+   * true בסביבות היוצר (עורך + תצוגה מקדימה), false בתוצר. שולט בהצגת רמזי
+   * יצירה — placeholder לתמונה עם פרומפט מומלץ — שהלומד לא אמור לראות.
+   */
+  authoring?: boolean;
   /** בעורך: הפרק שנערך כרגע גובר על הניווט הפנימי של הלומדה */
   forcedChapterIndex?: number;
   renderBlockWrapper?: BlockWrapper;
@@ -46,6 +51,7 @@ export function CourseRenderer({
   course,
   resolveAssetUrl,
   isEditing = false,
+  authoring = false,
   forcedChapterIndex,
   renderBlockWrapper,
   renderEmptyChapter,
@@ -86,8 +92,8 @@ export function CourseRenderer({
   useScrollReveal(rootRef, !isEditing, revealKey);
 
   const ctx: RenderContextValue = useMemo(
-    () => ({ direction: course.direction, resolveAssetUrl, isEditing }),
-    [course.direction, resolveAssetUrl, isEditing],
+    () => ({ direction: course.direction, resolveAssetUrl, isEditing, authoring }),
+    [course.direction, resolveAssetUrl, isEditing, authoring],
   );
 
   const themeStyle = useMemo(

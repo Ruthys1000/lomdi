@@ -365,11 +365,19 @@ const BLOCK_LINES: Record<string, string> = {
 const SETTINGS_NOTE =
   'settings (אופציונלי, פר-בלוק, ליצירת מקצב): { background: transparent|surface|muted|primary|accent|gradient|gradientSoft }. עטוף בו סקשן בולט אחד או שניים, לא את כל הבלוקים.';
 
+// שמות האייקונים ל-cards ו-callout — רשימה סגורה. שם מחוץ לרשימה לא מרונדר,
+// ולכן חובה לבחור *רק* מכאן (מסונכרן עם src/renderer/icons.ts).
+const ICON_NAMES =
+  'Sparkles, Target, Lightbulb, Rocket, Star, Award, TrendingUp, Users, Shield, Lock, Clock, Flag, Compass, Route, BookOpen, FileText, ClipboardList, HelpCircle, Info, AlertTriangle, Check, CircleCheck, Heart, ThumbsUp, Zap, Settings, Mail, Play';
+
 function catalogFor(types: string[]): string {
   const lines = types.map((type) => BLOCK_LINES[type]).filter(Boolean);
-  return ['סוגי הבלוקים המותרים בפורמט זה (type + השדות המרכזיים ב-content):', ...lines, '', SETTINGS_NOTE].join(
-    '\n',
-  );
+  const parts = ['סוגי הבלוקים המותרים בפורמט זה (type + השדות המרכזיים ב-content):', ...lines];
+  if (types.includes('cards') || types.includes('callout')) {
+    parts.push('', `אייקונים (שדה icon) — בחר *רק* מתוך הרשימה: ${ICON_NAMES}. שם מחוץ לרשימה לא יוצג.`);
+  }
+  parts.push('', SETTINGS_NOTE);
+  return parts.join('\n');
 }
 
 const RICH_TEXT = `doc הוא מסמך ProseMirror: { "type":"doc", "content":[ ... ] }.
@@ -476,7 +484,9 @@ const ONE_PAGER_EXAMPLE = {
             variant: 'spotlight',
             title: 'ניהול זמן אפקטיבי',
             subtitle: 'שלוש נקודות שישנו לכם את היום',
-            backgroundType: 'gradient',
+            backgroundType: 'image',
+            query: 'calm organized desk with clock and notebook, soft daylight, flat vector illustration',
+            alt: 'שולחן עבודה מסודר עם שעון',
             gradientFrom: '#2563eb',
             gradientTo: '#7c3aed',
             height: 'tall',
@@ -542,7 +552,9 @@ const PROCESS_EXAMPLE = {
             variant: 'panel',
             title: 'פתיחת קריאת שירות',
             subtitle: 'איך מטפלים בפנייה מהרגע הראשון',
-            backgroundType: 'gradient',
+            backgroundType: 'image',
+            query: 'friendly support agent at desk with headset, clean modern office, flat vector illustration',
+            alt: 'נציג שירות במוקד',
             gradientFrom: '#14532d',
             gradientTo: '#166534',
             height: 'tall',
@@ -632,14 +644,15 @@ const FORMAT_MODULES: Record<string, FormatModule> = {
     role: 'אתה עורך תוכן שמזקק חומר ארוך ל-One Pager — עמוד יחיד, סרוק וברור. המטרה: שהקורא יבין את המסר המרכזי במבט אחד.',
     interview: [
       '- זהה את המסר המרכזי האחד של התוכן.',
-      '- חלץ 3-5 נקודות מפתח תומכות.',
+      '- חלץ בדיוק 3 או 4 נקודות מפתח תומכות (לא 5) — כדי שרשת הכרטיסים תהיה אחידה.',
       '- נסח משפט "לקחת הביתה" אחד וחד.',
       '- זרוק פרטים משניים — One Pager הוא תמצית, לא סיכום מלא.',
     ].join('\n'),
     skeleton: [
       'פרק יחיד בלבד, בלי פרקים נוספים.',
-      'פתח ב-hero. אחריו richText קצר (פתיח/תמצית). cards לנקודות המפתח (variant "numbered" או "gradient").',
-      'סיים ב-callout מסוג "takeaway" עם המסר לקחת הביתה. אפשר quote אחד אם מתאים.',
+      'פתח ב-hero מרשים — עדיף backgroundType="image" עם query (רקע חזק), אחרת גרדיאנט נועז; height "tall".',
+      'אחריו richText קצר (פתיח/תמצית). cards לנקודות המפתח: 3 או 4 בלבד, variant "numbered" או "gradient", ולכל כרטיס icon מהרשימה.',
+      'סיים ב-callout מסוג "takeaway" עם המסר לקחת הביתה. אפשר quote אחד אם יש ייחוס אמיתי במקור.',
     ].join('\n'),
     allowedBlocks: ['hero', 'richText', 'cards', 'callout', 'quote', 'image', 'divider'],
     example: ONE_PAGER_EXAMPLE,
@@ -654,8 +667,9 @@ const FORMAT_MODULES: Record<string, FormatModule> = {
     ].join('\n'),
     skeleton: [
       'פרק יחיד בלבד, בלי פרקים נוספים.',
-      'פתח ב-hero. richText קצר שמסביר את מטרת התהליך. בלוק steps אחד עם כל השלבים (items:[{title, text}]).',
-      'אם יש נקודה קריטית — callout מסוג "warning" או "info".',
+      'פתח ב-hero מרשים — עדיף backgroundType="image" עם query, אחרת גרדיאנט נועז; height "tall".',
+      'richText קצר שמסביר את מטרת התהליך. בלוק steps אחד עם כל השלבים (items:[{title, text}]).',
+      'אם יש נקודה קריטית — callout מסוג "warning" או "info" (icon מהרשימה).',
     ].join('\n'),
     allowedBlocks: ['hero', 'richText', 'steps', 'callout', 'image', 'divider'],
     example: PROCESS_EXAMPLE,
@@ -675,6 +689,10 @@ const SHARED_RULES = [
   '  backgroundType="image", חייב שדה "query" — פרומפט קצר *באנגלית* לתמונה',
   '  (למשל "modern office team, flat vector illustration"). הוא יוצג למשתמש כהמלצה',
   '  ליצירת תמונה בעצמו; בינתיים מוצג placeholder. הוסף "alt" בעברית לנגישות.',
+  '- כלול לפחות מקום תמונה אחד עם query (hero עם backgroundType="image", או בלוק',
+  '  image), כדי שלמשתמש יהיה placeholder עם פרומפט מומלץ להשלמה.',
+  '- אל תמציא ייחוס בשם לציטוט (author/role) — אלא אם הוא מופיע במפורש במקור.',
+  '  בלי מקור אמין, השאר author ריק או ותר על ה-quote.',
 ].join('\n');
 
 /**

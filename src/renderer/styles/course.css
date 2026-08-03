@@ -961,8 +961,11 @@
 /* ─────────────────────── מצבי ריק ועזר ─────────────────────── */
 
 .lc-media-placeholder {
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--lc-space-unit) * 1);
   min-block-size: 160px;
   padding: calc(var(--lc-space-unit) * 3);
   border: 1px dashed var(--lc-color-border);
@@ -971,6 +974,74 @@
   color: var(--lc-color-text-muted);
   font-size: 0.88em;
   text-align: center;
+}
+
+.lc-media-placeholder__icon {
+  inline-size: 1.6em;
+  block-size: 1.6em;
+  opacity: 0.5;
+}
+
+.lc-media-placeholder__body {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--lc-space-unit) * 0.5);
+  max-inline-size: 40ch;
+}
+
+/* מצב "תמונה מומלצת" — מדגיש שיש כאן פרומפט להעתקה */
+.lc-media-placeholder--prompt {
+  border-color: color-mix(in srgb, var(--lc-color-primary) 35%, var(--lc-color-border));
+  background: var(--lc-surface-primary);
+}
+
+.lc-media-placeholder__label {
+  font-weight: 700;
+  color: var(--lc-color-text);
+}
+
+.lc-media-placeholder__prompt {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.92em;
+  color: var(--lc-color-primary);
+  word-break: break-word;
+}
+
+.lc-media-placeholder__note {
+  font-size: 0.82em;
+  opacity: 0.8;
+}
+
+/* תג "תמונת רקע מומלצת" על hero שנועד לתמונה אך עדיין ריק (סביבת היוצר בלבד) */
+.lc-hero__image-hint {
+  position: absolute;
+  inset-block-start: calc(var(--lc-space-unit) * 1.5);
+  inset-inline-end: calc(var(--lc-space-unit) * 1.5);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-inline-size: 32ch;
+  padding: calc(var(--lc-space-unit) * 1) calc(var(--lc-space-unit) * 1.5);
+  border-radius: var(--lc-radius-small);
+  background: rgb(8 12 22 / 0.55);
+  color: #fff;
+  text-align: start;
+  backdrop-filter: blur(4px);
+}
+
+.lc-hero__image-hint-label {
+  font-size: 0.72em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.85;
+}
+
+.lc-hero__image-hint-prompt {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8em;
+  word-break: break-word;
 }
 
 .lc-sr-only {
