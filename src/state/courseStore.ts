@@ -176,4 +176,6 @@ export const courseHistory = {
   undo: () => useCourseStore.temporal.getState().undo(),
   redo: () => useCourseStore.temporal.getState().redo(),
   clear: () => useCourseStore.temporal.getState().clear(),
+  canUndo: () => useCourseStore.temporal.getState().pastStates.length > 0,
+  canRedo: () => useCourseStore.temporal.getState().futureStates.length > 0,
 };

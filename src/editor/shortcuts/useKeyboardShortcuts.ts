@@ -54,14 +54,18 @@ export function useKeyboardShortcuts({ onSave, onDeleteBlock }: ShortcutHandlers
 
       // TipTap מנהל היסטוריה משלו כשהפוקוס בתוכו; התערבות כאן הייתה
       // גורמת ל-Ctrl+Z למחוק בלוק שלם במקום תו אחד
+      // הטוסט נשמר רק למקרה שבו *לא* קרה כלום. כשהביטול מצליח, השינוי על
+      // הקנבס הוא המשוב — ומי שמקליק Ctrl+Z ברצף לא צריך מגדל הודעות. אבל
+      // קיצור מקלדת שלא עושה כלום ואינו מסביר למה נראה כמו תקלה, ולכן
+      // דווקא הקצה החסום מדבר.
       if (modifier && event.key.toLowerCase() === 'z' && !editing) {
         event.preventDefault();
         if (event.shiftKey) {
-          courseHistory.redo();
-          toast('בוצע מחדש');
+          if (courseHistory.canRedo()) courseHistory.redo();
+          else toast('אין פעולה לביצוע מחדש');
         } else {
-          courseHistory.undo();
-          toast('הפעולה בוטלה');
+          if (courseHistory.canUndo()) courseHistory.undo();
+          else toast('אין פעולה לביטול');
         }
         return;
       }
