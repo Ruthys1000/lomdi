@@ -186,6 +186,7 @@ export function EditorCanvas() {
               course={course}
               resolveAssetUrl={resolveAssetUrl}
               isEditing
+              authoring
               forcedChapterIndex={chapterIndex}
               renderBlockWrapper={renderBlockWrapper}
               renderEmptyChapter={() => (

@@ -2,28 +2,35 @@ import type { BlockOf } from '@/model/types';
 import { useRenderContext } from '@/renderer/RenderContext';
 import type { HeroContent } from './content';
 
+const heroGradient = (content: HeroContent) =>
+  `linear-gradient(135deg, ${content.gradientFrom}, ${content.gradientTo})`;
+
 /** רקע הבלוק: צבע, גרדיאנט או תמונה עם שכבת כיסוי שמגנה על הקריאות */
 function backgroundStyle(content: HeroContent, imageUrl: string | undefined) {
   switch (content.backgroundType) {
     case 'color':
       return { background: content.backgroundColor };
     case 'gradient':
-      return {
-        background: `linear-gradient(135deg, ${content.gradientFrom}, ${content.gradientTo})`,
-      };
+      return { background: heroGradient(content) };
     case 'image':
+      // עם תמונה — היא הרקע. בלי תמונה (Lomdi לא מייצר) — נופלים לגרדיאנט
+      // ולא לצבע אחיד שטוח, כדי שה-hero לעולם לא ייראה קופסה ריקה.
       return imageUrl
         ? { backgroundImage: `url("${imageUrl}")`, backgroundSize: 'cover', backgroundPosition: 'center' }
-        : { background: content.backgroundColor };
+        : { background: heroGradient(content) };
   }
 }
 
 export function HeroRenderer({ block }: { block: BlockOf<HeroContent> }) {
   const { content } = block;
-  const { resolveAssetUrl } = useRenderContext();
+  const { resolveAssetUrl, authoring } = useRenderContext();
   const imageUrl = content.imageAssetId ? resolveAssetUrl(content.imageAssetId) : undefined;
 
   const hasImageBackground = content.backgroundType === 'image' && Boolean(imageUrl);
+  // רמז ליוצר: hero שנועד לתמונה אך עדיין ריק — מציג תג עם הפרומפט המומלץ,
+  // רק בסביבות היוצר (לא בתוצר של הלומד).
+  const showImageHint =
+    authoring && content.backgroundType === 'image' && !imageUrl && Boolean(content.imagePrompt.trim());
 
   return (
     <section
@@ -39,6 +46,15 @@ export function HeroRenderer({ block }: { block: BlockOf<HeroContent> }) {
     >
       {hasImageBackground && (
         <div className="lc-hero__overlay" style={{ opacity: content.overlayOpacity }} aria-hidden />
+      )}
+
+      {showImageHint && (
+        <div className="lc-hero__image-hint" role="note">
+          <span className="lc-hero__image-hint-label">תמונת רקע מומלצת</span>
+          <span className="lc-hero__image-hint-prompt" dir="ltr">
+            {content.imagePrompt}
+          </span>
+        </div>
       )}
 
       <div className="lc-hero__inner lc-container">

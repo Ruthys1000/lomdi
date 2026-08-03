@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Image as ImageIcon } from 'lucide-react';
 import { useRenderContext } from './RenderContext';
 
 /** עוזרי מדיה משותפים לבלוקי תמונה, טקסט ותמונה ווידאו */
@@ -19,28 +20,51 @@ const roundnessClass = (roundness: string) => `lc-round--${roundness}`;
 /**
  * מצב ריק למדיה שטרם הוגדרה.
  *
- * מוצג בעורך בלבד. בתוצר הוא לא מרונדר כלל — לומדה מיוצאת לא צריכה
- * להראות ללומד מסגרת מקווקוות עם הוראות לעורך.
+ * מוצג בסביבות היוצר בלבד (עורך + תצוגה מקדימה, `authoring`). בתוצר של
+ * הלומד הוא לא מרונדר כלל — לומדה מיוצאת לא צריכה להראות ללומד מסגרת ריקה.
+ *
+ * כשמועבר `prompt` (הפרומפט המומלץ שה-AI הציע), ה-placeholder מציג אותו
+ * עם הזמנה להעתיק אותו למחולל תמונות — כך היוצר רואה בדיוק היכן נועדה
+ * תמונה ומה מומלץ ליצור.
  */
 export function MediaPlaceholder({
   label,
   ratio,
   className,
+  prompt,
 }: {
   label: string;
   ratio?: string;
   className?: string;
+  prompt?: string;
 }) {
-  const { isEditing } = useRenderContext();
-  if (!isEditing) return null;
+  const { authoring } = useRenderContext();
+  if (!authoring) return null;
+
+  const hasPrompt = Boolean(prompt?.trim());
 
   return (
     <div
-      className={['lc-media-placeholder', className].filter(Boolean).join(' ')}
+      className={['lc-media-placeholder', hasPrompt && 'lc-media-placeholder--prompt', className]
+        .filter(Boolean)
+        .join(' ')}
       style={{ aspectRatio: ratio ? aspectRatioValue(ratio) : undefined }}
       role="note"
     >
-      {label}
+      <ImageIcon className="lc-media-placeholder__icon" aria-hidden />
+      {hasPrompt ? (
+        <span className="lc-media-placeholder__body">
+          <span className="lc-media-placeholder__label">תמונה מומלצת</span>
+          <span className="lc-media-placeholder__prompt" dir="ltr">
+            {prompt}
+          </span>
+          <span className="lc-media-placeholder__note">
+            העתיקו את הפרומפט למחולל תמונות, ואז העלו את התוצאה בפאנל ההגדרות
+          </span>
+        </span>
+      ) : (
+        <span className="lc-media-placeholder__body">{label}</span>
+      )}
     </div>
   );
 }

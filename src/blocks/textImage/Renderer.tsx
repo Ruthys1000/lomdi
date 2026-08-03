@@ -26,7 +26,11 @@ export function TextImageRenderer({ block }: { block: BlockOf<TextImageContent> 
       />
     </Figure>
   ) : (
-    <MediaPlaceholder label="בחרו תמונה בפאנל ההגדרות" ratio={content.aspectRatio} />
+    <MediaPlaceholder
+      label="בחרו תמונה בפאנל ההגדרות"
+      ratio={content.aspectRatio}
+      prompt={content.imagePrompt}
+    />
   );
 
   return (

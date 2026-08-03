@@ -14,12 +14,19 @@ export interface RenderContextValue {
   resolveAssetUrl: (assetId: string) => string | undefined;
   /** true בתוך קנבס העריכה — מאפשר לרנדרר להשבית אנימציות פתיחה וכדומה */
   isEditing: boolean;
+  /**
+   * true בעורך ובתצוגה המקדימה (סביבות היוצר), false בתוצר המיוצא (הלומד).
+   * מבדיל בין השניים — שגם `isEditing=false` — כדי להראית ליוצר רמזים כמו
+   * placeholder לתמונה עם הפרומפט המומלץ, בלי שהלומד יראה אותם בתוצר.
+   */
+  authoring: boolean;
 }
 
 const fallback: RenderContextValue = {
   direction: 'rtl',
   resolveAssetUrl: () => undefined,
   isEditing: false,
+  authoring: false,
 };
 
 /** ב-React 19 אפשר להשתמש בהקשר עצמו כ-Provider: <RenderContext value={…}> */

@@ -14,7 +14,11 @@ export function ImageRenderer({ block }: { block: BlockOf<ImageContent> }) {
   if (!url) {
     return (
       <div className="lc-container">
-        <MediaPlaceholder label="בחרו תמונה בפאנל ההגדרות" ratio={content.aspectRatio} />
+        <MediaPlaceholder
+          label="בחרו תמונה בפאנל ההגדרות"
+          ratio={content.aspectRatio}
+          prompt={content.imagePrompt}
+        />
       </div>
     );
   }

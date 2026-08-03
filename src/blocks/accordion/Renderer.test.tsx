@@ -30,6 +30,7 @@ function renderAccordion(overrides: Partial<AccordionContent> = {}) {
     direction: 'rtl',
     resolveAssetUrl: () => undefined,
     isEditing: false,
+    authoring: false,
   };
 
   return render(
