@@ -1307,9 +1307,11 @@
   content: '';
   inline-size: 0.62em;
   block-size: 0.34em;
+  /* גבולות פיזיים ולא logical: וי חייב להישאר ✓ גם ב-RTL.
+     border-inline-start ב-RTL הופך אותו ל־> */
   border: 0 solid var(--lc-color-on-primary);
-  border-block-end-width: 2.5px;
-  border-inline-start-width: 2.5px;
+  border-bottom-width: 2.5px;
+  border-left-width: 2.5px;
   transform: rotate(-45deg) scale(0);
   transform-origin: center;
   transition: transform 0.15s ease;
