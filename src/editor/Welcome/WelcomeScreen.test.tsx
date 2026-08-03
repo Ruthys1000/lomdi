@@ -19,21 +19,31 @@ const project = (id: string, title: string, savedAt: string): ProjectSummary => 
 let projects: ProjectSummary[] = [];
 let lastProjectId: string | null = null;
 
+const listProjects = vi.fn(() => Promise.resolve(projects));
+
 vi.mock('@/persistence/db', () => ({
-  listProjects: () => Promise.resolve(projects),
+  listProjects: () => listProjects(),
   getLastProjectId: () => Promise.resolve(lastProjectId),
   deleteProject: () => Promise.resolve(),
 }));
 
 const openProjectFile = vi.fn((_file: Blob) => Promise.resolve({ ok: true as const }));
+type OpenResult = { ok: true } | { ok: false; errors: string[] };
+const openStoredProject = vi.fn(
+  (_id: string): Promise<OpenResult> => Promise.resolve({ ok: true }),
+);
 
 vi.mock('@/persistence/session', () => ({
   openProjectFile: (file: Blob) => openProjectFile(file),
-  openStoredProject: () => Promise.resolve({ ok: true }),
+  openStoredProject: (id: string) => openStoredProject(id),
 }));
 
 beforeEach(() => {
   openProjectFile.mockClear();
+  listProjects.mockClear();
+  listProjects.mockImplementation(() => Promise.resolve(projects));
+  openStoredProject.mockClear();
+  openStoredProject.mockImplementation(() => Promise.resolve({ ok: true }));
   projects = [];
   lastProjectId = null;
 });
@@ -156,5 +166,69 @@ describe('מסך הפתיחה', () => {
     fireEvent.dragOver(screen.getByRole('main'), { dataTransfer: { files: [] } });
 
     expect(screen.getByText('שחררו. זה נטען לבד.')).toBeInTheDocument();
+  });
+
+  /*
+   * כשלי אחסון ופתיחה. עד כה ה-hook חישב `error` ומסך הפתיחה לא קרא אותו,
+   * כלומר אחסון חסום נראה כמו לומדות שנעלמו — ופתיחה איטית נראתה כמו לחיצה
+   * שלא נרשמה.
+   */
+  it('כשל בטעינת הלומדות השמורות מוצג במסך ולא נבלע', async () => {
+    listProjects.mockImplementation(() => Promise.reject(new Error('האחסון חסום')));
+
+    await setup();
+
+    expect(screen.getByRole('alert')).toHaveTextContent('האחסון חסום');
+  });
+
+  it('פתיחת לומדה מציגה מצב טעינה ונועלת את הרשימה עד לסיום', async () => {
+    projects = [project('a', 'קליטת חייל חדש', '2026-03-01T10:00:00.000Z')];
+    lastProjectId = 'a';
+
+    let release = () => {};
+    openStoredProject.mockImplementation(
+      () =>
+        new Promise<OpenResult>((resolve) => {
+          release = () => resolve({ ok: true });
+        }),
+    );
+
+    const { onOpened } = await setup();
+    fireEvent.click(screen.getByRole('button', { name: 'הלומדות שלי' }));
+
+    // לפי /פרקים/ ולא לפי השם: כפתור המחיקה נושא גם הוא את שם הלומדה
+    const drawer = screen.getByRole('dialog', { name: 'הלומדות שלי' });
+    fireEvent.click(within(drawer).getByRole('button', { name: /פרקים/ }));
+
+    // בזמן הפתיחה: חיווי על השורה, והשורה עצמה חסומה בפני לחיצה נוספת
+    const row = within(drawer).getByRole('button', { name: /פותח…/ });
+    expect(row).toBeDisabled();
+    expect(row).toHaveAttribute('aria-busy', 'true');
+    expect(onOpened).not.toHaveBeenCalled();
+
+    await act(async () => {
+      release();
+    });
+    expect(onOpened).toHaveBeenCalledTimes(1);
+  });
+
+  it('כשל פתיחה מוצג בתוך המגירה, שם המשתמש נמצא', async () => {
+    projects = [project('a', 'לומדה', '2026-03-01T10:00:00.000Z')];
+    lastProjectId = 'a';
+    openStoredProject.mockImplementation(() =>
+      Promise.resolve({ ok: false, errors: ['הפרויקט לא נמצא באחסון המקומי.'] }),
+    );
+
+    await setup();
+    fireEvent.click(screen.getByRole('button', { name: 'הלומדות שלי' }));
+
+    const drawer = screen.getByRole('dialog', { name: 'הלומדות שלי' });
+    await act(async () => {
+      fireEvent.click(within(drawer).getByRole('button', { name: /פרקים/ }));
+    });
+
+    // ההתראה חייבת לחיות בתוך המגירה: היא `<dialog>` מודאלי, וטקסט מאחוריה
+    // אינו נגיש בזמן שהיא פתוחה
+    expect(within(drawer).getByRole('alert')).toHaveTextContent('הפרויקט לא נמצא');
   });
 });

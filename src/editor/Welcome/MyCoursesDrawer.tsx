@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import type { ProjectSummary } from '@/persistence/db';
+import { Alert } from '../ui/Alert';
 import { ProjectList } from './RecentProjects';
 
 interface MyCoursesDrawerProps {
@@ -8,6 +9,13 @@ interface MyCoursesDrawerProps {
   onClose: () => void;
   /** כל הלומדות השמורות, האחרונה-שנפתחה ראשונה */
   projects: ProjectSummary[];
+  /** הלומדה שנפתחת ברגע זה — שורתה נעולה ומציגה ספינר */
+  openingId: string | null;
+  /**
+   * כשל פתיחה או מחיקה. מוצג *כאן* ולא רק בדף שמאחור: המגירה היא
+   * `<dialog>` מודאלי, והתראה מחוצה לה בלתי נראית בזמן שהיא פתוחה.
+   */
+  error: string | null;
   onOpen: (id: string) => void;
   onRemove: (project: ProjectSummary) => void;
 }
@@ -23,7 +31,15 @@ interface MyCoursesDrawerProps {
  * מלא (מגירה), ולא ממורכזת. הרשימה עצמה היא `ProjectList` הקיים, כולל
  * פתיחה, מחיקה עם אישור, וקיפול רשימה ארוכה.
  */
-export function MyCoursesDrawer({ open, onClose, projects, onOpen, onRemove }: MyCoursesDrawerProps) {
+export function MyCoursesDrawer({
+  open,
+  onClose,
+  projects,
+  openingId,
+  error,
+  onOpen,
+  onRemove,
+}: MyCoursesDrawerProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -58,8 +74,14 @@ export function MyCoursesDrawer({ open, onClose, projects, onOpen, onRemove }: M
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
-          <ProjectList projects={projects} onOpen={onOpen} onRemove={onRemove} />
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-4">
+          {error && <Alert messages={[error]} />}
+          <ProjectList
+            projects={projects}
+            openingId={openingId}
+            onOpen={onOpen}
+            onRemove={onRemove}
+          />
         </div>
       </div>
     </dialog>

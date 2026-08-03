@@ -4,6 +4,7 @@ import { openProjectFile } from '@/persistence/session';
 import { getTemplate } from '@/templates';
 import type { TemplateResult } from '@/templates';
 import { APP_NAME, APP_VERSION } from '@/version';
+import { Alert } from '../ui/Alert';
 import { Hero } from './Hero';
 import { MyCoursesDrawer } from './MyCoursesDrawer';
 import { useRecentProjects } from './useRecentProjects';
@@ -28,7 +29,7 @@ interface WelcomeScreenProps {
  * הגרירה תמיד תפסה את כל המסך אבל שום דבר לא הראה זאת.
  */
 export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
-  const { featured, rest, open, remove } = useRecentProjects(onOpened);
+  const { featured, rest, error, openingId, open, remove } = useRecentProjects(onOpened);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileErrors, setFileErrors] = useState<string[]>([]);
@@ -80,6 +81,16 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
     >
       <Header hasProjects={hasProjects} onOpenCourses={() => setCoursesOpen(true)} />
 
+      {/*
+        כשל אחסון מוצג כאן ולא נבלע: משתמשת שהעבודה שלה אינה מופיעה צריכה
+        לדעת שזו תקלת דפדפן ולא לומדה שנעלמה. מעל ה-Hero כדי שלא יפספסו אותו
+      */}
+      {error && !coursesOpen && (
+        <div className="mx-auto max-w-5xl px-6 pt-4">
+          <Alert messages={[error]} />
+        </div>
+      )}
+
       {/* נחיתה אחת לכולם — מוצגת תמיד, גם אחרי שנבנו לומדות */}
       <Hero onBuild={() => startTemplate('blank')} />
       <Closer loading={loading} fileErrors={fileErrors} onPickFile={pickFile} />
@@ -89,6 +100,8 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
         open={coursesOpen}
         onClose={() => setCoursesOpen(false)}
         projects={allProjects}
+        openingId={openingId}
+        error={error}
         onOpen={(id) => void open(id)}
         onRemove={(project) => void remove(project)}
       />
@@ -202,11 +215,9 @@ function ImportRow({
       </div>
 
       {fileErrors.length > 0 && (
-        <ul className="mt-3 space-y-1 rounded-xl bg-warn-soft px-4 py-3 text-sm leading-relaxed text-warn">
-          {fileErrors.map((message) => (
-            <li key={message}>{message}</li>
-          ))}
-        </ul>
+        <div className="mt-3">
+          <Alert messages={fileErrors} />
+        </div>
       )}
     </section>
   );
