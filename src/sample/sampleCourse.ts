@@ -149,7 +149,7 @@ function principlesChapter(outlineAssetId: string) {
       }),
 
       createBlock('divider', {
-        content: { style: 'line', icon: 'Sparkle', height: 'medium', lineWidth: 'half' },
+        content: { style: 'line', icon: 'Sparkle', height: 'small', lineWidth: 'half' },
       }),
 
       createBlock('richText', {

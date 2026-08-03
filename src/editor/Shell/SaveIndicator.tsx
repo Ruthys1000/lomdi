@@ -41,11 +41,12 @@ export function SaveIndicator() {
       <button
         type="button"
         onClick={() => void saveNow()}
-        title={error ?? undefined}
-        className="inline-flex items-center gap-1.5 rounded-lg bg-danger-soft px-2 py-1 text-xs font-semibold text-danger transition hover:bg-danger-soft"
+        title={error ?? 'השמירה נכשלה — נסו שוב'}
+        className="inline-flex items-center gap-1.5 rounded-lg bg-danger-soft px-1.5 py-1 text-xs font-semibold text-danger transition hover:bg-danger-soft sm:px-2"
       >
-        <AlertTriangle className="size-3.5" aria-hidden />
-        השמירה נכשלה — נסו שוב
+        <AlertTriangle className="size-3.5 shrink-0" aria-hidden />
+        <span className="hidden sm:inline">השמירה נכשלה — נסו שוב</span>
+        <span className="sm:hidden">שגיאה</span>
       </button>
     );
   }
@@ -61,12 +62,18 @@ export function SaveIndicator() {
 
   return (
     <span
-      className="inline-flex items-center gap-1.5 whitespace-nowrap px-2 text-xs text-shell-muted"
+      className="inline-flex max-w-none items-center gap-1.5 whitespace-nowrap px-1 text-xs text-shell-muted sm:px-2"
       role="status"
       aria-live="polite"
+      title={text}
     >
-      <Icon className="size-3.5" aria-hidden />
-      {text}
+      <Icon className="size-3.5 shrink-0" aria-hidden />
+      {/*
+        במובייל הטקסט הארוך ("שמירה אוטומטית פעילה") דחק את Preview/Save
+        מחוץ לסרגל. האייקון + title מספיקים; הטקסט חוזר מ-sm ומעלה.
+      */}
+      <span className="hidden sm:inline">{text}</span>
+      <span className="sr-only sm:hidden">{text}</span>
     </span>
   );
 }

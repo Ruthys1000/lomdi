@@ -109,4 +109,22 @@ describe('הסרגל העליון', () => {
 
     expect(toasts()).toEqual([]);
   });
+
+  it('תצוגה מקדימה ושמירת קובץ נשארות גלויות מחוץ לתפריט ״עוד״', () => {
+    render(<TopBar />);
+
+    // אלה הפעולות שנעלמו במובייל כשהסרגל הצטופף אחרי טעינת דוגמה
+    expect(screen.getByRole('button', { name: 'תצוגה מקדימה' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /שמירת קובץ פרויקט/ }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'עוד פעולות' }));
+
+    expect(screen.getByRole('menuitem', { name: 'ספריית הנכסים' })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'פתיחת קובץ פרויקט' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('menuitem', { name: 'ייצוא לומדה עצמאית' }),
+    ).toBeInTheDocument();
+  });
 });

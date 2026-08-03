@@ -162,14 +162,14 @@ export function EditorCanvas() {
 
   return (
     <section
-      className="min-h-0 overflow-y-auto bg-panel-2 p-6"
+      className="min-h-0 overflow-y-auto bg-panel-2 px-0 py-2 sm:p-4 lg:p-6"
       aria-label="אזור העריכה"
       onClick={(event) => {
         if (event.target === event.currentTarget) clearSelection();
       }}
     >
       <div
-        className="mx-auto overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-edge transition-[max-width] duration-200"
+        className="mx-auto overflow-hidden bg-white shadow-sm ring-1 ring-edge transition-[max-width] duration-200 sm:rounded-xl"
         style={{ maxWidth: width ? `${width}px` : '100%' }}
       >
         <DndContext
