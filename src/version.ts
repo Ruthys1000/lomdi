@@ -6,4 +6,6 @@
  * מה שהלומד מוריד.
  */
 export const APP_NAME = 'לומדי';
+/** שם המותג בנחיתה ובשיווק — כולל AI, בניגוד לשם הקצר בקבצי תוצר */
+export const APP_BRAND = 'לומדי AI';
 export const APP_VERSION = '0.1.0';
