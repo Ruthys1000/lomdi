@@ -21,7 +21,7 @@ export function ImagePromptField({
 
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(value);
+      await navigator.clipboard.writeText(value ?? '');
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
@@ -35,7 +35,7 @@ export function ImagePromptField({
         <label htmlFor={id} className="block text-xs font-medium text-fg-soft">
           פרומפט מומלץ לתמונה
         </label>
-        {value.trim() && (
+        {value?.trim() && (
           <button
             type="button"
             onClick={() => void copy()}
@@ -49,7 +49,7 @@ export function ImagePromptField({
       <textarea
         id={id}
         rows={3}
-        value={value}
+        value={value ?? ''}
         dir="ltr"
         placeholder="a clean modern illustration of…"
         onChange={(event) => onChange(event.target.value)}

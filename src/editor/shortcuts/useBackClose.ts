@@ -10,7 +10,20 @@ import { useEffect, useRef } from 'react';
  *
  * כל שכבה מנהלת רשומה משלה, ולכן שכבות מוערמות נסגרות LIFO — בדיוק מה שהמשתמש
  * מצפה מ"חזרה". `onClose` נשמר ב-ref כדי שהאפקט לא יידחוף רשומה חדשה בכל רינדור.
+ *
+ * **בטיחות הערמה:** אירוע `popstate` מגיע ל*כל* המאזינים בכל ניווט, ולא רק
+ * למאזין של הרשומה שנבלעה. בלי הגנה, סגירת שכבה פנימית (ה-`history.back()` שלה)
+ * הייתה מפעילה בטעות גם את `onClose` של השכבה החיצונית — למשל הוספת בלוק דרך
+ * הספרייה שהחזירה את המשתמש ממסך העריכה למסך הפתיחה. לכן כל רשומה מתויגת ב-id
+ * ייחודי, ו-`onClose` נקרא רק כשהרשומה *שלנו* כבר אינה הנוכחית (כלומר אנחנו
+ * נבלענו ב-back), ולא כששכבה שמעלינו נסגרה וחזרנו להיות הנוכחיים.
  */
+let overlayCounter = 0;
+
+interface OverlayState {
+  lcOverlayId?: number;
+}
+
 export function useBackClose(active: boolean, onClose: () => void): void {
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
@@ -18,10 +31,16 @@ export function useBackClose(active: boolean, onClose: () => void): void {
   useEffect(() => {
     if (!active || typeof window === 'undefined') return;
 
-    window.history.pushState({ lcOverlay: true }, '');
+    const id = ++overlayCounter;
+    window.history.pushState({ lcOverlayId: id } satisfies OverlayState, '');
 
     let closedByBack = false;
-    const onPop = () => {
+    const onPop = (event: PopStateEvent) => {
+      // אם הרשומה שלנו שוב הנוכחית — שכבה פנימית מעלינו נסגרה, לא אנחנו.
+      // מתעלמים, כדי שלא נסגור את עצמנו על סגירת שכבה אחרת.
+      const current = (event.state as OverlayState | null)?.lcOverlayId;
+      if (current === id) return;
+
       closedByBack = true;
       onCloseRef.current();
     };

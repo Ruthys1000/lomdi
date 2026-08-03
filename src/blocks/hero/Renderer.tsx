@@ -30,7 +30,7 @@ export function HeroRenderer({ block }: { block: BlockOf<HeroContent> }) {
   // רמז ליוצר: hero שנועד לתמונה אך עדיין ריק — מציג תג עם הפרומפט המומלץ,
   // רק בסביבות היוצר (לא בתוצר של הלומד).
   const showImageHint =
-    authoring && content.backgroundType === 'image' && !imageUrl && Boolean(content.imagePrompt.trim());
+    authoring && content.backgroundType === 'image' && !imageUrl && Boolean(content.imagePrompt?.trim());
 
   return (
     <section

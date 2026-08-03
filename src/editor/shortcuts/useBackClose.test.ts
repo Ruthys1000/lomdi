@@ -48,4 +48,24 @@ describe('useBackClose', () => {
     unmount();
     expect(back).not.toHaveBeenCalled();
   });
+
+  // רגרסיה: סגירת שכבה פנימית לא תסגור את השכבה החיצונית. זה היה הבאג שבו
+  // הוספת בלוק דרך הספרייה החזירה את המשתמש ממסך העריכה למסך הפתיחה.
+  it('שכבה חיצונית לא נסגרת כשנסגרת שכבה פנימית מעליה', () => {
+    const pushed: unknown[] = [];
+    vi.spyOn(window.history, 'pushState').mockImplementation((state) => {
+      pushed.push(state);
+    });
+
+    const outerClose = vi.fn();
+    const innerClose = vi.fn();
+    renderHook(() => useBackClose(true, outerClose)); // דוחף את רשומת השכבה החיצונית
+    renderHook(() => useBackClose(true, innerClose)); // דוחף את רשומת השכבה הפנימית
+
+    // ה-back של השכבה הפנימית נוחת חזרה על הרשומה של השכבה החיצונית
+    window.dispatchEvent(new PopStateEvent('popstate', { state: pushed[0] }));
+
+    expect(outerClose).not.toHaveBeenCalled();
+    expect(innerClose).toHaveBeenCalledTimes(1);
+  });
 });
