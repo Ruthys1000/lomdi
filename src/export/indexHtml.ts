@@ -1,7 +1,7 @@
 import { themeToCssVars } from '@/renderer/theme/themeToCssVars';
 import { COURSE_DATA_ELEMENT_ID, type EmbeddedCourseData } from '@/runtime/readCourseData';
 import { APP_NAME, APP_VERSION } from '@/version';
-import { fontCssPath } from './fonts';
+import { fontCssPaths } from './fonts';
 
 /**
  * `index.html` של הלומדה המיוצאת.
@@ -99,9 +99,11 @@ export interface IndexHtmlOptions {
 export function buildIndexHtml(data: EmbeddedCourseData, options: IndexHtmlOptions = {}): string {
   const { course } = data;
   const description = course.description || course.subtitle || '';
-  // הגופן נטען לפני גיליון הלומדה: כך ה-@font-face מוכר כשהכללים שמשתמשים
+  // הגופנים נטענים לפני גיליון הלומדה: כך ה-@font-face מוכר כשהכללים שמשתמשים
   // בו נקראים, ואין רגע של טקסט בגופן ברירת המחדל שקופץ אחר כך
-  const fontCss = fontCssPath(course.theme);
+  const fontLinks = fontCssPaths(course.theme)
+    .map((href) => `    <link rel="stylesheet" href="${href}" />\n`)
+    .join('');
   const preRuntime = (options.preRuntimeScripts ?? [])
     .map((src) => `    <script src="${src}"></script>\n`)
     .join('');
@@ -114,7 +116,7 @@ export function buildIndexHtml(data: EmbeddedCourseData, options: IndexHtmlOptio
     <meta name="generator" content="${escapeHtml(`${APP_NAME} ${APP_VERSION}`)}" />
 ${description ? `    <meta name="description" content="${escapeHtml(description)}" />\n` : ''}    <link rel="icon" href="${faviconDataUri(course.theme.colors.primary)}" />
     <title>${escapeHtml(course.title)}</title>
-${fontCss ? `    <link rel="stylesheet" href="${fontCss}" />\n` : ''}    <link rel="stylesheet" href="${RUNTIME_STYLES}" />
+${fontLinks}    <link rel="stylesheet" href="${RUNTIME_STYLES}" />
     <style>
 ${documentShellCss(data)}
     </style>

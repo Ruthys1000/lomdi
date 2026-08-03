@@ -60,7 +60,7 @@ beforeAll(() => {
   try {
     const css = readFileSync(join(FONTS_DIR, 'heebo.css'), 'utf8');
     fonts = {
-      css: { path: 'fonts/heebo.css', content: css },
+      stylesheets: [{ path: 'fonts/heebo.css', content: css }],
       files: fontFilesIn(css).map((name) => ({
         path: `fonts/${name}`,
         // Uint8Array ולא Blob, מאותה סיבה כמו התמונה למטה

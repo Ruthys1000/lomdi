@@ -6,6 +6,10 @@ import type { Theme, ThemePresetId } from './types';
  * כל הצמדים של טקסט על רקע נבדקו לניגודיות של 4.5:1 לפחות (WCAG AA),
  * כדי שערכה שנבחרה בלחיצה אחת לא תייצר לומדה לא קריאה. `themes.test.ts`
  * אוכף את זה על כל ערכה — הבטחה בהערה אינה נשמרת לבד.
+ *
+ * כל ערכה אמורה להרגיש כמו מערכת עיצוב קטנה (פלטה + טיפוגרפיה + צורה),
+ * לא רק החלפת primary. זיווג גופן כותרת/גוף, סגנון כפתור/כרטיס וצפיפות
+ * הם חלק מהזהות.
  */
 
 export interface ThemePreset {
@@ -47,7 +51,7 @@ export const themePresets: ThemePreset[] = [
   {
     id: 'darkElegant',
     name: 'כהה ואלגנטי',
-    description: 'רקע כהה עם הדגשות חמות. מתאים לתוכן קצר ולמצגות תדמית.',
+    description: 'רקע כהה שקט עם תכלת חם. מצגות תדמית ותוכן קצר — לא ניאון.',
     theme: {
       preset: 'darkElegant',
       colors: {
@@ -60,28 +64,39 @@ export const themePresets: ThemePreset[] = [
         textMuted: '#a3b1c4',
         border: '#26344a',
       },
-      typography: { ...baseTypography, headingWeight: 600 },
-      shape: { radius: 16, shadow: 'medium', buttonStyle: 'solid', cardStyle: 'bordered' },
+      typography: {
+        ...baseTypography,
+        fontFamily: 'heebo',
+        headingFamily: 'rubik',
+        headingWeight: 600,
+        headingStyle: 'plain',
+      },
+      shape: { radius: 16, shadow: 'soft', buttonStyle: 'outline', cardStyle: 'bordered' },
       layout: { contentMaxWidth: 760, density: 'comfortable' },
     },
   },
   {
     id: 'vivid',
     name: 'צבעוני ומודרני',
-    description: 'צבעים חיים וכותרות בולטות. מתאים להדרכות קצרות ולאונבורדינג.',
+    description: 'טורקיז וורוד-אלמוג על לבן. אנרגטי לאונבורדינג ולהדרכות קצרות — בלי סגול SaaS.',
     theme: {
       preset: 'vivid',
       colors: {
-        primary: '#7c3aed',
-        secondary: '#0f766e',
-        accent: '#ec4899',
+        primary: '#0d9488',
+        secondary: '#134e4a',
+        accent: '#f43f5e',
         background: '#ffffff',
-        surface: '#f5f3ff',
-        text: '#1e1b32',
-        textMuted: '#5f5a7a',
-        border: '#e5e0f7',
+        surface: '#f0fdfa',
+        text: '#042f2e',
+        textMuted: '#3f6864',
+        border: '#cce7e2',
       },
-      typography: { ...baseTypography, headingWeight: 800, headingStyle: 'accentBar' },
+      typography: {
+        ...baseTypography,
+        fontFamily: 'rubik',
+        headingWeight: 800,
+        headingStyle: 'accentBar',
+      },
       shape: { radius: 20, shadow: 'medium', buttonStyle: 'soft', cardStyle: 'elevated' },
       layout: { contentMaxWidth: 820, density: 'spacious' },
     },
@@ -89,34 +104,40 @@ export const themePresets: ThemePreset[] = [
   {
     id: 'warmSand',
     name: 'חול חם',
-    description: 'גווני חול, חימר וטרקוטה. רקע חמים שנעים לקריאה ארוכה.',
+    description: 'גווני חול וחימר עם טיל כהה. רקע חמים לקריאה ארוכה וסיפורית.',
     theme: {
       preset: 'warmSand',
       colors: {
-        primary: '#a2543a',
+        primary: '#9a3412',
         secondary: '#7c5c3b',
         accent: '#0f766e',
         // שבור-לבן חם ולא לבן: הרקע הוא חצי מהאופי של הערכה הזו
-        background: '#fdfaf5',
-        surface: '#f5ece0',
-        text: '#33261c',
+        background: '#faf6f0',
+        surface: '#f3ebe0',
+        text: '#2c2118',
         textMuted: '#6d5949',
-        border: '#e6d6c4',
+        border: '#e2d3c2',
       },
-      typography: { ...baseTypography, fontFamily: 'assistant' },
+      typography: {
+        ...baseTypography,
+        fontFamily: 'assistant',
+        headingFamily: 'heebo',
+        headingWeight: 700,
+        headingStyle: 'underline',
+      },
       shape: { radius: 12, shadow: 'soft', buttonStyle: 'solid', cardStyle: 'bordered' },
-      layout: { contentMaxWidth: 760, density: 'comfortable' },
+      layout: { contentMaxWidth: 720, density: 'comfortable' },
     },
   },
   {
     id: 'forest',
     name: 'ירוק יער',
-    description: 'ירוק עמוק על רקע קרם, עם הדגשת ענבר. רגוע ורציני.',
+    description: 'ירוק עמוק על רקע קרם, עם הדגשת ענבר. רגוע ורציני — לנהלים ומדיניות.',
     theme: {
       preset: 'forest',
       colors: {
         primary: '#166534',
-        secondary: '#14532d',
+        secondary: '#3f6212',
         accent: '#b45309',
         background: '#fbfdfa',
         surface: '#eef5ee',
@@ -124,7 +145,13 @@ export const themePresets: ThemePreset[] = [
         textMuted: '#4f6355',
         border: '#d3e3d6',
       },
-      typography: { ...baseTypography, headingWeight: 700, headingStyle: 'underline' },
+      typography: {
+        ...baseTypography,
+        fontFamily: 'heebo',
+        headingFamily: 'assistant',
+        headingWeight: 700,
+        headingStyle: 'underline',
+      },
       shape: { radius: 10, shadow: 'soft', buttonStyle: 'solid', cardStyle: 'bordered' },
       layout: { contentMaxWidth: 780, density: 'comfortable' },
     },
@@ -148,9 +175,9 @@ export const themePresets: ThemePreset[] = [
         border: '#000000',
       },
       typography: { ...baseTypography, baseSize: 18, headingWeight: 800 },
-      // בלי צללים: קווי מתאר מלאים נראים גם במסך זול ובהדפסה, צל לא
-      shape: { radius: 6, shadow: 'none', buttonStyle: 'solid', cardStyle: 'bordered' },
-      layout: { contentMaxWidth: 760, density: 'comfortable' },
+      // בלי צללים: קווי מתאר מלאים נראים גם במסך זול ובהדפסה; כפתור outline מדגיש מסגרת
+      shape: { radius: 6, shadow: 'none', buttonStyle: 'outline', cardStyle: 'flat' },
+      layout: { contentMaxWidth: 760, density: 'compact' },
     },
   },
   {
@@ -169,7 +196,12 @@ export const themePresets: ThemePreset[] = [
         textMuted: '#7a2f52',
         border: '#f6cddd',
       },
-      typography: { ...baseTypography, headingWeight: 800, headingStyle: 'accentBar' },
+      typography: {
+        ...baseTypography,
+        fontFamily: 'rubik',
+        headingWeight: 800,
+        headingStyle: 'accentBar',
+      },
       shape: { radius: 22, shadow: 'medium', buttonStyle: 'solid', cardStyle: 'elevated' },
       layout: { contentMaxWidth: 820, density: 'spacious' },
     },
@@ -177,7 +209,7 @@ export const themePresets: ThemePreset[] = [
   {
     id: 'midnight',
     name: 'חצות',
-    description: 'רקע כהה עמוק עם ניאון תכלת וסגול. דרמטי ומודרני — למצגות ולתוכן קצר.',
+    description: 'נייבי עמוק עם אינדיגו וציאן זוהר. דרמטי ומודרני — למצגות ולתוכן קצר.',
     theme: {
       preset: 'midnight',
       colors: {
@@ -190,8 +222,13 @@ export const themePresets: ThemePreset[] = [
         textMuted: '#9fb0d0',
         border: '#263154',
       },
-      typography: { ...baseTypography, headingWeight: 800 },
-      shape: { radius: 18, shadow: 'medium', buttonStyle: 'solid', cardStyle: 'elevated' },
+      typography: {
+        ...baseTypography,
+        fontFamily: 'rubik',
+        headingWeight: 800,
+        headingStyle: 'accentBar',
+      },
+      shape: { radius: 18, shadow: 'medium', buttonStyle: 'soft', cardStyle: 'elevated' },
       layout: { contentMaxWidth: 800, density: 'spacious' },
     },
   },

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { defaultTheme } from '@/model/themes';
 import type { Theme } from '@/model/types';
 import { ExportError } from './runtimeBundle';
-import { fontCssPath, fontFilesIn, loadFontBundle } from './fonts';
+import { fontCssPath, fontCssPaths, fontFamiliesFor, fontFilesIn, loadFontBundle } from './fonts';
 
 /**
  * הגופן הוא ההבדל בין "הלומדה נראית כמו שתוכננה בכל מחשב" לבין "הלומדה
@@ -23,9 +23,22 @@ const HEEBO_CSS = `@font-face {
   unicode-range: U+0000-00FF;
 }`;
 
-const themeWith = (fontFamily: Theme['typography']['fontFamily']): Theme => ({
+const RUBIK_CSS = `@font-face {
+  font-family: 'Rubik Variable';
+  src: url(rubik-hebrew-wght-normal.woff2) format('woff2-variations');
+}
+
+@font-face {
+  font-family: 'Rubik Variable';
+  src: url(rubik-latin-wght-normal.woff2) format('woff2-variations');
+}`;
+
+const themeWith = (
+  fontFamily: Theme['typography']['fontFamily'],
+  headingFamily?: Theme['typography']['headingFamily'],
+): Theme => ({
   ...defaultTheme,
-  typography: { ...defaultTheme.typography, fontFamily },
+  typography: { ...defaultTheme.typography, fontFamily, headingFamily },
 });
 
 const respond = (body: string) =>
@@ -48,23 +61,36 @@ const bundle = {
   'fonts/heebo.css': HEEBO_CSS,
   'fonts/heebo-hebrew-wght-normal.woff2': 'wOF2-hebrew',
   'fonts/heebo-latin-wght-normal.woff2': 'wOF2-latin',
+  'fonts/rubik.css': RUBIK_CSS,
+  'fonts/rubik-hebrew-wght-normal.woff2': 'wOF2-rubik-he',
+  'fonts/rubik-latin-wght-normal.woff2': 'wOF2-rubik-la',
   'fonts/OFL.txt': 'SIL Open Font License 1.1',
 };
 
 const options = { fetchImpl: fetchOf(bundle), baseUrl: 'http://localhost:5173/' };
 
 describe('בחירת הגופן שנארז', () => {
-  it('נארזת רק המשפחה שהערכה בחרה', () => {
+  it('נארזת את משפחת הגוף שהערכה בחרה', () => {
     expect(fontCssPath(themeWith('heebo'))).toBe('fonts/heebo.css');
     expect(fontCssPath(themeWith('rubik'))).toBe('fonts/rubik.css');
+    expect(fontCssPaths(themeWith('heebo'))).toEqual(['fonts/heebo.css']);
+  });
+
+  it('כשגופן הכותרות שונה — נארזות שתי המשפחות', () => {
+    expect(fontFamiliesFor(themeWith('heebo', 'rubik'))).toEqual(['heebo', 'rubik']);
+    expect(fontCssPaths(themeWith('heebo', 'rubik'))).toEqual([
+      'fonts/heebo.css',
+      'fonts/rubik.css',
+    ]);
   });
 
   it('גופן המערכת אינו אורז דבר — אין מה להטמיע', async () => {
     expect(fontCssPath(themeWith('system'))).toBeNull();
+    expect(fontCssPaths(themeWith('system'))).toEqual([]);
 
     const fonts = await loadFontBundle(themeWith('system'), options);
 
-    expect(fonts.css).toBeNull();
+    expect(fonts.stylesheets).toEqual([]);
     expect(fonts.files).toEqual([]);
   });
 });
@@ -88,13 +114,28 @@ describe('טעינת חבילת הגופן לייצוא', () => {
   it('מחזירה את הגיליון, את הקבצים ואת הרישיון', async () => {
     const fonts = await loadFontBundle(themeWith('heebo'), options);
 
-    expect(fonts.css?.path).toBe('fonts/heebo.css');
+    expect(fonts.stylesheets).toEqual([{ path: 'fonts/heebo.css', content: HEEBO_CSS }]);
     expect(fonts.files.map((file) => file.path)).toEqual([
       'fonts/heebo-hebrew-wght-normal.woff2',
       'fonts/heebo-latin-wght-normal.woff2',
     ]);
     // OFL 1.1 מחייב שהרישיון ילווה את הקבצים בכל הפצה
     expect(fonts.license).toContain('Open Font License');
+  });
+
+  it('אורזת גם גופן כותרות נפרד בלי לשכפל קבצים', async () => {
+    const fonts = await loadFontBundle(themeWith('heebo', 'rubik'), options);
+
+    expect(fonts.stylesheets.map((sheet) => sheet.path)).toEqual([
+      'fonts/heebo.css',
+      'fonts/rubik.css',
+    ]);
+    expect(fonts.files.map((file) => file.path)).toEqual([
+      'fonts/heebo-hebrew-wght-normal.woff2',
+      'fonts/heebo-latin-wght-normal.woff2',
+      'fonts/rubik-hebrew-wght-normal.woff2',
+      'fonts/rubik-latin-wght-normal.woff2',
+    ]);
   });
 
   it('עוצרת כשקובץ גופן חסר, במקום לארוז CSS שמפנה לשום מקום', async () => {

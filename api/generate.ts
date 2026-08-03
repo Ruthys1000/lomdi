@@ -394,7 +394,17 @@ nodes מותרים: doc, paragraph, text, heading(attrs.level 2–4), bulletList
 marks מותרים: bold, italic, underline, strike, link.
 דוגמה: {"type":"doc","content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"text","text":"כותרת"}]},{"type":"paragraph","content":[{"type":"text","text":"פסקה."}]},{"type":"bulletList","content":[{"type":"listItem","content":[{"type":"paragraph","content":[{"type":"text","text":"פריט"}]}]}]}]}`;
 
-const THEMES = 'ערכות עיצוב (בחר id בשדה theme של הלומדה): clean, darkElegant, vivid, warmSand, forest, highContrast, sunset, midnight.';
+const THEMES = [
+  'ערכות עיצוב (בחר id בשדה theme — התאם לנושא ולטון):',
+  '- clean — נקי ובהיר: נהלים, מדיניות, הדרכות ארוכות.',
+  '- darkElegant — כהה שקט עם תכלת: מצגות תדמית, תוכן קצר אלגנטי.',
+  '- vivid — טורקיז ואלמוג: אונבורדינג והדרכות קצרות ואנרגטיות.',
+  '- warmSand — חול חם: קריאה ארוכה וסיפורית.',
+  '- forest — ירוק יער: נהלים רציניים, בטיחות, ציות.',
+  '- highContrast — שחור-לבן+צהוב: נגישות ומסכים חלשים.',
+  '- sunset — ורוד/ענבר חגיגי: השקות, קמפיינים, אונבורדינג חם.',
+  '- midnight — נייבי+ציאן זוהר: מצגות דרמטיות ותוכן קצר מודרני.',
+].join('\n');
 
 const GENERIC_EXAMPLE = {
   title: 'בטיחות במשרד',

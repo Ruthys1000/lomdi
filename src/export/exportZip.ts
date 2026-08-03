@@ -104,8 +104,10 @@ export async function buildCourseZip({
   root.file(RUNTIME_SCRIPT, runtime.appJs);
   root.file(RUNTIME_STYLES, runtime.stylesCss);
 
-  if (fonts.css) {
-    root.file(fonts.css.path, fonts.css.content);
+  if (fonts.stylesheets.length > 0) {
+    for (const sheet of fonts.stylesheets) {
+      root.file(sheet.path, sheet.content);
+    }
     for (const file of fonts.files) root.file(file.path, file.blob);
     // OFL 1.1 מחייב שהרישיון ילווה את קובצי הגופן בכל הפצה
     if (fonts.license) root.file(FONT_LICENSE, fonts.license);

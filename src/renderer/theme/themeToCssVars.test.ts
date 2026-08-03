@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { themePresets } from '@/model/themes';
 import {
   contrastRatio,
+  heroGradientStops,
   isDarkSurface,
   readableTextOn,
   themeToCssVarMap,
@@ -29,6 +30,24 @@ describe('themeToCssVars', () => {
 
     expect(vars['--lc-font-size-base']).toMatch(/^\d+px$/);
     expect(vars['--lc-radius']).toMatch(/^\d+px$/);
+  });
+
+  it('מזריקה צללים כהים לערכה כהה', () => {
+    const midnight = themePresets.find((preset) => preset.id === 'midnight')!.theme;
+    const vars = themeToCssVarMap(midnight);
+
+    expect(vars['--lc-shadow']).toContain('rgb(0 0 0');
+    expect(vars['--lc-shadow-card']).toContain('rgb(0 0 0');
+  });
+
+  it('מחשבת גרדיאנט hero עם ניגודיות טקסט לבן', () => {
+    const elegant = themePresets.find((preset) => preset.id === 'darkElegant')!.theme;
+    const vars = themeToCssVarMap(elegant);
+
+    expect(vars['--lc-gradient-hero']).toMatch(/^linear-gradient\(135deg,/);
+    for (const stop of heroGradientStops(elegant.colors.primary, elegant.colors.accent)) {
+      expect(contrastRatio('#ffffff', stop)).toBeGreaterThanOrEqual(4.5);
+    }
   });
 });
 

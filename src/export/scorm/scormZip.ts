@@ -50,9 +50,11 @@ export async function buildScormZip({
   zip.file(RUNTIME_STYLES, runtime.stylesCss);
   zip.file(CONTENT_JSON, JSON.stringify(payload, null, 2));
 
-  if (fonts.css) {
-    zip.file(fonts.css.path, fonts.css.content);
-    paths.push(fonts.css.path);
+  if (fonts.stylesheets.length > 0) {
+    for (const sheet of fonts.stylesheets) {
+      zip.file(sheet.path, sheet.content);
+      paths.push(sheet.path);
+    }
     for (const file of fonts.files) {
       zip.file(file.path, file.blob);
       paths.push(file.path);
