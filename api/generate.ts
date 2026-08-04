@@ -23,6 +23,48 @@ export const config = { maxDuration: 800 };
 
 const MAX_INPUT_CHARS = 20_000;
 
+/**
+ * פרמטרי המודל לפי פורמט — מאזנים איכות מול זמן המתנה.
+ *
+ * Opus נשאר בכל הפורמטים: עם Sonnet התוכן יצא "רזה" מדי. את עיקר החיסכון
+ * בזמן משיגים מ-thinking, לא מהחלפת מודל:
+ *   - פורמטים מובנים (צ׳ק-ליסט / תהליך / עמוד אחד / אתגר): השלד כבר בפרומפט,
+ *     אז thinking מבוטל — חוסך את שלב החשיבה הארוך לפני הכתיבה.
+ *   - פורמטים נרטיביים (תרחיש / חקר מקרה) והגנרי: thinking adaptive עם
+ *     effort נמוך (ירד מ-medium) — עדיין עוזר לתכנון ענפים/פרקים, בלי
+ *     ההמתנה של medium/high.
+ */
+type GenerationModelParams = {
+  model: 'claude-opus-5';
+  max_tokens: number;
+  thinking: { type: 'disabled' } | { type: 'adaptive' };
+  output_config: { effort: 'low' | 'medium' };
+};
+
+/** פורמטים עם שלד קשיח בפרומפט — לא זקוקים לחשיבה מורחבת לפני ה-JSON. */
+const STRUCTURED_FORMATS = new Set(['onePager', 'process', 'checklist', 'challenge']);
+
+export function generationModelParams(format: string | undefined): GenerationModelParams {
+  // Opus ולא Sonnet: איכות ועושר התוכן חשובים כאן יותר מהמהירות.
+  if (format && STRUCTURED_FORMATS.has(format)) {
+    return {
+      model: 'claude-opus-5',
+      max_tokens: 24_000,
+      thinking: { type: 'disabled' },
+      // בלי thinking, medium שומר על עומק הכתיבה בלי לשלם על reasoning.
+      output_config: { effort: 'medium' },
+    };
+  }
+  return {
+    model: 'claude-opus-5',
+    max_tokens: 32_000,
+    thinking: { type: 'adaptive' },
+    // effort low מאזן איכות מול זמן: medium האריך את ההמתנה מדי אחרי ש-high
+    // כבר נפסל; יצירת JSON עם שלד בפרומפט אינה הוכחה מתמטית.
+    output_config: { effort: 'low' },
+  };
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'שיטה לא נתמכת.' });
@@ -73,18 +115,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   let activeStream: ReturnType<typeof client.messages.stream> | null = null;
 
   // ניסיון יצירה בודד: פותח stream, מסמן אותו כפעיל, וממתין לתשובה המלאה.
-  // הפרמטרים זהים בכל ניסיון.
+  // הפרמטרים זהים בכל ניסיון (לפי הפורמט).
+  const modelParams = generationModelParams(format);
   const attemptGenerate = (): Promise<Anthropic.Message> => {
     const stream = client.messages.stream({
-      // Opus ולא Sonnet: איכות ועושר התוכן חשובים כאן יותר מהמהירות — התרחישים
-      // והדפים יוצאים "רזים" מדי עם מודל מהיר. ה-heartbeat של הסטרימינג ממילא
-      // שומר על החיבור חי לאורך ההמתנה הארוכה יותר, ושכבת הריפוי מבטיחה חוסן.
-      model: 'claude-opus-5',
-      max_tokens: 32_000,
-      thinking: { type: 'adaptive' },
-      // effort medium מאזן איכות מול זמן: יצירת ה-JSON היא משימת חילוץ מובנית,
-      // לא הוכחה מתמטית, ו-high האריך את ההמתנה מדי.
-      output_config: { effort: 'medium' },
+      ...modelParams,
       system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
       messages: [
         {

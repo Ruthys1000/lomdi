@@ -203,7 +203,7 @@ export function GenerateForm({ format, onBack, tone = 'light' }: GenerateFormPro
                 עברו {formatElapsed(elapsed)}
                 {elapsed >= 60 ? '' : ' · התחלה'}
               </span>
-              <span>בדרך כלל 2–3 דקות</span>
+              <span>בדרך כלל כ־1–2 דקות</span>
             </div>
           </div>
 

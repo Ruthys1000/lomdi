@@ -1,22 +1,22 @@
 import type { GenerateProgressStage } from '@/ai/generateCourse';
 
-/** אמצע טווח 2–3 דקות — בסיס לבר ההתקדמות (לא מגיע ל־100% עד שהתוצאה מגיעה). */
-export const EXPECTED_SECONDS = 150;
+/** אמצע טווח ~1–2 דקות — בסיס לבר ההתקדמות (לא מגיע ל־100% עד שהתוצאה מגיעה). */
+export const EXPECTED_SECONDS = 90;
 
 export const WAIT_STEPS = [
   { id: 'read', label: 'קוראים ומבינים את התוכן', afterSec: 0 },
-  { id: 'structure', label: 'בונים את מבנה הדף', afterSec: 25 },
-  { id: 'write', label: 'כותבים תוכן לכל בלוק', afterSec: 55 },
-  { id: 'polish', label: 'מלטשים ומסיימים', afterSec: 110 },
+  { id: 'structure', label: 'בונים את מבנה הדף', afterSec: 15 },
+  { id: 'write', label: 'כותבים תוכן לכל בלוק', afterSec: 35 },
+  { id: 'polish', label: 'מלטשים ומסיימים', afterSec: 65 },
 ] as const;
 
 const STATUS_LINES: ReadonlyArray<{ afterSec: number; text: string }> = [
   { afterSec: 0, text: 'מפצחים את התוכן ומארגנים פרקים…' },
-  { afterSec: 20, text: 'בונים את שלד הדף לפי הפורמט…' },
-  { afterSec: 45, text: 'כותבים מלל עשיר לכל בלוק…' },
-  { afterSec: 80, text: 'מכינים פרומפטים לתמונות…' },
-  { afterSec: 120, text: 'עוד רגע — לומדות איכותיות לוקחות זמן…' },
-  { afterSec: 180, text: 'כמעט שם — ממשיכים ללטש…' },
+  { afterSec: 12, text: 'בונים את שלד הדף לפי הפורמט…' },
+  { afterSec: 28, text: 'כותבים מלל עשיר לכל בלוק…' },
+  { afterSec: 50, text: 'מכינים פרומפטים לתמונות…' },
+  { afterSec: 75, text: 'עוד רגע — מלטשים את התוצאה…' },
+  { afterSec: 120, text: 'כמעט שם — ממשיכים ללטש…' },
 ];
 
 export function formatElapsed(seconds: number): string {
@@ -25,7 +25,7 @@ export function formatElapsed(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-/** בר התקדמות לפי זמן — מתקרב ל־90% סביב 2.5 דקות, בלי להגיע לסיום. */
+/** בר התקדמות לפי זמן — מתקרב ל־90% סביב ~1.5 דקות, בלי להגיע לסיום. */
 export function estimateProgressPercent(elapsedSec: number): number {
   const t = Math.min(1, Math.max(0, elapsedSec) / EXPECTED_SECONDS);
   return Math.round((1 - (1 - t) ** 1.35) * 90);
