@@ -240,7 +240,8 @@
   font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.04em;
-  opacity: 0.78;
+  color: var(--color-volt-ink);
+  opacity: 0.9;
 }
 
 .lc-landing-preview__title {
@@ -256,7 +257,8 @@
   max-inline-size: 28ch;
   font-size: 0.82rem;
   line-height: 1.45;
-  opacity: 0.88;
+  color: var(--color-fg-soft);
+  opacity: 1;
 }
 
 .lc-landing-preview__body {

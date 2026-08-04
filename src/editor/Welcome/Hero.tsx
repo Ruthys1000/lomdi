@@ -40,7 +40,7 @@ export function Hero({ onCreateAi, onBuild }: HeroProps) {
             <button
               type="button"
               onClick={onCreateAi}
-              className="inline-flex items-center gap-2 rounded-xl bg-volt-ink px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#0d7a6c] sm:px-6 sm:text-base"
+              className="inline-flex items-center gap-2 rounded-xl bg-volt-ink px-5 py-3 text-sm font-extrabold text-white transition hover:brightness-110 sm:px-6 sm:text-base"
             >
               <Sparkles className="size-4.5" aria-hidden />
               צרו עם AI
