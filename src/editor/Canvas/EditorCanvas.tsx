@@ -16,7 +16,6 @@ import {
 } from '@dnd-kit/sortable';
 import { Plus } from 'lucide-react';
 import { blockLabel } from '@/blocks/labels';
-import { allowedBlockTypesFor } from '@/formats';
 import { CourseRenderer, type BlockWrapper } from '@/renderer/CourseRenderer';
 import { useCourseStore } from '@/state/courseStore';
 import { useEditorStore, viewportWidths } from '@/state/editorStore';
@@ -220,7 +219,6 @@ export function EditorCanvas() {
         open={libraryIndex !== null}
         onClose={() => setLibraryIndex(null)}
         onPick={handleAddBlock}
-        allowedTypes={allowedBlockTypesFor(course?.format)}
       />
 
       <ConfirmDialog
