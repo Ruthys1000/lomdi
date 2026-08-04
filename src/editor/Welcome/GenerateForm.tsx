@@ -131,7 +131,7 @@ export function GenerateForm({ format, onBack, tone = 'light' }: GenerateFormPro
             type="button"
             onClick={() => void generate()}
             disabled={!text.trim()}
-            className="inline-flex items-center gap-2 rounded-xl bg-volt px-6 py-3 font-extrabold text-on-volt transition hover:bg-volt-bright disabled:opacity-70"
+            className="inline-flex items-center gap-2 rounded-xl bg-volt-ink px-6 py-3 font-extrabold text-white transition hover:bg-[#0d7a6c] disabled:opacity-70"
           >
             <Sparkles className="size-4.5" aria-hidden />
             {`צרו ${format.label}`}
