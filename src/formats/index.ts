@@ -4,8 +4,8 @@
  * פורמט הוא "סוג חוויית הלמידה" שהמשתמש בוחר מראש (One Pager, Process,
  * Checklist…). זהו מקור האמת עבור:
  *   1. גלריית הבחירה במסך הפתיחה (label, tagline, preview).
- *   2. אילוצי העורך — אילו בלוקים מותרים (`allowedBlockTypes`) והאם מותר
- *      לפצל לפרקים (`allowChapters`).
+ *   2. הנחיית ה-AI ביצירה (`allowedBlockTypes`) והאם מותר לפצל לפרקים
+ *      (`allowChapters`). בעורך עצמו כל הבלוקים זמינים תמיד.
  *   3. רמז הקלט המותאם בטופס היצירה (`entryPlaceholder`).
  *
  * ה"אישיות" של הפורמט בצד ה-AI (role/interview/skeleton/example) חיה בנפרד
@@ -52,7 +52,10 @@ export interface FormatDefinition {
    * מפת הדרכים בלי להטעות (אותו דפוס כמו הבלוקים "בקרוב").
    */
   status: 'ready' | 'soon';
-  /** סוגי הבלוקים שמותר להוסיף בפורמט זה. מסנן את ספריית הבלוקים. */
+  /**
+   * סוגי הבלוקים שה-AI מעדיף בפורמט זה (שלד היצירה). בעורך כל הבלוקים
+   * זמינים תמיד — לא מסננים לפי השדה הזה.
+   */
   allowedBlockTypes: string[];
   /** האם מותר לפצל את הלומדה לכמה פרקים */
   allowChapters: boolean;
@@ -166,12 +169,4 @@ export const formatList: FormatDefinition[] = [
 export function getFormat(id: string | undefined): FormatDefinition | undefined {
   if (!id) return undefined;
   return formatRegistry[id as FormatId];
-}
-
-/**
- * סוגי הבלוקים המותרים ללומדה בפורמט נתון. פורמט לא מוכר או חסר (legacy)
- * מחזיר `undefined` — הקורא מפרש זאת כ"הכול מותר", כמו לפני הפיבוט.
- */
-export function allowedBlockTypesFor(formatId: string | undefined): string[] | undefined {
-  return getFormat(formatId)?.allowedBlockTypes;
 }

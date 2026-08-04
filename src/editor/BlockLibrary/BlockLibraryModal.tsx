@@ -10,8 +10,8 @@ interface BlockLibraryModalProps {
   onClose: () => void;
   onPick: (type: string) => void;
   /**
-   * סוגי הבלוקים המותרים בפורמט הנוכחי. `undefined` (לומדת legacy בלי פורמט)
-   * = כל הבלוקים מוצגים, כמו לפני הפיבוט.
+   * אופציונלי: הגבלת סוגי בלוקים. `undefined` = כל הבלוקים מוצגים.
+   * העורך הראשי לא מעביר ערך — כל הבלוקים זמינים בכל פורמט.
    */
   allowedTypes?: string[];
 }
@@ -58,7 +58,6 @@ export function BlockLibraryModal({ open, onClose, onPick, allowedTypes }: Block
     const term = query.trim();
 
     return editorBlockList.filter((definition) => {
-      // סינון לפי הפורמט — רק בלוקים ששייכים לפורמט הנוכחי
       if (allowedTypes && !allowedTypes.includes(definition.type)) return false;
       if (category !== 'all' && definition.category !== category) return false;
       if (!term) return true;
