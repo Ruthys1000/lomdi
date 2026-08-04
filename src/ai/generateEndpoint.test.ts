@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import handler from '../../api/generate';
+import handler, { generationModelParams } from '../../api/generate';
 
 /**
  * בדיקות ברמת ההנדלר ל-`/api/generate` — האזור השברירי ביותר בקוד, שעד היום
@@ -19,13 +19,16 @@ const sdk = vi.hoisted(() => ({
   scripted: [] as unknown[],
   /** כמה פעמים נפתח stream — מודד את מספר הניסיונות בפועל. */
   streamCalls: 0,
+  /** ארגומנטים אחרונים שנשלחו ל-stream — לבדיקת פרמטרי המודל. */
+  lastStreamArgs: null as Record<string, unknown> | null,
 }));
 
 vi.mock('@anthropic-ai/sdk', () => {
   class FakeAnthropic {
     messages = {
-      stream: () => {
+      stream: (args: Record<string, unknown>) => {
         sdk.streamCalls += 1;
+        sdk.lastStreamArgs = args;
         const next = sdk.scripted.shift();
         return {
           finalMessage: async () => {
@@ -50,8 +53,8 @@ const textMessage = (text: string, stopReason = 'end_turn'): unknown => ({
 /** דחיית בטיחות — בלי תוכן, עם stop_reason 'refusal'. */
 const refusalMessage = (): unknown => ({ content: [], stop_reason: 'refusal' });
 
-const postRequest = (text: string): VercelRequest =>
-  ({ method: 'POST', body: { text } }) as unknown as VercelRequest;
+const postRequest = (text: string, format?: string): VercelRequest =>
+  ({ method: 'POST', body: { text, format } }) as unknown as VercelRequest;
 
 /** res מזויף שאוסף כותרות, סטטוס, גוף JSON, ושורות ה-NDJSON שנכתבו. */
 function createResponse() {
@@ -103,6 +106,7 @@ const ORIGINAL_KEY = process.env.ANTHROPIC_API_KEY;
 beforeEach(() => {
   sdk.scripted = [];
   sdk.streamCalls = 0;
+  sdk.lastStreamArgs = null;
   process.env.ANTHROPIC_API_KEY = 'test-key';
 });
 
@@ -213,5 +217,40 @@ describe('api/generate handler', () => {
 
     expect(res.statusCode).toBe(413);
     expect(sdk.streamCalls).toBe(0);
+  });
+
+  it('שולח thinking מבוטל לפורמט מובנה (checklist)', async () => {
+    sdk.scripted = [textMessage('{"title":"בדיקה","chapters":[]}')];
+
+    await runHandler(postRequest('תוכן', 'checklist'));
+
+    expect(sdk.lastStreamArgs?.thinking).toEqual({ type: 'disabled' });
+    expect(sdk.lastStreamArgs?.model).toBe('claude-opus-5');
+  });
+
+  it('שולח thinking adaptive עם effort נמוך לפורמט נרטיבי (scenario)', async () => {
+    sdk.scripted = [textMessage('{"title":"תרחיש","chapters":[]}')];
+
+    await runHandler(postRequest('תוכן', 'scenario'));
+
+    expect(sdk.lastStreamArgs?.thinking).toEqual({ type: 'adaptive' });
+    expect(sdk.lastStreamArgs?.output_config).toEqual({ effort: 'low' });
+  });
+});
+
+describe('generationModelParams', () => {
+  it('מבטל thinking בפורמטים מובנים', () => {
+    for (const format of ['onePager', 'process', 'checklist', 'challenge']) {
+      expect(generationModelParams(format).thinking).toEqual({ type: 'disabled' });
+      expect(generationModelParams(format).model).toBe('claude-opus-5');
+    }
+  });
+
+  it('משאיר thinking adaptive עם effort נמוך לתרחיש/חקר מקרה/גנרי', () => {
+    for (const format of ['scenario', 'caseStudy', undefined]) {
+      const params = generationModelParams(format);
+      expect(params.thinking).toEqual({ type: 'adaptive' });
+      expect(params.output_config).toEqual({ effort: 'low' });
+    }
   });
 });

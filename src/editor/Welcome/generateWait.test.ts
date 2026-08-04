@@ -4,14 +4,14 @@ import { estimateProgressPercent, formatElapsed, statusLineFor } from './generat
 describe('generateWait helpers', () => {
   it('מעריכה התקדמות שמתחילה מאפס ולא מגיעה ל־100%', () => {
     expect(estimateProgressPercent(0)).toBe(0);
-    expect(estimateProgressPercent(150)).toBe(90);
+    expect(estimateProgressPercent(90)).toBe(90);
     expect(estimateProgressPercent(600)).toBe(90);
   });
 
-  it('עולה בהדרגה בטווח 2–3 דקות', () => {
-    const early = estimateProgressPercent(30);
-    const mid = estimateProgressPercent(90);
-    const late = estimateProgressPercent(140);
+  it('עולה בהדרגה בטווח 1–2 דקות', () => {
+    const early = estimateProgressPercent(20);
+    const mid = estimateProgressPercent(50);
+    const late = estimateProgressPercent(80);
     expect(early).toBeGreaterThan(0);
     expect(mid).toBeGreaterThan(early);
     expect(late).toBeGreaterThan(mid);
