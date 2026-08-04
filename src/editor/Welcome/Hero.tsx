@@ -8,6 +8,8 @@ import { CoursePreview } from './CoursePreview';
  * המותג הוא האות הראשית (לא רק כיתוב ב-nav). מתחתיו משפט אחד, CTA ראשי
  * ליצירה עם AI, ו-CTA משני לדף ריק. מימין/מתחת — ויזואל תוצר מלא, בלי
  * כרטיסי פורמט, בלי proof pills, ובלי תגיות צפות על התמונה.
+ *
+ * רקע בהיר בכוונה: שחור+מנטה על הנחיתה הרגיש חד מדי לסביבת יצירת לומדות.
  */
 
 interface HeroProps {
@@ -19,7 +21,7 @@ interface HeroProps {
 
 export function Hero({ onCreateAi, onBuild }: HeroProps) {
   return (
-    <section className="lc-landing-hero relative overflow-hidden bg-shell text-shell-fg">
+    <section className="lc-landing-hero relative overflow-hidden text-fg">
       <div aria-hidden className="lc-landing-hero__atmosphere" />
 
       <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-6 py-14 md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] md:gap-12 md:py-16 lg:py-20">
@@ -30,7 +32,7 @@ export function Hero({ onCreateAi, onBuild }: HeroProps) {
             מטקסט ללומדה.
           </h1>
 
-          <p className="mt-4 max-w-[40ch] text-base leading-relaxed text-shell-muted md:text-lg">
+          <p className="mt-4 max-w-[40ch] text-base leading-relaxed text-fg-muted md:text-lg">
             בחרו פורמט, הדביקו תוכן — וה‑AI בונה טיוטה שאפשר לערוך מיד.
           </p>
 
@@ -38,7 +40,7 @@ export function Hero({ onCreateAi, onBuild }: HeroProps) {
             <button
               type="button"
               onClick={onCreateAi}
-              className="inline-flex items-center gap-2 rounded-xl bg-volt px-5 py-3 text-sm font-extrabold text-on-volt transition hover:bg-volt-bright sm:px-6 sm:text-base"
+              className="inline-flex items-center gap-2 rounded-xl bg-volt-ink px-5 py-3 text-sm font-extrabold text-white transition hover:brightness-110 sm:px-6 sm:text-base"
             >
               <Sparkles className="size-4.5" aria-hidden />
               צרו עם AI
@@ -48,7 +50,7 @@ export function Hero({ onCreateAi, onBuild }: HeroProps) {
             <button
               type="button"
               onClick={onBuild}
-              className="rounded-xl border border-shell-edge px-5 py-3 text-sm font-semibold text-shell-fg transition hover:border-volt-dim hover:text-volt sm:text-base"
+              className="rounded-xl border border-edge-strong bg-field/70 px-5 py-3 text-sm font-semibold text-fg transition hover:border-volt-ink hover:text-volt-ink sm:text-base"
             >
               התחילו מדף ריק
             </button>

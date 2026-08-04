@@ -180,15 +180,18 @@
  *
  * Hero + תצוגת תוצר + תנועות כניסה. חי כאן ולא ב-Tailwind כי keyframes
  * ואיור ה-preview דורשים CSS מפורש. מכבד prefers-reduced-motion.
+ *
+ * כיוון ויזואלי: light רגוע. המנטה נשארת זהות מותג, אבל כדיו עמוק
+ * ונגיעות רכות — לא כניאון על שחור.
  */
 
 .lc-landing-hero__atmosphere {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(90% 70% at 12% -10%, rgb(45 225 194 / 0.22), transparent 55%),
-    radial-gradient(70% 55% at 100% 20%, rgb(45 225 194 / 0.08), transparent 50%),
-    linear-gradient(160deg, #0e1218 0%, #161b22 55%, #10141a 100%);
+    radial-gradient(85% 65% at 10% -8%, rgb(11 107 94 / 0.11), transparent 58%),
+    radial-gradient(70% 55% at 100% 12%, rgb(23 191 166 / 0.08), transparent 52%),
+    linear-gradient(180deg, #f5f7f6 0%, #eef1ef 48%, #e9ebee 100%);
   pointer-events: none;
 }
 
@@ -197,7 +200,7 @@
   font-weight: 800;
   line-height: 0.95;
   letter-spacing: -0.03em;
-  color: #ffffff;
+  color: var(--color-fg);
 }
 
 .lc-landing-preview {
@@ -211,25 +214,25 @@
   inset: 12% -8% -10% 18%;
   z-index: -1;
   border-radius: 28px;
-  background: linear-gradient(145deg, rgb(45 225 194 / 0.28), rgb(45 225 194 / 0.04));
+  background: linear-gradient(145deg, rgb(11 107 94 / 0.14), rgb(23 191 166 / 0.04));
   transform: rotate(-3deg);
 }
 
 .lc-landing-preview__sheet {
   overflow: hidden;
-  border: 1px solid rgb(255 255 255 / 0.1);
+  border: 1px solid rgb(20 24 29 / 0.08);
   border-radius: 20px;
-  background: #f7f8fa;
+  background: #fbfcfc;
   color: #14181d;
   box-shadow:
-    0 1px 0 rgb(255 255 255 / 0.08) inset,
-    0 24px 48px -28px rgb(0 0 0 / 0.65);
+    0 1px 0 rgb(255 255 255 / 0.9) inset,
+    0 18px 40px -26px rgb(20 24 29 / 0.28);
 }
 
 .lc-landing-preview__hero {
   padding: 1.35rem 1.4rem 1.2rem;
-  background: linear-gradient(125deg, #1a4a42 0%, #0f1c28 58%, #2a1c14 100%);
-  color: #ffffff;
+  background: linear-gradient(125deg, #dff2ed 0%, #e7eef2 58%, #edf1f3 100%);
+  color: #14181d;
 }
 
 .lc-landing-preview__eyebrow {
@@ -237,7 +240,8 @@
   font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.04em;
-  opacity: 0.78;
+  color: var(--color-volt-ink);
+  opacity: 0.9;
 }
 
 .lc-landing-preview__title {
@@ -253,7 +257,8 @@
   max-inline-size: 28ch;
   font-size: 0.82rem;
   line-height: 1.45;
-  opacity: 0.88;
+  color: var(--color-fg-soft);
+  opacity: 1;
 }
 
 .lc-landing-preview__body {
