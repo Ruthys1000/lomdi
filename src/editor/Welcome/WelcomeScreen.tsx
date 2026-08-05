@@ -11,6 +11,9 @@ import { Hero } from './Hero';
 import { MyCoursesDrawer } from './MyCoursesDrawer';
 import { useRecentProjects } from './useRecentProjects';
 
+/** יצירת קשר בפוטר הנחיתה */
+const CONTACT_EMAIL = 'ruthy.salomon@gmail.com';
+
 interface WelcomeScreenProps {
   onStart: (result: TemplateResult) => void;
   /** נקרא כשפרויקט קיים נטען ישירות ל-stores, בלי לעבור דרך onStart */
@@ -198,11 +201,25 @@ function Footer({
 }) {
   return (
     <footer className="border-t border-edge bg-panel/60">
-      <div className="mx-auto flex max-w-6xl flex-col gap-3 px-6 py-8 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs text-fg-muted">
-          {APP_BRAND} {APP_VERSION} · העריכה נשמרת בדפדפן.
-        </p>
-        <p className="text-xs text-fg-muted">
+      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-10 sm:flex-row sm:items-end sm:justify-between sm:gap-8">
+        <div className="min-w-0 space-y-2">
+          <p className="text-sm font-semibold text-fg">{APP_BRAND}</p>
+          <p className="text-xs text-fg-muted">
+            גרסה {APP_VERSION} · העריכה נשמרת בדפדפן
+          </p>
+          <p className="max-w-md text-sm leading-relaxed text-fg-soft">
+            שאלות, הצעות והערות — רותי סלומון
+            <span className="text-fg-muted"> · </span>
+            <a
+              href={`mailto:${CONTACT_EMAIL}`}
+              className="font-medium text-volt-ink underline-offset-2 hover:underline"
+            >
+              {CONTACT_EMAIL}
+            </a>
+          </p>
+        </div>
+
+        <p className="shrink-0 text-xs text-fg-muted sm:text-end">
           יש קובץ ‎.course.zip‎? גררו לכל מקום במסך, או{' '}
           <button
             type="button"
