@@ -64,6 +64,15 @@ describe('מסך הפתיחה', () => {
     expect(screen.getByRole('button', { name: 'התחילו מדף ריק' })).toBeInTheDocument();
   });
 
+  it('מציג בפוטר יצירת קשר לרותי סלומון', async () => {
+    await setup();
+
+    expect(screen.getByText(/שאלות, הצעות והערות/)).toBeInTheDocument();
+    expect(screen.getByText(/רותי סלומון/)).toBeInTheDocument();
+    const mail = screen.getByRole('link', { name: 'ruthy.salomon@gmail.com' });
+    expect(mail).toHaveAttribute('href', 'mailto:ruthy.salomon@gmail.com');
+  });
+
   it('לחיצה על "התחילו מדף ריק" מחזירה לומדה עם פרק, ולא רק שם תבנית', async () => {
     const { onStart } = await setup();
 
