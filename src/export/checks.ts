@@ -52,12 +52,17 @@ export function summarizeExport(course: Course, assets: AssetMeta[]): ExportSumm
   let brokenVideos = 0;
   let emptyVideos = 0;
   let blockCount = 0;
+  let quizCount = 0;
+  let answerableCount = 0;
 
   for (const chapter of course.chapters) {
     if (chapter.blocks.length === 0) emptyChapters.push(chapter.title);
     blockCount += chapter.blocks.length;
 
     for (const block of chapter.blocks) {
+      if (block.type === 'quiz') quizCount++;
+      if (block.type === 'quiz' || block.type === 'challenge') answerableCount++;
+
       if (blockAssetIds(block.type, block.content).some((id) => id && !known.has(id))) {
         missingIn.push(blockLabel(block.type));
       }
@@ -112,6 +117,32 @@ export function summarizeExport(course: Course, assets: AssetMeta[]): ExportSumm
         ? 'בלוק וידאו אחד עדיין בלי קישור ויופיע ריק בלומדה.'
         : `${emptyVideos} בלוקי וידאו עדיין בלי קישור ויופיעו ריקים בלומדה.`,
     );
+  }
+
+  // הגדרות רצף שלא יעשו את מה שהמחבר מצפה. כל אחת מהן "עובדת" טכנית, ולכן
+  // בלי אזהרה המחבר מגלה את הפער רק כשלומד מדווח שעבר בלי לענות על כלום.
+  const nav = course.navigation;
+  const passScore = nav.passScore ?? 0;
+  const wantsSequence = nav.sequence === 'linear' || nav.requireAnswersToAdvance || passScore > 0;
+
+  if (wantsSequence && !nav.trackProgress) {
+    warnings.push(
+      'הוגדרו הגדרות רצף למידה, אבל מעקב ההתקדמות כבוי — ולכן הן לא יפעלו אצל הלומד.',
+    );
+  } else {
+    if ((nav.sequence === 'linear' || nav.requireAnswersToAdvance) && nav.mode !== 'chapters') {
+      warnings.push(
+        'פתיחה הדרגתית וחובת מענה פועלות רק במצב ניווט "פרקים". במצב גלילה כל התוכן פתוח.',
+      );
+    }
+    if (passScore > 0 && quizCount === 0) {
+      warnings.push(
+        `הוגדר ציון מעבר (${passScore}%), אבל אין בלומדה שאלות בחירה — כל לומד שיסיים ייחשב כעובר.`,
+      );
+    }
+    if (nav.requireAnswersToAdvance && nav.mode === 'chapters' && answerableCount === 0) {
+      warnings.push('הוגדרה חובת מענה כדי להמשיך, אבל אין בלומדה שאלות או אתגרים.');
+    }
   }
 
   const unused = unusedAssets(course, assets);

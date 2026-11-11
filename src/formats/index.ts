@@ -17,6 +17,7 @@
  */
 
 export type FormatId =
+  | 'journey'
   | 'onePager'
   | 'process'
   | 'checklist'
@@ -61,6 +62,11 @@ export interface FormatDefinition {
   allowChapters: boolean;
   /** מצב ניווט ברירת מחדל ללומדה בפורמט זה */
   defaultNavigation: 'scroll' | 'chapters';
+  /**
+   * סדר המעבר בין פרקים בלומדה שנוצרת בפורמט זה. חסר = 'free'. מסלול למידה
+   * נבנה מהפשוט למורכב, ולכן נפתח פרק-פרק.
+   */
+  defaultSequence?: 'free' | 'linear';
   /** רמז הקלט בטופס היצירה — מנוסח לפי סוג התוכן שהפורמט מצפה לו */
   entryPlaceholder: string;
   /** שלד סכמטי שמצויר בכרטיס הגלריה כדי להמחיש את המבנה */
@@ -74,6 +80,31 @@ export interface FormatDefinition {
 const SHARED_STRUCTURE = ['hero', 'richText', 'divider'];
 
 export const formatRegistry: Record<FormatId, FormatDefinition> = {
+  journey: {
+    id: 'journey',
+    label: 'מסלול למידה',
+    labelEn: 'Learning Journey',
+    tagline: 'כמה פרקים שנבנים זה על זה, עם שאלות בדרך וסיכום.',
+    description:
+      'תהליך למידה רצוף: פתיחה שממסגרת, פרקים מהפשוט למורכב, שאלת הבנה אחרי כל רעיון ופרק סיכום. הלומד מתקדם פרק-פרק וממשיך מאיפה שעצר.',
+    status: 'ready',
+    allowedBlockTypes: [
+      ...SHARED_STRUCTURE,
+      'callout',
+      'cards',
+      'steps',
+      'accordion',
+      'quiz',
+      'checklist',
+      'image',
+      'textImage',
+    ],
+    allowChapters: true,
+    defaultNavigation: 'chapters',
+    defaultSequence: 'linear',
+    entryPlaceholder: 'הדביקו כאן חומר לימוד מלא — ונבנה ממנו מסלול של כמה פרקים עם שאלות וסיכום…',
+    preview: ['hero', 'text', 'steps', 'challenge'],
+  },
   onePager: {
     id: 'onePager',
     label: 'עמוד אחד',

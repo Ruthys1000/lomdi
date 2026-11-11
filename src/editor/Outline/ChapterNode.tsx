@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ChevronDown, ChevronLeft, Copy, GripVertical, Pencil, Trash2 } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { cn } from '@/lib/cn';
+import { chapterMinutes } from '@/model/readingTime';
 import type { Chapter } from '@/model/types';
 import { useCourseStore } from '@/state/courseStore';
 import { useEditorStore } from '@/state/editorStore';
@@ -33,6 +34,7 @@ export function ChapterNode({ chapter, index, canDelete, onRequestDelete }: Chap
   const [isRenaming, setRenaming] = useState(false);
 
   const isActiveChapter = selectedChapterId === chapter.id;
+  const minutes = useMemo(() => chapterMinutes(chapter), [chapter]);
   const ChevronIcon = collapsed ? ChevronLeft : ChevronDown;
 
   return (
@@ -100,8 +102,21 @@ export function ChapterNode({ chapter, index, canDelete, onRequestDelete }: Chap
           </button>
         )}
 
+        {/*
+          זמן למידה משוער — כדי לראות במבט פרק שחורג מהאחרים. מפנה מקום
+          לפעולות בריחוף, כדי שהשורה לא תתרחב.
+        */}
+        {minutes > 0 && !isRenaming && (
+          <span
+            className="shrink-0 text-[11px] text-fg-muted tabular-nums group-focus-within:hidden group-hover:hidden"
+            title="זמן למידה משוער"
+          >
+            {minutes} דק׳
+          </span>
+        )}
+
         {/* הפעולות מופיעות בריחוף, אבל נשארות נגישות במקלדת דרך focus-within */}
-        <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition group-focus-within:opacity-100 group-hover:opacity-100">
+        <div className="hidden shrink-0 items-center gap-0.5 group-focus-within:flex group-hover:flex">
           <OutlineAction icon={Pencil} label="שינוי שם" onClick={() => setRenaming(true)} />
           <OutlineAction icon={Copy} label="שכפול פרק" onClick={() => duplicateChapter(chapter.id)} />
           <OutlineAction

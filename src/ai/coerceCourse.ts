@@ -424,7 +424,12 @@ export function coerceGeneratedCourse(raw: unknown, format?: string): CoerceResu
     direction,
     language,
     theme: coerceTheme(root.theme),
-    navigation: { ...defaultNavigation, mode: navMode },
+    navigation: {
+      ...defaultNavigation,
+      mode: navMode,
+      // מסלול למידה נפתח פרק-פרק; שאר הפורמטים נשארים בניווט חופשי
+      sequence: getFormat(format)?.defaultSequence ?? defaultNavigation.sequence,
+    },
     chapters,
   });
 

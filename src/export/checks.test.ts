@@ -114,4 +114,57 @@ describe('אזהרות לפני ייצוא', () => {
 
     expect(summary.warnings.join(' ')).toContain('אין בלומדה פרקים');
   });
+
+  describe('הגדרות רצף', () => {
+    const withNav = (
+      navigation: Partial<ReturnType<typeof createCourse>['navigation']>,
+      ...blocks: ReturnType<typeof createBlock>[]
+    ) => {
+      const course = courseWith(...blocks);
+      return { ...course, navigation: { ...course.navigation, ...navigation } };
+    };
+
+    it('מזהירה על ציון מעבר בלי שאלות בחירה', () => {
+      const { warnings } = summarizeExport(
+        withNav({ passScore: 70 }, createBlock('richText')),
+        [],
+      );
+      expect(warnings.some((w) => w.includes('ציון מעבר (70%)'))).toBe(true);
+    });
+
+    it('מזהירה שפתיחה הדרגתית אינה פועלת במצב גלילה', () => {
+      const { warnings } = summarizeExport(
+        withNav({ mode: 'scroll', sequence: 'linear' }, createBlock('quiz')),
+        [],
+      );
+      expect(warnings.some((w) => w.includes('רק במצב ניווט "פרקים"'))).toBe(true);
+    });
+
+    it('מזהירה על חובת מענה בלי שאלות', () => {
+      const { warnings } = summarizeExport(
+        withNav({ mode: 'chapters', requireAnswersToAdvance: true }, createBlock('richText')),
+        [],
+      );
+      expect(warnings.some((w) => w.includes('חובת מענה'))).toBe(true);
+    });
+
+    it('מזהירה שהגדרות הרצף לא יפעלו כשמעקב ההתקדמות כבוי', () => {
+      const { warnings } = summarizeExport(
+        withNav({ mode: 'chapters', sequence: 'linear', trackProgress: false }, createBlock('quiz')),
+        [],
+      );
+      expect(warnings.some((w) => w.includes('מעקב ההתקדמות כבוי'))).toBe(true);
+    });
+
+    it('מסלול ליניארי תקין עם שאלות וציון מעבר אינו מייצר אזהרות', () => {
+      const { warnings } = summarizeExport(
+        withNav(
+          { mode: 'chapters', sequence: 'linear', requireAnswersToAdvance: true, passScore: 70 },
+          createBlock('quiz'),
+        ),
+        [],
+      );
+      expect(warnings).toEqual([]);
+    });
+  });
 });

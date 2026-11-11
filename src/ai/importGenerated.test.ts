@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { SCHEMA_VERSION } from '@/model/types';
 import { validateProjectFile } from '@/model/validate';
+import { formatExample } from '../../api/generate';
 import { importGeneratedCourse } from './importGenerated';
 
 const roundTrip = (value: unknown) => JSON.parse(JSON.stringify(value));
@@ -48,5 +49,21 @@ describe('importGeneratedCourse', () => {
       { refine: false },
     );
     expect(course.chapters[0].blocks[0].type).toBe('richText');
+  });
+
+  it('דוגמת הפורמט "מסלול למידה" עוברת את הייבוא בלי אזהרות, כמסלול ליניארי בפרקים', () => {
+    const { course, warnings } = importGeneratedCourse(formatExample('journey'), {
+      format: 'journey',
+    });
+
+    expect(warnings).toEqual([]);
+    expect(course.format).toBe('journey');
+    expect(course.navigation.mode).toBe('chapters');
+    expect(course.navigation.sequence).toBe('linear');
+    expect(course.chapters).toHaveLength(3);
+    // לכל פרק מטרת למידה, ויש שאלות בדרך ובסיכום
+    expect(course.chapters.every((chapter) => chapter.description.length > 0)).toBe(true);
+    const quizzes = course.chapters.flatMap((c) => c.blocks).filter((b) => b.type === 'quiz');
+    expect(quizzes).toHaveLength(2);
   });
 });
