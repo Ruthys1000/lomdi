@@ -25,6 +25,18 @@ describe('validateProjectFile', () => {
     expect(result.ok).toBe(true);
   });
 
+  it('ממלאת את הגדרות הרצף בלומדה שנשמרה לפני שנוספו', () => {
+    const legacy = roundTrip(projectFile());
+    delete legacy.course.navigation.sequence;
+    delete legacy.course.navigation.requireAnswersToAdvance;
+    const result = validateProjectFile(legacy);
+
+    if (!result.ok) throw new Error(`נכשל: ${result.errors.join(', ')}`);
+    expect(result.project.course.navigation.sequence).toBe('free');
+    expect(result.project.course.navigation.requireAnswersToAdvance).toBe(false);
+    expect(result.project.course.navigation.passScore).toBeUndefined();
+  });
+
   it('מקבלת את לומדת הדוגמה על כל סוגי הבלוקים שבה', () => {
     const project = projectFile({ course: createSampleCourse().course });
     const result = validateProjectFile(roundTrip(project));

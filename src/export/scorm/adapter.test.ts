@@ -129,4 +129,20 @@ describe('scormAdapter', () => {
     expect(win.API.store['cmi.core.exit']).toBe('suspend');
     expect(win.API.calls).toContain('finish');
   });
+
+  it('מדווח passed או failed כשהוגדר ציון מעבר', () => {
+    win.API = makeApi();
+    eval(scormAdapterJs());
+
+    window.dispatchEvent(
+      new CustomEvent('lc:progress', { detail: { completed: true, score: 60, passScore: 70 } }),
+    );
+    expect(win.API.store['cmi.core.lesson_status']).toBe('failed');
+
+    // ניסיון חוזר שמשפר את הציון מעדכן את הסטטוס
+    window.dispatchEvent(
+      new CustomEvent('lc:progress', { detail: { completed: true, score: 80, passScore: 70 } }),
+    );
+    expect(win.API.store['cmi.core.lesson_status']).toBe('passed');
+  });
 });

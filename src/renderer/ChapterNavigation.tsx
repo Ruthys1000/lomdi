@@ -3,6 +3,9 @@ import type { Chapter, NavigationSettings } from '@/model/types';
 import { courseIcons, navIcons } from './icons';
 import { useRenderContext } from './RenderContext';
 
+/** מצב פרק בתפריט, כשמעקב ההתקדמות פעיל */
+export type ChapterStatus = 'done' | 'open' | 'locked';
+
 interface ChapterNavigationProps {
   chapters: Chapter[];
   navigation: NavigationSettings;
@@ -14,6 +17,13 @@ interface ChapterNavigationProps {
    * (מעקב התקדמות פעיל). בלעדיו הכפתור מושבת בפרק האחרון כברירת המחדל.
    */
   onFinish?: () => void;
+  /**
+   * סטטוס לכל פרק (לפי אינדקס). כשמסופק, התפריט מסמן פרקים שהושלמו ונועל
+   * פרקים שעוד לא נפתחו, ופס ההתקדמות נמדד לפי פרקים שהושלמו ולא לפי המיקום.
+   */
+  statuses?: ChapterStatus[];
+  /** false נועל את "הבא"/"סיום" — הלומד עוד לא ענה על שאלות הפרק */
+  canAdvance?: boolean;
 }
 
 /**
@@ -30,6 +40,8 @@ export function ChapterNavigation({
   onNavigate,
   renderChapter,
   onFinish,
+  statuses,
+  canAdvance = true,
 }: ChapterNavigationProps) {
   const { direction } = useRenderContext();
   const [isMenuOpen, setMenuOpen] = useState(false);
@@ -46,10 +58,22 @@ export function ChapterNavigation({
 
   const total = chapters.length;
   const chapter = chapters[activeIndex];
-  const progress = total > 0 ? ((activeIndex + 1) / total) * 100 : 0;
+  const doneCount = statuses ? statuses.filter((status) => status === 'done').length : 0;
+  // עם מעקב: כמה מהלומדה הושלם בפועל. בלעדיו: איפה הלומד נמצא
+  const progressNow = statuses ? doneCount : activeIndex + 1;
+  const progress = total > 0 ? (progressNow / total) * 100 : 0;
+
+  const isLocked = (index: number) => statuses?.[index] === 'locked' && index !== activeIndex;
 
   const goTo = (index: number) => {
     if (index < 0 || index >= total) return;
+    // צעד קדימה מהפרק הנוכחי הוא הדרך לפתוח את הפרק הבא, ולכן הוא כפוף רק
+    // לתנאי המעבר ולא לנעילה; כל קפיצה אחרת כפופה לנעילה
+    if (index === activeIndex + 1) {
+      if (!canAdvance) return;
+    } else if (isLocked(index)) {
+      return;
+    }
     onNavigate(index);
     setMenuOpen(false);
   };
@@ -104,7 +128,7 @@ export function ChapterNavigation({
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeIndex, total, isRtl]);
+  }, [activeIndex, total, isRtl, canAdvance, statuses]);
 
   if (!chapter) return null;
 
@@ -133,19 +157,36 @@ export function ChapterNavigation({
 
               {isMenuOpen && (
                 <ul id={menuId} className="lc-chapter-menu__list">
-                  {chapters.map((item, index) => (
-                    <li key={item.id}>
-                      <button
-                        type="button"
-                        className="lc-chapter-menu__item"
-                        aria-current={index === activeIndex ? 'step' : undefined}
-                        onClick={() => goTo(index)}
-                      >
-                        <span className="lc-chapter-menu__number">{index + 1}</span>
-                        <span>{item.title}</span>
-                      </button>
-                    </li>
-                  ))}
+                  {chapters.map((item, index) => {
+                    const locked = isLocked(index);
+                    const done = statuses?.[index] === 'done';
+                    return (
+                      <li key={item.id}>
+                        <button
+                          type="button"
+                          className="lc-chapter-menu__item"
+                          aria-current={index === activeIndex ? 'step' : undefined}
+                          data-status={locked ? 'locked' : done ? 'done' : undefined}
+                          disabled={locked}
+                          onClick={() => goTo(index)}
+                        >
+                          <span className="lc-chapter-menu__number">
+                            {/* הסטטוס מועבר באייקון ובטקסט נסתר, לא רק בצבע */}
+                            {done ? (
+                              <courseIcons.Check className="lc-chapter-menu__mark" aria-hidden />
+                            ) : locked ? (
+                              <courseIcons.Lock className="lc-chapter-menu__mark" aria-hidden />
+                            ) : (
+                              index + 1
+                            )}
+                          </span>
+                          <span>{item.title}</span>
+                          {done && <span className="lc-visually-hidden"> (הושלם)</span>}
+                          {locked && <span className="lc-visually-hidden"> (נעול)</span>}
+                        </button>
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </div>
@@ -156,10 +197,14 @@ export function ChapterNavigation({
           <div
             className="lc-progress"
             role="progressbar"
-            aria-valuemin={1}
+            aria-valuemin={statuses ? 0 : 1}
             aria-valuemax={total}
-            aria-valuenow={activeIndex + 1}
-            aria-label={`התקדמות: ${navigation.labels.chapter} ${activeIndex + 1} מתוך ${total}`}
+            aria-valuenow={progressNow}
+            aria-label={
+              statuses
+                ? `התקדמות: הושלמו ${doneCount} מתוך ${total}`
+                : `התקדמות: ${navigation.labels.chapter} ${activeIndex + 1} מתוך ${total}`
+            }
           >
             <div className="lc-progress__bar" style={{ inlineSize: `${progress}%` }} />
           </div>
@@ -195,8 +240,19 @@ export function ChapterNavigation({
             {navigation.labels.prev}
           </button>
 
+          {!canAdvance && (
+            <p className="lc-chapter-nav__hint" role="status">
+              ענו על השאלות בפרק כדי להמשיך
+            </p>
+          )}
+
           {activeIndex >= total - 1 && onFinish ? (
-            <button type="button" className="lc-button lc-button--primary" onClick={onFinish}>
+            <button
+              type="button"
+              className="lc-button lc-button--primary"
+              onClick={onFinish}
+              disabled={!canAdvance}
+            >
               סיום
               <courseIcons.CircleCheck className="lc-icon" aria-hidden />
             </button>
@@ -205,7 +261,7 @@ export function ChapterNavigation({
               type="button"
               className="lc-button lc-button--primary"
               onClick={() => goTo(activeIndex + 1)}
-              disabled={activeIndex >= total - 1}
+              disabled={activeIndex >= total - 1 || !canAdvance}
             >
               {navigation.labels.next}
               <NextIcon className="lc-icon" aria-hidden />

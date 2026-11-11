@@ -48,7 +48,7 @@ export function scormAdapterJs(): string {
     api.LMSInitialize("");
     started = true;
     var status = api.LMSGetValue("cmi.core.lesson_status");
-    alreadyDone = status === "completed" || status === "passed";
+    alreadyDone = status === "completed" || status === "passed" || status === "failed";
     if (!status || status === "not attempted" || status === "unknown") {
       api.LMSSetValue("cmi.core.lesson_status", "incomplete");
       api.LMSCommit("");
@@ -96,7 +96,12 @@ export function scormAdapterJs(): string {
     }
     if (d.completed) {
       alreadyDone = true;
-      api.LMSSetValue("cmi.core.lesson_status", "completed");
+      // עם ציון מעבר הסטטוס הסופי הוא עבר/נכשל; בלעדיו — "הושלם" בלבד
+      var graded = typeof d.passScore === "number" && typeof d.score === "number";
+      api.LMSSetValue(
+        "cmi.core.lesson_status",
+        graded ? (d.score >= d.passScore ? "passed" : "failed") : "completed"
+      );
     } else if (!alreadyDone) {
       api.LMSSetValue("cmi.core.lesson_status", "incomplete");
     }

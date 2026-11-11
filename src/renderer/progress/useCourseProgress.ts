@@ -138,13 +138,21 @@ export interface CourseProgress {
   /** מצב הבלוקים האינטראקטיביים, לפי מזהה בלוק */
   blockState: Record<string, unknown>;
   setBlockState: (blockId: string, update: (previous: unknown) => unknown) => void;
+  /** תוצאת כל שאלה שנענתה, לפי מזהה בלוק */
+  quizResults: Record<string, boolean>;
+  /**
+   * true כשהלומדה נטענה עם התקדמות שמורה מהפעלה קודמת (ולא הושלמה) — הסימן
+   * להציג "ממשיכים מאיפה שעצרת". נקבע פעם אחת בטעינה, ומתאפס ב-`reset`.
+   */
+  resumed: boolean;
 }
 
 export function useCourseProgress(
   courseId: string,
-  options: { enabled: boolean; totalQuizzes: number; chapterIds?: string[] },
+  options: { enabled: boolean; totalQuizzes: number; chapterIds?: string[]; passScore?: number },
 ): CourseProgress {
   const { enabled, totalQuizzes } = options;
+  const passScore = options.passScore && options.passScore > 0 ? options.passScore : null;
   const key = `lc-progress:${courseId}`;
   const chapterIdsKey = (options.chapterIds ?? []).join('|');
   const chapterIds = useMemo(() => (chapterIdsKey ? chapterIdsKey.split('|') : []), [chapterIdsKey]);
@@ -156,6 +164,14 @@ export function useCourseProgress(
     const loaded = normalizeProgress(injected !== undefined ? injected : readStore(key), chapterIds);
     return { ...loaded, visited: addUnique(loaded.visited, loaded.chapterId) };
   });
+
+  const [resumed, setResumed] = useState(
+    () =>
+      !state.completed &&
+      (state.chapterIndex > 0 ||
+        Object.keys(state.quizResults).length > 0 ||
+        Object.keys(state.blockState).length > 0),
+  );
 
   // שמירה בכל שינוי — רק כשהמעקב פעיל
   useEffect(() => {
@@ -182,12 +198,13 @@ export function useCourseProgress(
           correct: correctCount,
           total: totalQuizzes,
           score,
+          passScore,
           location: String(state.chapterIndex),
           state,
         },
       }),
     );
-  }, [enabled, state, correctCount, totalQuizzes]);
+  }, [enabled, state, correctCount, totalQuizzes, passScore]);
 
   const update = useCallback((change: (previous: StoredProgress) => StoredProgress) => {
     setState((previous) => {
@@ -258,6 +275,7 @@ export function useCourseProgress(
   const reset = useCallback(() => {
     const cleared = { ...emptyProgress(), chapterId: chapterIds[0] ?? null };
     setState({ ...cleared, visited: addUnique([], cleared.chapterId), updatedAt: Date.now() });
+    setResumed(false);
   }, [chapterIds]);
 
   return {
@@ -273,5 +291,7 @@ export function useCourseProgress(
     doneChapters: state.doneChapters,
     blockState: state.blockState,
     setBlockState,
+    quizResults: state.quizResults,
+    resumed,
   };
 }

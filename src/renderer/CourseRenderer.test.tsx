@@ -216,4 +216,113 @@ describe('CourseRenderer — רצף למידה', () => {
 
     expect(window.localStorage.getItem('lc-progress:course-sequence')).toBeNull();
   });
+
+  const quizBlock = (id: string): Block => ({
+    ...createBlock('quiz'),
+    id,
+    content: {
+      ...createBlock('quiz').content,
+      question: `שאלה ${id}`,
+      options: [
+        { id: `${id}-right`, text: 'התשובה הנכונה', correct: true },
+        { id: `${id}-wrong`, text: 'תשובה שגויה', correct: false },
+      ],
+      shuffle: false,
+    },
+  });
+
+  const journey = (navigation: Partial<Course['navigation']>): Course => ({
+    ...course,
+    id: 'course-journey',
+    navigation: { ...defaultNavigation, mode: 'chapters', trackProgress: true, ...navigation },
+    chapters: [
+      { id: 'j1', title: 'פתיחה', description: '', blocks: [quizBlock('q1')] },
+      { id: 'j2', title: 'עקרונות', description: '', blocks: [quizBlock('q2')] },
+      { id: 'j3', title: 'סיכום', description: '', blocks: [] },
+    ],
+  });
+
+  const answer = async (user: ReturnType<typeof userEvent.setup>, text: RegExp) => {
+    await user.click(screen.getByRole('radio', { name: text }));
+    await user.click(screen.getByRole('button', { name: 'בדיקה' }));
+  };
+
+  it('בסדר ליניארי פרקים שעוד לא נפתחו נעולים בתפריט, ונפתחים עם ההתקדמות', async () => {
+    const user = userEvent.setup();
+    render(
+      <CourseRenderer course={journey({ sequence: 'linear' })} resolveAssetUrl={() => undefined} />,
+    );
+
+    // בהתחלה רק הפרק הראשון פתוח; לפרק הבא מגיעים ב"הבא", לא בקפיצה
+    await user.click(screen.getByRole('button', { name: /תוכן העניינים/ }));
+    expect(screen.getByRole('button', { name: /עקרונות \(נעול\)/ })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /סיכום \(נעול\)/ })).toBeDisabled();
+
+    // התקדמות לפרק 2 משלימה את פרק 1; פרק 3 נשאר נעול עד שפרק 2 יושלם
+    await user.click(screen.getByRole('button', { name: /^הבא/ }));
+    await user.click(screen.getByRole('button', { name: /תוכן העניינים/ }));
+    expect(screen.getByRole('button', { name: /פתיחה \(הושלם\)/ })).toBeEnabled();
+    expect(screen.getByRole('button', { name: /עקרונות/ })).toBeEnabled();
+    expect(screen.getByRole('button', { name: /סיכום \(נעול\)/ })).toBeDisabled();
+  });
+
+  it('בסדר חופשי אין נעילה', async () => {
+    const user = userEvent.setup();
+    render(<CourseRenderer course={journey({})} resolveAssetUrl={() => undefined} />);
+
+    await user.click(screen.getByRole('button', { name: /תוכן העניינים/ }));
+    await user.click(screen.getByRole('button', { name: /סיכום/ }));
+    expect(screen.getByRole('main')).toHaveAccessibleName(/סיכום/);
+  });
+
+  it('״חובה לענות״ נועל את הבא עד שנענתה שאלת הפרק', async () => {
+    const user = userEvent.setup();
+    render(
+      <CourseRenderer
+        course={journey({ requireAnswersToAdvance: true })}
+        resolveAssetUrl={() => undefined}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: /^הבא/ })).toBeDisabled();
+    expect(screen.getByText('ענו על השאלות בפרק כדי להמשיך')).toBeInTheDocument();
+
+    await answer(user, /תשובה שגויה/);
+    expect(screen.getByRole('button', { name: /^הבא/ })).toBeEnabled();
+  });
+
+  it('מסך הסיום מציג עבר / לא עבר מול ציון המעבר, ומוביל לשאלה שנענתה לא נכון', async () => {
+    const user = userEvent.setup();
+    render(
+      <CourseRenderer course={journey({ passScore: 100 })} resolveAssetUrl={() => undefined} />,
+    );
+
+    await answer(user, /התשובה הנכונה/);
+    await user.click(screen.getByRole('button', { name: /^הבא/ }));
+    await answer(user, /תשובה שגויה/);
+    await user.click(screen.getByRole('button', { name: /^הבא/ }));
+    await user.click(screen.getByRole('button', { name: /סיום/ }));
+
+    expect(screen.getByRole('heading', { name: /עוד לא עברת/ })).toBeInTheDocument();
+    expect(screen.getByText(/ציון המעבר הוא 100%/)).toBeInTheDocument();
+    expect(screen.getByRole('list', { name: 'פירוט לפי פרק' })).toHaveTextContent('עקרונות0 מתוך 1');
+
+    await user.click(screen.getByRole('button', { name: /חזרה לשאלות שטעיתי בהן/ }));
+    expect(screen.getByRole('main')).toHaveAccessibleName(/עקרונות/);
+  });
+
+  it('לומד שחוזר רואה מאיפה ממשיכים, ויכול להתחיל מחדש', async () => {
+    const user = userEvent.setup();
+    const first = render(<CourseRenderer course={journey({})} resolveAssetUrl={() => undefined} />);
+    expect(screen.queryByText(/ברוכים השבים/)).toBeNull();
+    await user.click(screen.getByRole('button', { name: /^הבא/ }));
+    first.unmount();
+
+    render(<CourseRenderer course={journey({})} resolveAssetUrl={() => undefined} />);
+    expect(screen.getByText(/ממשיכים מפרק 2: עקרונות/)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'להתחיל מחדש' }));
+    expect(screen.queryByText(/ברוכים השבים/)).toBeNull();
+    expect(screen.getByRole('main')).toHaveAccessibleName(/פתיחה/);
+  });
 });
