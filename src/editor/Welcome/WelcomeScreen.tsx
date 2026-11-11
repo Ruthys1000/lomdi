@@ -9,6 +9,7 @@ import { Alert } from '../ui/Alert';
 import { FormatsSection } from './FormatsSection';
 import { Hero } from './Hero';
 import { MyCoursesDrawer } from './MyCoursesDrawer';
+import { ValueBand } from './ValueBand';
 import { useRecentProjects } from './useRecentProjects';
 
 /** יצירת קשר בפוטר הנחיתה */
@@ -103,6 +104,7 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
       )}
 
       <Hero onCreateAi={goToFormats} onBuild={() => startTemplate('blank')} />
+      <ValueBand />
       <FormatsSection
         selected={selected}
         onSelect={selectFormat}

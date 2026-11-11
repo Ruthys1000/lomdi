@@ -7,9 +7,11 @@ import { CoursePreview } from './CoursePreview';
  *
  * המותג הוא האות הראשית (לא רק כיתוב ב-nav). מתחתיו משפט אחד, CTA ראשי
  * ליצירה עם AI, ו-CTA משני לדף ריק. מימין/מתחת — ויזואל תוצר מלא, בלי
- * כרטיסי פורמט, בלי proof pills, ובלי תגיות צפות על התמונה.
+ * כרטיסי פורמט, בלי proof pills, ובלי תגיות צפות על התמונה. מתחת ל-CTA שורת
+ * טקסט אחת שעונה על שלוש השאלות הראשונות של מי שמגיע: צריך חשבון? איפה זה
+ * נשמר? מה יוצא מזה?
  *
- * רקע בהיר בכוונה: שחור+מנטה על הנחיתה הרגיש חד מדי לסביבת יצירת לומדות.
+ * רקע בהיר בכוונה: רקע כהה על הנחיתה הרגיש חד מדי לסביבת יצירת לומדות.
  */
 
 interface HeroProps {
@@ -32,8 +34,9 @@ export function Hero({ onCreateAi, onBuild }: HeroProps) {
             מטקסט ללומדה.
           </h1>
 
-          <p className="mt-4 max-w-[40ch] text-base leading-relaxed text-fg-muted md:text-lg">
-            בחרו פורמט, הדביקו תוכן — וה‑AI בונה טיוטה שאפשר לערוך מיד.
+          <p className="mt-4 max-w-[44ch] text-base leading-relaxed text-fg-muted md:text-lg">
+            הדביקו חומר לימוד, וה‑AI בונה ממנו לומדה או מסלול למידה שלם — עם פרקים, שאלות
+            וסיכום — שאפשר לערוך מיד.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -55,6 +58,10 @@ export function Hero({ onCreateAi, onBuild }: HeroProps) {
               התחילו מדף ריק
             </button>
           </div>
+
+          <p className="mt-5 text-xs leading-relaxed text-fg-muted">
+            בלי הרשמה · העבודה נשמרת בדפדפן שלכם · ייצוא ל‑HTML ול‑SCORM
+          </p>
         </div>
 
         <div className="lc-landing-hero__visual relative z-[1] min-w-0">
