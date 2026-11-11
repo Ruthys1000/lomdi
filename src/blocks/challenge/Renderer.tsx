@@ -1,8 +1,17 @@
-import { useId, useState } from 'react';
+import { useId } from 'react';
 import type { BlockOf } from '@/model/types';
 import { courseIcons } from '@/renderer/icons';
+import { useBlockState } from '@/renderer/progress/ProgressContext';
 import { useRenderContext } from '@/renderer/RenderContext';
 import type { ChallengeContent, ChallengeQuestion } from './content';
+
+interface ChallengeAttempt {
+  /** מזהה השאלה ← מזהה האפשרות שנבחרה */
+  answers: Record<string, string>;
+  submitted: boolean;
+}
+
+const EMPTY_ATTEMPT: ChallengeAttempt = { answers: {}, submitted: false };
 
 // מוגדר כאן ולא מיובא מ-content.ts: ייבוא ערך (לא-טיפוס) מ-content היה גורר את
 // zod לחבילת ה-runtime ושובר את גבול הרנדרר.
@@ -21,8 +30,9 @@ export function ChallengeRenderer({ block }: { block: BlockOf<ChallengeContent> 
   const { isEditing } = useRenderContext();
   const groupId = useId();
 
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [submitted, setSubmitted] = useState(false);
+  // התשובות נשמרות במאגר ההתקדמות, כדי שאתגר שנענה חלקית לא יתאפס במעבר פרק
+  const [attempt, setAttempt] = useBlockState<ChallengeAttempt>(block.id, EMPTY_ATTEMPT);
+  const { answers, submitted } = attempt;
 
   const total = content.questions.length;
   const correctCount = content.questions.filter(
@@ -32,10 +42,7 @@ export function ChallengeRenderer({ block }: { block: BlockOf<ChallengeContent> 
   const passed = score >= content.passScore;
   const allAnswered = content.questions.every((question) => answers[question.id]);
 
-  const reset = () => {
-    setAnswers({});
-    setSubmitted(false);
-  };
+  const reset = () => setAttempt(EMPTY_ATTEMPT);
 
   return (
     <div className="lc-container">
@@ -80,7 +87,10 @@ export function ChallengeRenderer({ block }: { block: BlockOf<ChallengeContent> 
                           checked={chosen}
                           disabled={isEditing || submitted}
                           onChange={() =>
-                            setAnswers((prev) => ({ ...prev, [question.id]: option.id }))
+                            setAttempt((prev) => ({
+                              ...prev,
+                              answers: { ...prev.answers, [question.id]: option.id },
+                            }))
                           }
                           className="lc-challenge__radio"
                         />
@@ -111,7 +121,7 @@ export function ChallengeRenderer({ block }: { block: BlockOf<ChallengeContent> 
               type="button"
               className="lc-button lc-button--primary"
               disabled={!allAnswered}
-              onClick={() => setSubmitted(true)}
+              onClick={() => setAttempt((prev) => ({ ...prev, submitted: true }))}
             >
               בדיקה
             </button>

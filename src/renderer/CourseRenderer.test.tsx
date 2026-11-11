@@ -1,9 +1,10 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { afterEach, describe, expect, it } from 'vitest';
 import { defaultNavigation } from '@/model/defaults';
 import { createBlock } from '@/model/factory';
 import { defaultTheme } from '@/model/themes';
-import type { Course } from '@/model/types';
+import type { Block, Course } from '@/model/types';
 import { CourseRenderer } from './CourseRenderer';
 
 const course: Course = {
@@ -159,5 +160,60 @@ describe('CourseRenderer', () => {
 
     render(<CourseRenderer course={withUnknown} resolveAssetUrl={() => undefined} isEditing />);
     expect(screen.getByRole('note')).toHaveTextContent('futureBlockType');
+  });
+});
+
+describe('CourseRenderer — רצף למידה', () => {
+  afterEach(() => window.localStorage.clear());
+
+  const checklist: Block = {
+    ...createBlock('checklist'),
+    id: 'block-checklist',
+    content: {
+      items: [
+        { id: 'item-1', text: 'לקרוא את הנוהל', description: '' },
+        { id: 'item-2', text: 'לחתום על הטופס', description: '' },
+      ],
+      showCount: true,
+    },
+  };
+
+  const sequenced: Course = {
+    ...course,
+    id: 'course-sequence',
+    navigation: { ...defaultNavigation, mode: 'chapters', trackProgress: true },
+    chapters: [
+      { id: 'chapter-1', title: 'פתיחה', description: '', blocks: [checklist] },
+      { id: 'chapter-2', title: 'עקרונות', description: '', blocks: [] },
+    ],
+  };
+
+  it('סימון בצ׳ק-ליסט נשמר כשעוברים פרק וחוזרים', async () => {
+    const user = userEvent.setup();
+    render(<CourseRenderer course={sequenced} resolveAssetUrl={() => undefined} />);
+
+    await user.click(screen.getByRole('checkbox', { name: /לקרוא את הנוהל/ }));
+    await user.click(screen.getByRole('button', { name: /הבא/ }));
+    expect(screen.queryByRole('checkbox', { name: /לקרוא את הנוהל/ })).toBeNull();
+
+    await user.click(screen.getByRole('button', { name: /הקודם/ }));
+    expect(screen.getByRole('checkbox', { name: /לקרוא את הנוהל/ })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: /לחתום על הטופס/ })).not.toBeChecked();
+  });
+
+  it('סימון בצ׳ק-ליסט נשמר אחרי טעינה מחדש של הלומדה', async () => {
+    const user = userEvent.setup();
+    const first = render(<CourseRenderer course={sequenced} resolveAssetUrl={() => undefined} />);
+    await user.click(screen.getByRole('checkbox', { name: /לקרוא את הנוהל/ }));
+    first.unmount();
+
+    render(<CourseRenderer course={sequenced} resolveAssetUrl={() => undefined} />);
+    expect(screen.getByRole('checkbox', { name: /לקרוא את הנוהל/ })).toBeChecked();
+  });
+
+  it('בקנבס העריכה מצב הבלוקים אינו נשמר כתשובת לומד', () => {
+    render(<CourseRenderer course={sequenced} resolveAssetUrl={() => undefined} isEditing />);
+
+    expect(window.localStorage.getItem('lc-progress:course-sequence')).toBeNull();
   });
 });

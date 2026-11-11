@@ -1,7 +1,7 @@
 import { useId, useState } from 'react';
 import type { BlockOf } from '@/model/types';
 import { courseIcons } from '@/renderer/icons';
-import { useQuizReporter } from '@/renderer/progress/ProgressContext';
+import { useBlockState, useQuizReporter } from '@/renderer/progress/ProgressContext';
 import { useRenderContext } from '@/renderer/RenderContext';
 import type { QuizContent, QuizOption } from './content';
 
@@ -29,27 +29,30 @@ export function QuizRenderer({ block }: { block: BlockOf<QuizContent> }) {
   const [options] = useState(() =>
     content.shuffle && !isEditing ? shuffle(content.options) : content.options,
   );
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [submitted, setSubmitted] = useState(false);
-  const [solutionShown, setSolutionShown] = useState(false);
+  // המענה נשמר במאגר ההתקדמות, כדי שלומד שחוזר לפרק או ללומדה ימצא את
+  // התשובה שלו ולא שאלה ריקה
+  const [answer, setAnswer] = useBlockState<QuizAnswer>(block.id, EMPTY_ANSWER);
 
   // בעריכה הרשימה מתעדכנת מיד; אחרי משחק המשתמש הסדר כבר קבוע
   const visibleOptions = isEditing ? content.options : options;
 
-  const selected = visibleOptions.find((option) => option.id === selectedId);
+  // תשובה שמורה על אפשרות שהמחבר מחק מאז אינה תשובה — חוזרים לשאלה נקייה
+  const selected = visibleOptions.find((option) => option.id === answer.selectedId);
+  const selectedId = selected ? answer.selectedId : null;
+  const submitted = answer.submitted && Boolean(selected);
+  const solutionShown = answer.solutionShown && submitted;
   const isCorrect = Boolean(selected?.correct);
   const canRetry = submitted && !isCorrect && content.allowRetry;
 
-  const reset = () => {
-    setSubmitted(false);
-    setSelectedId(null);
-    setSolutionShown(false);
-  };
+  const setSelectedId = (id: string) => setAnswer((prev) => ({ ...prev, selectedId: id }));
+  const setSolutionShown = (shown: boolean) =>
+    setAnswer((prev) => ({ ...prev, solutionShown: shown }));
+  const reset = () => setAnswer(EMPTY_ANSWER);
 
   // הגשה מדווחת את התוצאה למנגנון ההתקדמות (בתוצר בלבד). ריצה חוזרת אחרי
   // retry מדווחת מחדש, כך שהציון משקף את הניסיון האחרון.
   const submit = () => {
-    setSubmitted(true);
+    setAnswer((prev) => ({ ...prev, submitted: true }));
     if (!isEditing) reportQuiz(block.id, isCorrect);
   };
 
@@ -144,6 +147,14 @@ export function QuizRenderer({ block }: { block: BlockOf<QuizContent> }) {
     </div>
   );
 }
+
+interface QuizAnswer {
+  selectedId: string | null;
+  submitted: boolean;
+  solutionShown: boolean;
+}
+
+const EMPTY_ANSWER: QuizAnswer = { selectedId: null, submitted: false, solutionShown: false };
 
 function optionState(option: QuizOption, submitted: boolean, solutionShown: boolean) {
   if (!submitted && !solutionShown) return undefined;

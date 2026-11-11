@@ -2,12 +2,14 @@
  * מתאם SCORM 1.2 — הגשר היחיד בין הלומדה ל-LMS.
  *
  * הרנדרר אינו יודע דבר על SCORM: הוא משדר `window` אירוע `lc:progress` עם
- * מצב ההשלמה והציון, והמתאם הזה — שנכנס **רק** לחבילת ה-SCORM — מקשיב
+ * מצב ההשלמה, הציון ומצב הלומד המלא, והמתאם הזה — שנכנס **רק** לחבילת ה-SCORM — מקשיב
  * ומדווח ל-LMS. כך מוסכמת הגבול נשמרת, וה-`index.html` של חבילת ה-SCORM
  * עדיין נפתח גם לבד מ-`file://` (בלי LMS המתאם פשוט אינו עושה דבר).
  *
  * נכתב ידנית כ-JS קלאסי בלי תלויות, בדיוק כמו חבילת הריצה — הוא נטען
- * כסקריפט קלאסי לפני הריצה, כדי שהמאזין יירשם לפני השידור הראשון.
+ * כסקריפט קלאסי לפני הריצה, כדי שהמאזין יירשם לפני השידור הראשון — וכדי
+ * שמצב הלומד מה-LMS (`cmi.suspend_data`) יחכה ב-`window.__LC_RESUME__`
+ * כשהלומדה עולה. כך לומד שהתחיל במחשב אחד ממשיך באחר.
  */
 
 export const SCORM_ADAPTER_FILE = 'scorm-adapter.js';
@@ -35,18 +37,54 @@ export function scormAdapterJs(): string {
   var api = getAPI();
   if (!api) return;
 
+  // מגבלת התקן ל-cmi.suspend_data ב-SCORM 1.2 היא 4096 תווים; נשאר מרווח
+  var SUSPEND_LIMIT = 4000;
+
   var started = false;
+  // סטטוס סופי שכבר דווח ב-LMS — לא מורידים אותו בחזרה ל-incomplete
+  var alreadyDone = false;
   function start() {
     if (started) return;
     api.LMSInitialize("");
     started = true;
     var status = api.LMSGetValue("cmi.core.lesson_status");
+    alreadyDone = status === "completed" || status === "passed";
     if (!status || status === "not attempted" || status === "unknown") {
       api.LMSSetValue("cmi.core.lesson_status", "incomplete");
       api.LMSCommit("");
     }
+
+    // המשך מהמקום שבו הלומד עצר: המצב שנשמר ב-LMS מוזרק ללומדה לפני שהיא
+    // עולה (המתאם נטען לפני חבילת הריצה). אובייקט ריק מסמן "הפעלה ב-LMS בלי
+    // מצב קודם", כדי שהלומדה לא תיפול חזרה למצב של לומד אחר ב-localStorage.
+    var resume = {};
+    try {
+      var raw = api.LMSGetValue("cmi.suspend_data");
+      var parsed = raw ? JSON.parse(raw) : null;
+      if (parsed && typeof parsed === "object") resume = parsed;
+    } catch (e) {
+      resume = {};
+    }
+    window.__LC_RESUME__ = resume;
   }
   start();
+
+  // שומר את מצב הלומד ב-LMS. אם המצב המלא חורג מהמגבלה מוותרים על מצב
+  // הבלוקים (תשובות מסומנות) ושומרים את העיקר: מיקום, פרקים שהושלמו וציון.
+  function suspend(state) {
+    if (!state || typeof state !== "object") return;
+    var data = JSON.stringify(state);
+    if (data.length > SUSPEND_LIMIT) {
+      var slim = {};
+      for (var key in state) {
+        if (Object.prototype.hasOwnProperty.call(state, key) && key !== "blockState") {
+          slim[key] = state[key];
+        }
+      }
+      data = JSON.stringify(slim);
+    }
+    if (data.length <= SUSPEND_LIMIT) api.LMSSetValue("cmi.suspend_data", data);
+  }
 
   window.addEventListener("lc:progress", function (event) {
     if (!started) return;
@@ -56,7 +94,16 @@ export function scormAdapterJs(): string {
       api.LMSSetValue("cmi.core.score.min", "0");
       api.LMSSetValue("cmi.core.score.max", "100");
     }
-    api.LMSSetValue("cmi.core.lesson_status", d.completed ? "completed" : "incomplete");
+    if (d.completed) {
+      alreadyDone = true;
+      api.LMSSetValue("cmi.core.lesson_status", "completed");
+    } else if (!alreadyDone) {
+      api.LMSSetValue("cmi.core.lesson_status", "incomplete");
+    }
+    if (typeof d.location === "string") {
+      api.LMSSetValue("cmi.core.lesson_location", d.location);
+    }
+    suspend(d.state);
     api.LMSCommit("");
   });
 
@@ -65,6 +112,8 @@ export function scormAdapterJs(): string {
   function finish() {
     if (!started) return;
     started = false;
+    // exit=suspend מורה ל-LMS לשמור את suspend_data לכניסה הבאה
+    api.LMSSetValue("cmi.core.exit", "suspend");
     api.LMSCommit("");
     api.LMSFinish("");
   }

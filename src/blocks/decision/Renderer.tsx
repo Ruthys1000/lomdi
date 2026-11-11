@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import type { BlockOf } from '@/model/types';
+import { useBlockState } from '@/renderer/progress/ProgressContext';
 import { useRenderContext } from '@/renderer/RenderContext';
 import type { DecisionContent } from './content';
 
@@ -13,9 +13,13 @@ import type { DecisionContent } from './content';
 export function DecisionRenderer({ block }: { block: BlockOf<DecisionContent> }) {
   const { content } = block;
   const { isEditing } = useRenderContext();
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  // הבחירה נשמרת במאגר ההתקדמות: תרחיש נבנה מהחלטה להחלטה, ולומד שחוזר
+  // אליו צריך לראות באיזו דרך כבר הלך
+  const [choice, setChoice] = useBlockState<{ selectedId: string | null }>(block.id, NO_CHOICE);
 
-  const selected = content.options.find((option) => option.id === selectedId);
+  // בחירה שמורה באפשרות שנמחקה מאז אינה בחירה
+  const selected = content.options.find((option) => option.id === choice.selectedId);
+  const selectedId = selected ? choice.selectedId : null;
   const locked = selectedId !== null && !content.allowReselect;
 
   return (
@@ -34,7 +38,7 @@ export function DecisionRenderer({ block }: { block: BlockOf<DecisionContent> })
                 data-active={active || undefined}
                 disabled={isEditing || (locked && !active)}
                 aria-pressed={active}
-                onClick={() => setSelectedId(option.id)}
+                onClick={() => setChoice({ selectedId: option.id })}
               >
                 {option.text}
               </button>
@@ -52,3 +56,5 @@ export function DecisionRenderer({ block }: { block: BlockOf<DecisionContent> })
     </div>
   );
 }
+
+const NO_CHOICE: { selectedId: string | null } = { selectedId: null };

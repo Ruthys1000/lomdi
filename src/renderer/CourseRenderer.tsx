@@ -70,7 +70,12 @@ export function CourseRenderer({
       ),
     [course.chapters],
   );
-  const progress = useCourseProgress(course.id, { enabled: trackingEnabled, totalQuizzes });
+  const chapterIds = useMemo(() => course.chapters.map((chapter) => chapter.id), [course.chapters]);
+  const progress = useCourseProgress(course.id, {
+    enabled: trackingEnabled,
+    totalQuizzes,
+    chapterIds,
+  });
   const activeIndex = progress.chapterIndex;
   const setActiveIndex = progress.setChapterIndex;
 
@@ -166,7 +171,21 @@ export function CourseRenderer({
 
   const chapterIndex = forcedChapterIndex ?? activeIndex;
   const useChapterMode = course.navigation.mode === 'chapters' && forcedChapterIndex === undefined;
-  const progressValue = useMemo(() => ({ reportQuiz: progress.reportQuiz }), [progress.reportQuiz]);
+  // מאגר מצב הבלוקים נמסר רק מחוץ לקנבס העריכה: שם בלוק אינטראקטיבי מחזיק
+  // את המצב שלו מקומית, כדי שמשחק של המחבר עם שאלה לא יישמר כתשובת לומד.
+  // בתצוגה המקדימה ובתוצר המאגר פעיל גם כשהמעקב כבוי — אז הוא זיכרון זמני
+  // שמחזיק את התשובות בין פרקים, בלי לגעת באחסון.
+  const progressValue = useMemo(
+    () =>
+      isEditing
+        ? { reportQuiz: progress.reportQuiz }
+        : {
+            reportQuiz: progress.reportQuiz,
+            blockState: progress.blockState,
+            setBlockState: progress.setBlockState,
+          },
+    [isEditing, progress.reportQuiz, progress.blockState, progress.setBlockState],
+  );
 
   // במצב פרקים הסיום הוא מסך מלא שמחליף את סרגלי הניווט; במצב גלילה הוא
   // רצועה בתחתית והלומדה נשארת גלויה מעליה
