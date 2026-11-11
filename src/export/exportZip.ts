@@ -16,7 +16,7 @@ import {
  *
  * המבנה — הכול תחת תיקיית שורש אחת:
  *
- *   lomdi-safety-2026-07-25/
+ *   learnit-safety-2026-07-25/
  *     index.html
  *     content.json
  *     runtime/app.js

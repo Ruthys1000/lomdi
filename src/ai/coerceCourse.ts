@@ -242,7 +242,7 @@ const IMAGE_FIELD_BY_TYPE: Record<string, ImageField> = {
 /**
  * במקום לפתור תמונה, שומר את הפרומפט שהמודל הציע כ-`imagePrompt` בתוכן.
  *
- * Lomdi לא מייצר תמונות: הבלוק נשאר עם placeholder, והמשתמש מקבל פרומפט
+ * Learnit לא מייצר תמונות: הבלוק נשאר עם placeholder, והמשתמש מקבל פרומפט
  * מומלץ באנגלית להעתקה למחולל תמונות משלו. הפניית הנכס מתאפסת (אין assetId
  * להמציא), וה-alt של המודל נשמר לנגישות.
  */
@@ -424,7 +424,12 @@ export function coerceGeneratedCourse(raw: unknown, format?: string): CoerceResu
     direction,
     language,
     theme: coerceTheme(root.theme),
-    navigation: { ...defaultNavigation, mode: navMode },
+    navigation: {
+      ...defaultNavigation,
+      mode: navMode,
+      // מסלול למידה נפתח פרק-פרק; שאר הפורמטים נשארים בניווט חופשי
+      sequence: getFormat(format)?.defaultSequence ?? defaultNavigation.sequence,
+    },
     chapters,
   });
 

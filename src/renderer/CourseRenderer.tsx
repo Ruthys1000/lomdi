@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useRef, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Block, Chapter, Course } from '@/model/types';
 import { BlockRenderer } from './BlockRenderer';
-import { ChapterNavigation } from './ChapterNavigation';
-import { CompletionSummary } from './CompletionSummary';
+import { ChapterNavigation, type ChapterStatus } from './ChapterNavigation';
+import { CompletionSummary, type ChapterScore } from './CompletionSummary';
 import { ProgressContext } from './progress/ProgressContext';
 import { useCourseProgress } from './progress/useCourseProgress';
 import { RenderContext, type RenderContextValue } from './RenderContext';
+import { ResumeBanner } from './ResumeBanner';
 import { ScrollNavigation } from './ScrollNavigation';
 import { useScrollReveal } from './scrollEffects';
 import { isDarkSurface, themeToCssVarMap } from './theme/themeToCssVars';
@@ -70,7 +71,13 @@ export function CourseRenderer({
       ),
     [course.chapters],
   );
-  const progress = useCourseProgress(course.id, { enabled: trackingEnabled, totalQuizzes });
+  const chapterIds = useMemo(() => course.chapters.map((chapter) => chapter.id), [course.chapters]);
+  const progress = useCourseProgress(course.id, {
+    enabled: trackingEnabled,
+    totalQuizzes,
+    chapterIds,
+    passScore: course.navigation.passScore,
+  });
   const activeIndex = progress.chapterIndex;
   const setActiveIndex = progress.setChapterIndex;
 
@@ -166,11 +173,75 @@ export function CourseRenderer({
 
   const chapterIndex = forcedChapterIndex ?? activeIndex;
   const useChapterMode = course.navigation.mode === 'chapters' && forcedChapterIndex === undefined;
-  const progressValue = useMemo(() => ({ reportQuiz: progress.reportQuiz }), [progress.reportQuiz]);
+  // מאגר מצב הבלוקים נמסר רק מחוץ לקנבס העריכה: שם בלוק אינטראקטיבי מחזיק
+  // את המצב שלו מקומית, כדי שמשחק של המחבר עם שאלה לא יישמר כתשובת לומד.
+  // בתצוגה המקדימה ובתוצר המאגר פעיל גם כשהמעקב כבוי — אז הוא זיכרון זמני
+  // שמחזיק את התשובות בין פרקים, בלי לגעת באחסון.
+  const progressValue = useMemo(
+    () =>
+      isEditing
+        ? { reportQuiz: progress.reportQuiz }
+        : {
+            reportQuiz: progress.reportQuiz,
+            blockState: progress.blockState,
+            setBlockState: progress.setBlockState,
+          },
+    [isEditing, progress.reportQuiz, progress.blockState, progress.setBlockState],
+  );
 
   // במצב פרקים הסיום הוא מסך מלא שמחליף את סרגלי הניווט; במצב גלילה הוא
   // רצועה בתחתית והלומדה נשארת גלויה מעליה
   const showCompletionScreen = useChapterMode && trackingEnabled && progress.completed;
+
+  // ── רצף למידה ──────────────────────────────────────────────────────
+  // לכל פרק: אילו בלוקים דורשים מענה, וכמה משאלות הבחירה נענו נכון
+  const chapterAnswers = useMemo(
+    () =>
+      course.chapters.map((chapter) => {
+        const quizIds = chapter.blocks.filter((b) => b.type === 'quiz').map((b) => b.id);
+        const challengeIds = chapter.blocks.filter((b) => b.type === 'challenge').map((b) => b.id);
+        const answered =
+          quizIds.every((id) => id in progress.quizResults) &&
+          challengeIds.every((id) => isSubmitted(progress.blockState[id]));
+        const correct = quizIds.filter((id) => progress.quizResults[id] === true).length;
+        return { id: chapter.id, title: chapter.title, answered, correct, total: quizIds.length };
+      }),
+    [course.chapters, progress.quizResults, progress.blockState],
+  );
+
+  const chapterStatuses: ChapterStatus[] | undefined = useMemo(() => {
+    if (!trackingEnabled) return undefined;
+    const done = course.chapters.map((chapter) => progress.doneChapters.includes(chapter.id));
+    // בסדר ליניארי פתוח רק הפרק הראשון שעוד לא הושלם, וכל מה שלפניו
+    const firstOpen = done.indexOf(false);
+    const frontier = firstOpen === -1 ? done.length : firstOpen;
+    return done.map((isDone, index) =>
+      isDone ? 'done' : nav.sequence === 'linear' && index > frontier ? 'locked' : 'open',
+    );
+  }, [trackingEnabled, course.chapters, progress.doneChapters, nav.sequence]);
+
+  const canAdvance =
+    !trackingEnabled ||
+    !nav.requireAnswersToAdvance ||
+    (chapterAnswers[activeIndex]?.answered ?? true);
+
+  const chapterScores: ChapterScore[] = chapterAnswers;
+  const firstMistakeIndex = chapterAnswers.findIndex((chapter) => chapter.correct < chapter.total);
+
+  // הודעת "ממשיכים מאיפה שעצרת": עד שהלומד סוגר אותה או עובר פרק
+  const [resumeDismissed, setResumeDismissed] = useState(false);
+  const resumeIndex = useRef(activeIndex);
+  const showResume =
+    trackingEnabled &&
+    progress.resumed &&
+    !resumeDismissed &&
+    !progress.completed &&
+    activeIndex === resumeIndex.current;
+  const resumeChapter = course.chapters[activeIndex];
+  const resumeLocation =
+    useChapterMode && activeIndex > 0 && resumeChapter
+      ? `${nav.labels.chapter} ${activeIndex + 1}${resumeChapter.title ? `: ${resumeChapter.title}` : ''}`
+      : undefined;
 
   return (
     <RenderContext value={ctx}>
@@ -203,15 +274,33 @@ export function CourseRenderer({
           </a>
         )}
 
+        {showResume && (
+          <ResumeBanner
+            location={resumeLocation}
+            onRestart={progress.reset}
+            onDismiss={() => setResumeDismissed(true)}
+          />
+        )}
+
         {showCompletionScreen ? (
           <main className="lc-chapter-body" id="lc-main" tabIndex={-1}>
             <CompletionSummary
               correctCount={progress.correctCount}
               totalQuizzes={totalQuizzes}
+              passScore={nav.passScore}
+              chapters={chapterScores}
               onReview={() => {
                 progress.setCompleted(false);
                 setActiveIndex(0);
               }}
+              onReviewMistakes={
+                firstMistakeIndex >= 0
+                  ? () => {
+                      progress.setCompleted(false);
+                      setActiveIndex(firstMistakeIndex);
+                    }
+                  : undefined
+              }
             />
           </main>
         ) : useChapterMode ? (
@@ -222,6 +311,8 @@ export function CourseRenderer({
             onNavigate={setActiveIndex}
             renderChapter={renderChapter}
             onFinish={trackingEnabled ? () => progress.setCompleted(true) : undefined}
+            statuses={chapterStatuses}
+            canAdvance={canAdvance}
           />
         ) : forcedChapterIndex === undefined ? (
           <ScrollNavigation
@@ -231,7 +322,12 @@ export function CourseRenderer({
             rootRef={rootRef}
             completion={
               trackingEnabled ? (
-                <CompletionSummary correctCount={progress.correctCount} totalQuizzes={totalQuizzes} />
+                <CompletionSummary
+                  correctCount={progress.correctCount}
+                  totalQuizzes={totalQuizzes}
+                  passScore={nav.passScore}
+                  chapters={chapterScores}
+                />
               ) : undefined
             }
             onReachedEnd={trackingEnabled ? () => progress.setCompleted(true) : undefined}
@@ -247,4 +343,9 @@ export function CourseRenderer({
       </ProgressContext>
     </RenderContext>
   );
+}
+
+/** אתגר נחשב "נענה" כשהלומד הגיש אותו — כך הוא נשמר ב-`useBlockState` */
+function isSubmitted(state: unknown): boolean {
+  return typeof state === 'object' && state !== null && (state as { submitted?: unknown }).submitted === true;
 }

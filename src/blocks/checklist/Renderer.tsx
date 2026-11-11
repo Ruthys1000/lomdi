@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import type { BlockOf } from '@/model/types';
+import { useBlockState } from '@/renderer/progress/ProgressContext';
 import { useRenderContext } from '@/renderer/RenderContext';
 import type { ChecklistContent } from './content';
 
@@ -7,21 +7,18 @@ import type { ChecklistContent } from './content';
  * צ׳ק-ליסט אינטראקטיבי.
  *
  * אותו רכיב בתצוגה המקדימה ובתוצר — הסימון עובד בשניהם. בעורך (`isEditing`)
- * הסימון מושבת כדי שלחיצה על פריט לא תתחרה בבחירת הבלוק לעריכה. מצב הסימון
- * מקומי ו-ephemeral (מתאפס ברענון), כמו שאלת התרגול.
+ * הסימון מושבת כדי שלחיצה על פריט לא תתחרה בבחירת הבלוק לעריכה. הסימון
+ * נשמר במאגר ההתקדמות (כמערך מזהים, כי `Set` אינו JSON), כך שלומד שחוזר
+ * לרשימה אחרי יום ממשיך מהפריט שבו עצר.
  */
 export function ChecklistRenderer({ block }: { block: BlockOf<ChecklistContent> }) {
   const { content } = block;
   const { isEditing } = useRenderContext();
-  const [checked, setChecked] = useState<Set<string>>(new Set());
+  const [checkedIds, setCheckedIds] = useBlockState<string[]>(block.id, NONE);
+  const checked = new Set(checkedIds);
 
   const toggle = (id: string) => {
-    setChecked((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+    setCheckedIds((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
   };
 
   const doneCount = content.items.filter((item) => checked.has(item.id)).length;
@@ -62,3 +59,5 @@ export function ChecklistRenderer({ block }: { block: BlockOf<ChecklistContent> 
     </div>
   );
 }
+
+const NONE: string[] = [];

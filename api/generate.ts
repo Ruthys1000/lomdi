@@ -1138,6 +1138,129 @@ const CHALLENGE_EXAMPLE = {
 };
 
 /**
+ * דוגמת מסלול למידה — כמה פרקים שנבנים זה על זה: פתיחה, רעיון + שאלה, סיכום.
+ */
+const JOURNEY_EXAMPLE = {
+  title: 'משוב שמקדם',
+  subtitle: 'מסלול קצר למנהלים',
+  theme: 'clean',
+  chapters: [
+    {
+      title: 'למה משוב נכשל',
+      description: 'נבין מה הופך שיחת משוב לוויכוח, ומה נלמד במסלול.',
+      blocks: [
+        {
+          type: 'hero',
+          content: {
+            variant: 'panel',
+            title: 'משוב שמקדם',
+            subtitle: 'שלושה פרקים, רבע שעה, כלי אחד שנשאר',
+            backgroundType: 'image',
+            query:
+              'two people at a small round table seen from above, one sliding a single folded note across, warm morning side light, editorial photo, muted palette',
+            alt: 'שני אנשים ליד שולחן עגול, פתק מועבר ביניהם',
+            height: 'medium',
+            fullBleed: true,
+          },
+        },
+        {
+          type: 'richText',
+          content: {
+            doc: {
+              type: 'doc',
+              content: [
+                { type: 'paragraph', content: [{ type: 'text', text: 'רוב שיחות המשוב נכשלות לא בגלל מה שנאמר, אלא בגלל הסדר: פותחים במסקנה על האדם, והוא מפסיק להקשיב ומתחיל להתגונן.' }] },
+                { type: 'paragraph', content: [{ type: 'text', text: 'במסלול הזה נלמד מבנה קצר שמחליף את המסקנה בעובדה, ונתרגל אותו עד שיהיה טבעי.' }] },
+              ],
+            },
+          },
+        },
+        {
+          type: 'callout',
+          content: {
+            variant: 'info',
+            icon: 'Compass',
+            title: 'מה נלמד',
+            text: 'קודם נזהה את הטעות הנפוצה, אחר כך נכיר מבנה של שלושה צעדים, ובסוף נתרגל אותו על מקרה אמיתי.',
+          },
+        },
+      ],
+    },
+    {
+      title: 'עובדה לפני פרשנות',
+      description: 'נלמד להפריד בין מה שראינו לבין מה שהסקנו.',
+      blocks: [
+        {
+          type: 'richText',
+          content: {
+            doc: {
+              type: 'doc',
+              content: [
+                { type: 'paragraph', content: [{ type: 'text', text: 'פרשנות היא מה שהסקנו: "לא אכפת לו". עובדה היא מה שראינו: "הדוח הגיע יומיים אחרי המועד". על עובדה אפשר לדבר; על פרשנות מתווכחים.' }] },
+                { type: 'paragraph', content: [{ type: 'text', text: 'לכן משוב שמקדם בנוי משלושה צעדים, תמיד באותו סדר:' }] },
+              ],
+            },
+          },
+        },
+        {
+          type: 'steps',
+          content: {
+            items: [
+              { title: 'מה ראיתי', text: 'תיאור של התנהגות אחת, בזמן ובמקום מסוימים.' },
+              { title: 'מה זה גרם', text: 'ההשפעה על הצוות, על הלקוח או על התוצאה.' },
+              { title: 'מה מבקשים', text: 'בקשה אחת, קונקרטית, שאפשר לבדוק אם קרתה.' },
+            ],
+          },
+        },
+        {
+          type: 'quiz',
+          content: {
+            question: 'איזה משפט פותח משוב בעובדה ולא בפרשנות?',
+            hint: 'חפשו את המשפט שמצלמה הייתה יכולה לתעד.',
+            options: [
+              { text: 'בישיבה אתמול נכנסת לדברי דנה שלוש פעמים', correct: true },
+              { text: 'אתה לא מכבד את החברים בצוות', correct: false },
+              { text: 'תמיד קשה לך להקשיב', correct: false },
+            ],
+            feedbackCorrect: 'נכון. זו התנהגות שאפשר היה לראות, ולכן קשה להתווכח איתה.',
+            feedbackIncorrect: 'זו מסקנה על האדם, לא תיאור של מה שקרה. מסקנה מזמינה התגוננות.',
+          },
+        },
+      ],
+    },
+    {
+      title: 'סיכום ובדיקה',
+      description: 'נאחד את שלושת הצעדים ונבדוק שהם יושבים.',
+      blocks: [
+        {
+          type: 'callout',
+          content: {
+            variant: 'takeaway',
+            icon: 'Lightbulb',
+            title: 'השורה התחתונה',
+            text: 'משוב טוב מתאר התנהגות אחת, מסביר את ההשפעה שלה ומסתיים בבקשה אחת שאפשר לבדוק.',
+          },
+        },
+        {
+          type: 'quiz',
+          content: {
+            question: 'מה חסר במשוב: "איחרת למסירה ביום שלישי, והלקוח קיבל את הדוח באיחור"?',
+            hint: 'עברו על שלושת הצעדים לפי הסדר.',
+            options: [
+              { text: 'בקשה קונקרטית להמשך', correct: true },
+              { text: 'תיאור של ההתנהגות', correct: false },
+              { text: 'ההשפעה של ההתנהגות', correct: false },
+            ],
+            feedbackCorrect: 'בדיוק. יש עובדה ויש השפעה, אבל בלי בקשה השיחה נגמרת בלי שינוי.',
+            feedbackIncorrect: 'ההתנהגות וההשפעה כבר שם. מה שחסר הוא הצעד השלישי: מה מבקשים מעכשיו.',
+          },
+        },
+      ],
+    },
+  ],
+};
+
+/**
  * מודול פורמט — ה"אישיות" של הפורמט בצד ה-AI.
  *
  * מסונכרן ידנית עם `src/formats/index.ts` (allowedBlocks תואם ל-allowedBlockTypes).
@@ -1234,6 +1357,46 @@ const FORMAT_MODULES: Record<string, FormatModule> = {
     allowedBlocks: ['hero', 'richText', 'checklist', 'callout', 'divider'],
     example: CHECKLIST_EXAMPLE,
   },
+  journey: {
+    role:
+      'אתה מעצב/ת למידה מנוסה. אתה בונה מסלול למידה רצוף: מחליט מה ללמד מתוך החומר, ' +
+      'באיזה סדר, מתי לבדוק הבנה ומתי לאחד — כך שכל פרק נשען על קודמו.',
+    interview: [
+      '- פרק = מטרת למידה אחת. כתוב אותה ב-description של הפרק, במשפט אחד בלשון "נלמד/נבין/נתרגל".',
+      '- סקאפולדינג: סדר את הפרקים מהפשוט למורכב. אל תניח ידע שעוד לא הוצג בפרק קודם.',
+      '- פרק פתיחה קצר שממסגר מה נלמד ולמה זה חשוב ללומד — בלי שאלה.',
+      '- שאלה במקום הנכון: quiz מיד אחרי שרעיון מרכזי הושלם, בסוף הפרק — לא באמצע הסבר.',
+      '  לא כל פרק חייב שאלה; פרק שרק מציג רעיון ברצף הוא לגיטימי.',
+      '- מסיחים סבירים שמבוססים על טעויות נפוצות; feedback שמלמד למה, לא רק "נכון/לא נכון".',
+      '- הימנע מקיר טקסט: פסקאות של 2–4 משפטים; פריטים מקבילים כ-steps/cards; העשרה',
+      '  שלא כולם חייבים — ב-accordion.',
+      '- פרק סיכום שמאחד את הרעיונות (callout takeaway) ובו 1–3 שאלות מסכמות שמשלבות',
+      '  כמה פרקים.',
+      '- בסס הכול על החומר שנמסר. מותר לארגן, לפשט ולהוסיף דוגמה קרובה; אסור להוסיף עובדות.',
+    ].join('\n'),
+    skeleton: [
+      '3–6 פרקים, לפי היקף החומר. אל תמתח תוכן דליל ואל תדחוס נושא עמוס לפרק אחד.',
+      'פרק 1 (פתיחה): hero עם query יצירתי → richText קצר → callout info "מה נלמד".',
+      'פרקי תוכן: richText → בלוק מבני אחד או שניים (steps/cards/accordion/checklist/',
+      'textImage) → quiz בסוף כשהרעיון הושלם. hero רק בפרק הראשון.',
+      'פרק אחרון (סיכום): callout takeaway → 1–3 quiz מסכמים.',
+      'לכל פרק title קצר ו-description עם מטרת הלמידה.',
+    ].join('\n'),
+    allowedBlocks: [
+      'hero',
+      'richText',
+      'divider',
+      'callout',
+      'cards',
+      'steps',
+      'accordion',
+      'quiz',
+      'checklist',
+      'image',
+      'textImage',
+    ],
+    example: JOURNEY_EXAMPLE,
+  },
   caseStudy: {
     role:
       'אתה אנליסט-מספר סיפורים: כותב מקרה בוחן חי מהרקע עד הלקחים, עם מתח, ' +
@@ -1307,7 +1470,7 @@ const SHARED_RULES = [
   '  לחרוג מהבלוקים המותרים לפורמט.',
   '',
   '═══ תמונות / query ═══',
-  'Lomdi לא מייצר תמונות. כל image/textImage ו-hero עם backgroundType="image" חייב',
+  'Learnit לא מייצר תמונות. כל image/textImage ו-hero עם backgroundType="image" חייב',
   '"query" באנגלית + "alt" בעברית. ה-query מוצג למשתמש כהמלצה ליצירה חיצונית.',
   '- query יצירתי וספציפי (כ־12–28 מילים): נושא + קומפוזיציה + תאורה/מצב רוח + סגנון.',
   '- גוון סגנונות בין לומדות ובתוך לומדה — אל תחזור תמיד על "flat vector illustration".',
@@ -1326,6 +1489,14 @@ const SHARED_RULES = [
   '  בלי מקור אמין, השאר author ריק או ותר על ה-quote.',
   '- אל תמציא נתונים/עובדות שאינם במקור; מותר להעמיק בניסוח ובדוגמאות שמבוססות עליו.',
 ].join('\n');
+
+/**
+ * דוגמת ה-few-shot של פורמט. מיוצאת לבדיקות בלבד: דוגמה שאינה עוברת את
+ * שכבת הייבוא של הלקוח מלמדת את המודל לייצר פלט שהלקוח ידחה.
+ */
+export function formatExample(format: string): unknown {
+  return FORMAT_MODULES[format]?.example;
+}
 
 /**
  * מרכיב את פרומפט המערכת לפי הפורמט: מצע משותף + מודול-פורמט + קטלוג מסונן.

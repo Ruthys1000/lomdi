@@ -83,6 +83,10 @@ export const navigationSchema = z.object({
   // default(true) ממלא את השדה בלומדות שנשמרו לפני שהתווסף — כך אימות של
   // קובץ ישן עובר בלי צורך במיגרציה, ולומדות חדשות נבנות עם המעקב דלוק
   trackProgress: z.boolean().default(true),
+  // שדות הרצף — אותו דפוס: ברירת מחדל שמשאירה לומדה ישנה בדיוק כפי שהייתה
+  sequence: z.enum(['free', 'linear']).default('free'),
+  requireAnswersToAdvance: z.boolean().default(false),
+  passScore: z.number().min(0).max(100).optional(),
   labels: z.object({
     next: z.string(),
     prev: z.string(),

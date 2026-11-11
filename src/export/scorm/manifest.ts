@@ -19,7 +19,7 @@ function manifestId(title: string): string {
     .replace(/[^A-Za-z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '')
     .slice(0, 40);
-  return `LOMDI_${slug || 'course'}`;
+  return `LEARNIT_${slug || 'course'}`;
 }
 
 export function buildManifest(title: string, filePaths: string[]): string {

@@ -142,6 +142,12 @@ export interface Theme {
 
 export type NavigationMode = 'scroll' | 'chapters';
 
+/**
+ * סדר המעבר בין פרקים. `free` — הלומד קופץ לכל פרק; `linear` — פרק נפתח רק
+ * אחרי שהקודם הושלם, כמו במסלול למידה מובנה. משפיע רק במצב פרקים.
+ */
+export type SequenceMode = 'free' | 'linear';
+
 export interface NavigationSettings {
   mode: NavigationMode;
   showProgress: boolean;
@@ -152,6 +158,15 @@ export interface NavigationSettings {
    * נשמר ב-localStorage של הדפדפן, ולכן פעיל רק בתוצר ובתצוגה המקדימה.
    */
   trackProgress: boolean;
+  /** פתיחה הדרגתית של פרקים. דורש מעקב התקדמות ומצב פרקים */
+  sequence: SequenceMode;
+  /** "הבא" ננעל עד שהלומד ענה על כל שאלות הפרק (שאלה ואתגר) */
+  requireAnswersToAdvance: boolean;
+  /**
+   * ציון מעבר באחוזים (1–100). חסר או 0 = אין ציון מעבר, והלומדה רק "הושלמה".
+   * כשמוגדר, מסך הסיום מציג עבר/לא עבר וחבילת ה-SCORM מדווחת passed/failed.
+   */
+  passScore?: number;
   labels: {
     next: string;
     prev: string;

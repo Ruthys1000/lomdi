@@ -74,7 +74,7 @@ export function WelcomeScreen({ onStart, onOpened }: WelcomeScreenProps) {
 
   return (
     <main
-      className="relative min-h-full overflow-y-auto bg-app"
+      className="lc-landing relative min-h-full overflow-y-auto bg-app text-fg"
       onDragOver={(event) => {
         event.preventDefault();
         setDragging(true);
