@@ -85,12 +85,13 @@ describe('מסך הפתיחה', () => {
   it('גלריית הפורמטים מציגה את הפורמטים המוכנים כלחיצים', async () => {
     await setup();
 
-    // כל ששת הפורמטים מוכנים — כרטיסים לחיצים בעברית, בלי "בקרוב"
+    // כל הפורמטים מוכנים — כרטיסים לחיצים בעברית, בלי "בקרוב"
     const onePager = screen.getByRole('button', { name: /עמוד אחד/ });
     expect(onePager).toBeInTheDocument();
     expect(onePager).not.toBeDisabled();
 
-    expect(screen.getByRole('button', { name: /תהליך/ })).not.toBeDisabled();
+    expect(screen.getByRole('button', { name: /^תהליך/ })).not.toBeDisabled();
+    expect(screen.getByRole('button', { name: /^מסלול למידה/ })).not.toBeDisabled();
     expect(screen.queryByText(/בקרוב/)).not.toBeInTheDocument();
   });
 

@@ -96,7 +96,7 @@ export function GenerateForm({ format, onBack, tone = 'light' }: GenerateFormPro
     >
       <div className="mb-4 flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className={cn('text-xs font-semibold', dark ? 'text-volt' : 'text-volt-ink')}>
+          <p className={cn('text-xs font-semibold', dark ? 'text-volt-glow' : 'text-volt-ink')}>
             פורמט נבחר
           </p>
           <p className={cn('truncate text-sm font-bold', dark ? 'text-shell-fg' : 'text-fg')}>
@@ -120,7 +120,7 @@ export function GenerateForm({ format, onBack, tone = 'light' }: GenerateFormPro
         className={cn(
           'w-full resize-y rounded-xl border p-4 text-sm leading-relaxed focus:outline-none disabled:opacity-60',
           dark
-            ? 'border-shell-edge bg-shell text-shell-fg placeholder:text-shell-muted focus:border-volt'
+            ? 'border-shell-edge bg-shell text-shell-fg placeholder:text-shell-muted focus:border-volt-glow'
             : 'border-edge-strong bg-app text-fg placeholder:text-fg-muted focus:border-volt-dim',
         )}
       />
@@ -216,7 +216,7 @@ export function GenerateForm({ format, onBack, tone = 'light' }: GenerateFormPro
                   key={step.id}
                   className={cn(
                     'flex items-center gap-2.5 text-sm',
-                    done && (dark ? 'text-volt' : 'text-volt-ink'),
+                    done && (dark ? 'text-volt-glow' : 'text-volt-ink'),
                     active && (dark ? 'font-semibold text-shell-fg' : 'font-semibold text-fg'),
                     !done && !active && (dark ? 'text-shell-muted' : 'text-fg-muted'),
                   )}

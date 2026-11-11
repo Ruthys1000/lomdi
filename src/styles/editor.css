@@ -36,16 +36,16 @@
    */
 
   /* צ'רום בהיר */
-  --color-app: #e9ebee;
-  --color-panel: #f5f6f8;
-  --color-panel-2: #ebedf0;
+  --color-app: #e8ecf0;
+  --color-panel: #f6f8fa;
+  --color-panel-2: #eceff3;
   --color-field: #ffffff;
-  --color-edge: #dde1e6;
-  --color-edge-strong: #c3cad3;
+  --color-edge: #e0e5eb;
+  --color-edge-strong: #cbd3dc;
 
-  --color-fg: #14181d;
-  --color-fg-soft: #3f4854;
-  --color-fg-muted: #667081;
+  --color-fg: #1c2733;
+  --color-fg-soft: #3a4756;
+  --color-fg-muted: #5b6878;
 
   /*
    * האזורים הכהים היחידים: הפס העליון והתצוגה המקדימה.
@@ -54,31 +54,32 @@
    * צריך *גם* טקסט בהיר — ו-`text-fg` הבהיר היה הופך אותו לבלתי קריא שם.
    * מי שמרנדר בתוך הפס משתמש ב-shell, וכל השאר לא נוגע בו.
    */
-  --color-shell: #12151a;
-  --color-shell-2: #1f242c;
-  --color-shell-edge: #2a303a;
-  --color-shell-fg: #f2f4f7;
-  --color-shell-muted: #99a1ae;
+  --color-shell: #1c2733;
+  --color-shell-2: #2a3745;
+  --color-shell-edge: #354454;
+  --color-shell-fg: #f2f5f8;
+  --color-shell-muted: #a3b1c0;
 
   /* לשכבות כהות מעל תוכן בהיר — תמיד עם שקיפות */
-  --color-scrim: #14181d;
+  --color-scrim: #1c2733;
 
   /*
-   * volt — צבע הדגש. הגוון הוא אקווה-מנטה (#2de1c2), ולא הסולם `teal-*`
-   * של Tailwind: שם ייעודי משאיר `bg-volt` כתפקיד ("צבע המצב") במקום
-   * לכבול אותו לגוון מספרי שיתפרק אם נכוונן אותו.
+   * volt — צבע הדגש: כחול-אפור של Learnit (#3f6282). השם נשאר `volt` כי הוא
+   * שם של תפקיד ("צבע המצב") ולא של גוון — בדיוק כדי שאפשר יהיה להחליף את
+   * הגוון, כמו כאן, בלי לגעת באף רכיב.
    *
-   * **הדגש הוא צבע רקע, לא צבע טקסט.** #2de1c2 על רקע בהיר נותן ניגודיות
-   * נמוכה מדי — קישור בצבע הזה אינו נקרא. לכן יש שני טוקנים נפרדים: `volt`
-   * לרקעים, ו-`volt-ink` (טורקיז כהה, ≥4.5:1) לטקסט ולאייקונים. הטקסט
-   * *על* הדגש הוא `on-volt`, כמעט-שחור, בערך 13:1.
+   * הדגש כהה מספיק כדי לשאת טקסט לבן (≈6.4:1), ולכן `on-volt` לבן.
+   * `volt-ink` הוא הגרסה העמוקה לטקסט ולאייקונים על רקע בהיר, `volt-bright`
+   * מצב הריחוף של כפתור מלא (עדיין ≥4.5:1 מול לבן), ו-`volt-glow` הגרסה
+   * הבהירה לאזורים הכהים — שם הדגש עצמו כמעט נבלע ברקע.
    */
-  --color-volt: #2de1c2;
-  --color-volt-bright: #5eead0;
-  --color-volt-dim: #17bfa6;
-  --color-volt-ink: #0b6b5e;
-  --color-volt-soft: #d6f7ef;
-  --color-on-volt: #14181d;
+  --color-volt: #3f6282;
+  --color-volt-bright: #4d7399;
+  --color-volt-dim: #34536f;
+  --color-volt-ink: #2e4a63;
+  --color-volt-soft: #e4ebf2;
+  --color-volt-glow: #9dbcd6;
+  --color-on-volt: #ffffff;
 
   --color-danger: #c02626;
   --color-danger-soft: #fdeaea;
@@ -121,7 +122,7 @@
   }
 
   .lc-shell :focus-visible {
-    outline-color: var(--color-volt);
+    outline-color: var(--color-volt-glow);
   }
 }
 
@@ -181,31 +182,15 @@
  * Hero + תצוגת תוצר + תנועות כניסה. חי כאן ולא ב-Tailwind כי keyframes
  * ואיור ה-preview דורשים CSS מפורש. מכבד prefers-reduced-motion.
  *
- * כיוון ויזואלי: light רגוע בפלטת Learnit — כחול-פלדה (#3f6282) על אפור
- * קריר. הפלטה מוגדרת כאן כדריסה של טוקני הצ'רום בתוך `.lc-landing` בלבד:
- * רכיבי הנחיתה ממשיכים להשתמש ב-`bg-volt`/`text-volt-ink` כתפקידים, והעורך
- * עצמו (שמעבר למסך הזה) אינו מושפע.
+ * כיוון ויזואלי: light רגוע בפלטת Learnit — כחול-אפור (#3f6282) על אפור
+ * קריר, אותה פלטה של העורך. `.lc-landing` רק מבהיר את המשטחים: דף שיווקי
+ * צריך יותר אוויר מסביבת עבודה.
  */
 
 .lc-landing {
   --color-app: #f4f6f8;
   --color-panel: #fbfcfd;
   --color-panel-2: #f1f4f7;
-  --color-field: #ffffff;
-  --color-edge: #e0e5eb;
-  --color-edge-strong: #d1d8e0;
-
-  --color-fg: #1c2733;
-  --color-fg-soft: #3a4756;
-  --color-fg-muted: #5b6878;
-
-  --color-volt: #3f6282;
-  --color-volt-bright: #8fb0cc;
-  --color-volt-dim: #3f6282;
-  --color-volt-ink: #2e4a63;
-  --color-volt-soft: #e6edf4;
-  /* הדגש כאן כהה, ולכן הטקסט שעליו לבן (≈6.4:1) ולא כמעט-שחור */
-  --color-on-volt: #ffffff;
 }
 
 .lc-landing-hero__atmosphere {

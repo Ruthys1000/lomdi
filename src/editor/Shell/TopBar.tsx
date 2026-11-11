@@ -124,7 +124,7 @@ export function TopBar() {
         onClick={() => void handleGoHome()}
         title="חזרה לדף הבית"
         aria-label="חזרה לדף הבית"
-        className="group flex shrink-0 items-center gap-2 rounded-lg px-1 py-1 transition hover:bg-shell-2 focus-visible:outline-2 focus-visible:outline-volt"
+        className="group flex shrink-0 items-center gap-2 rounded-lg px-1 py-1 transition hover:bg-shell-2 focus-visible:outline-2 focus-visible:outline-volt-glow"
       >
         <span className="flex size-8 items-center justify-center rounded-lg bg-volt text-on-volt">
           <BookOpen className="size-4" aria-hidden />
@@ -160,7 +160,7 @@ export function TopBar() {
           value={course.title}
           onChange={(event) => updateCourse({ title: event.target.value })}
           placeholder="שם הלומדה"
-          className="w-full min-w-0 max-w-[9rem] truncate rounded-lg border border-transparent bg-transparent px-1.5 py-1.5 text-sm font-semibold text-shell-fg placeholder:text-shell-muted hover:border-shell-edge focus:border-volt focus:bg-shell-2 focus:outline-none sm:max-w-[12rem] sm:px-2 md:max-w-xs lg:max-w-sm"
+          className="w-full min-w-0 max-w-[9rem] truncate rounded-lg border border-transparent bg-transparent px-1.5 py-1.5 text-sm font-semibold text-shell-fg placeholder:text-shell-muted hover:border-shell-edge focus:border-volt-glow focus:bg-shell-2 focus:outline-none sm:max-w-[12rem] sm:px-2 md:max-w-xs lg:max-w-sm"
         />
       </label>
 
