@@ -20,7 +20,7 @@ function backgroundStyle(content: HeroContent, imageUrl: string | undefined) {
     case 'gradient':
       return { background: heroGradient(content) };
     case 'image':
-      // עם תמונה — היא הרקע. בלי תמונה (Lomdi לא מייצר) — נופלים לרקע הערכה
+      // עם תמונה — היא הרקע. בלי תמונה (Learnit לא מייצר) — נופלים לרקע הערכה
       // ולא לצבע אחיד שטוח, כדי שה-hero לעולם לא ייראה קופסה ריקה.
       return imageUrl
         ? { backgroundImage: `url("${imageUrl}")`, backgroundSize: 'cover', backgroundPosition: 'center' }

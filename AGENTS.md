@@ -2,7 +2,7 @@
 
 ## Cursor Cloud specific instructions
 
-Lomdi (לומדי) is a single web product: a block-based HTML learning-module ("lomda") generator with a Hebrew/RTL UI. It is a browser-only React 19 + Vite 6 + TypeScript SPA that persists work in IndexedDB and exports self-contained HTML course ZIPs. The only backend is one optional Vercel serverless function (`api/generate.ts`) that calls Anthropic Claude to generate a course from pasted text. There is no database and no docker/compose.
+Learnit (לרנִיט, formerly Lomdi / לומדי) is a single web product: a block-based HTML learning-module ("lomda") generator with a Hebrew/RTL UI. It is a browser-only React 19 + Vite 6 + TypeScript SPA that persists work in IndexedDB and exports self-contained HTML course ZIPs. The only backend is one optional Vercel serverless function (`api/generate.ts`) that calls Anthropic Claude to generate a course from pasted text. There is no database and no docker/compose.
 
 The update script already runs `npm ci` on startup, so dependencies are installed. Node 20+ is required (the VM has Node 22, which works). Standard commands live in `package.json` `scripts` — refer to them rather than re-deriving.
 

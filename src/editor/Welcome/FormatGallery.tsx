@@ -51,7 +51,7 @@ function FormatCard({
         'group flex h-full w-full flex-col gap-3 rounded-2xl border p-4 text-start transition',
         ready
           ? selected
-            ? 'border-volt-dim bg-volt-soft shadow-[0_10px_28px_-18px_rgba(11,107,94,0.45)]'
+            ? 'border-volt-dim bg-volt-soft shadow-[0_10px_28px_-18px_rgba(63,98,130,0.45)]'
             : 'border-edge-strong bg-field hover:-translate-y-0.5 hover:border-volt-dim'
           : 'cursor-not-allowed border-dashed border-edge bg-panel opacity-60',
       )}

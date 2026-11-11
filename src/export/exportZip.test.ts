@@ -37,7 +37,7 @@ function courseWithImage(assetId: string) {
   });
 }
 
-const FOLDER = 'lomdi-2026-07-25';
+const FOLDER = 'learnit-2026-07-25';
 
 async function writeZip(payload: EmbeddedCourseData, blobs: Map<string, Blob>) {
   return JSZip.loadAsync(
@@ -189,9 +189,9 @@ describe('שם הקובץ ושם התיקייה', () => {
 
   it('הם ASCII ונגזרים מאותה נוסחה של קובץ הפרויקט', () => {
     // כותרת עברית-בלבד מקבלת מבדיל hash קצר (ASCII) במקום slug ריק
-    expect(exportFileName('לומדת בטיחות', day)).toMatch(/^lomdi-[0-9a-z]{4}-2026-07-25\.zip$/);
-    expect(exportFolderName('לומדת בטיחות', day)).toMatch(/^lomdi-[0-9a-z]{4}-2026-07-25$/);
-    expect(exportFileName('Safety 101 — מבוא', day)).toBe('lomdi-Safety-101-2026-07-25.zip');
+    expect(exportFileName('לומדת בטיחות', day)).toMatch(/^learnit-[0-9a-z]{4}-2026-07-25\.zip$/);
+    expect(exportFolderName('לומדת בטיחות', day)).toMatch(/^learnit-[0-9a-z]{4}-2026-07-25$/);
+    expect(exportFileName('Safety 101 — מבוא', day)).toBe('learnit-Safety-101-2026-07-25.zip');
   });
 
   it('כותרות עבריות שונות אינן דורסות זו את זו, ואותה כותרת יציבה', () => {

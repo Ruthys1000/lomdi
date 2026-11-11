@@ -74,7 +74,7 @@ describe('כתיבת קובץ פרויקט', () => {
     const project = buildProjectFile(createCourse(), []);
 
     expect(project.version).toBe(SCHEMA_VERSION);
-    expect(project.generator.name).toBe('לומדי');
+    expect(project.generator.name).toBe('Learnit');
     expect(Date.parse(project.savedAt)).not.toBeNaN();
   });
 });
@@ -151,7 +151,7 @@ describe('קריאת קובץ פרויקט', () => {
       COURSE_JSON,
       JSON.stringify({
         version: SCHEMA_VERSION,
-        generator: { name: 'לומדי', version: '0.1.0' },
+        generator: { name: 'Learnit', version: '0.1.0' },
         savedAt: new Date().toISOString(),
         course: { ...createCourse(), language: '' },
         assets: [],
@@ -187,7 +187,7 @@ describe('שם קובץ ההורדה', () => {
     const name = projectFileName('לומדת בטיחות', day);
 
     // כותרת עברית-בלבד מקבלת מבדיל hash קצר (ASCII) כדי שלא תדרוס קובץ אחר
-    expect(name).toMatch(/^lomdi-[0-9a-z]{4}-2026-07-25\.course\.zip$/);
+    expect(name).toMatch(/^learnit-[0-9a-z]{4}-2026-07-25\.course\.zip$/);
     // הבדיקה המהותית: הסיומת שורדת, ולכן אפשר לפתוח את הקובץ בחזרה
     expect(name).toMatch(/^[ -~]+$/);
     expect(name.endsWith('.course.zip')).toBe(true);
@@ -195,15 +195,15 @@ describe('שם קובץ ההורדה', () => {
 
   it('שומר את החלק הלטיני של הכותרת, כדי שהקובץ עדיין יהיה מזוהה', () => {
     expect(projectFileName('Safety 101 — מבוא', day)).toBe(
-      'lomdi-Safety-101-2026-07-25.course.zip',
+      'learnit-Safety-101-2026-07-25.course.zip',
     );
   });
 
   it('מסיר תווים שמערכות קבצים אוסרות', () => {
-    expect(projectFileName('Rules: part 1/2', day)).toBe('lomdi-Rules-part-1-2-2026-07-25.course.zip');
+    expect(projectFileName('Rules: part 1/2', day)).toBe('learnit-Rules-part-1-2-2026-07-25.course.zip');
   });
 
   it('נופל לשם עם תאריך בלבד כשהכותרת ריקה', () => {
-    expect(projectFileName('   ', day)).toBe('lomdi-2026-07-25.course.zip');
+    expect(projectFileName('   ', day)).toBe('learnit-2026-07-25.course.zip');
   });
 });

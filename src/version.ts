@@ -5,7 +5,7 @@
  * ייבוא של package.json היה גורר את כל הקובץ — כולל רשימת התלויות — לתוך
  * מה שהלומד מוריד.
  */
-export const APP_NAME = 'לומדי';
+export const APP_NAME = 'Learnit';
 /** שם המותג בנחיתה ובשיווק — כולל AI, בניגוד לשם הקצר בקבצי תוצר */
-export const APP_BRAND = 'לומדי AI';
+export const APP_BRAND = 'Learnit AI';
 export const APP_VERSION = '0.1.0';

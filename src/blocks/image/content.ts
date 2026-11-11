@@ -5,7 +5,7 @@ export const imageContentSchema = z.object({
   assetId: assetRefSchema,
   /**
    * פרומפט מומלץ לתמונה — תיאור באנגלית שה-AI מציע, שהמשתמש יכול להעתיק
-   * ולהזין למחולל תמונות משלו. Lomdi לא מייצר תמונות; זה נשאר placeholder.
+   * ולהזין למחולל תמונות משלו. Learnit לא מייצר תמונות; זה נשאר placeholder.
    * `.default('')` שומר על תאימות אחורה לקבצים ישנים בלי השדה.
    */
   imagePrompt: z.string().default(''),

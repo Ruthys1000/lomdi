@@ -7,7 +7,7 @@ import { validateProjectFile } from './validate';
 function projectFile(overrides: Partial<ProjectFile> = {}): ProjectFile {
   return {
     version: SCHEMA_VERSION,
-    generator: { name: 'לומדי', version: '0.1.0' },
+    generator: { name: 'Learnit', version: '0.1.0' },
     savedAt: new Date().toISOString(),
     course: createCourse(),
     assets: [],

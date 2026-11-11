@@ -48,7 +48,7 @@ describe('חבילת SCORM', () => {
     expect(paths).toContain('index.html');
     expect(paths).toContain('scorm-adapter.js');
     // אין תיקיית שורש עוטפת — index.html ממש בשורש
-    expect(paths.every((p) => !p.startsWith('lomdi-'))).toBe(true);
+    expect(paths.every((p) => !p.startsWith('learnit-'))).toBe(true);
   });
 
   it('טוען את מתאם ה-SCORM לפני חבילת הריצה ב-index.html', async () => {

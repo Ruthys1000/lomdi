@@ -44,6 +44,6 @@ describe('buildManifest', () => {
   it('מזהה החבילה הוא ASCII חוקי גם לכותרת עברית-בלבד', () => {
     const xml = buildManifest('לומדה', files);
     const id = xml.match(/identifier="([^"]+)"/)?.[1] ?? '';
-    expect(id).toMatch(/^LOMDI_[A-Za-z0-9_]*$/);
+    expect(id).toMatch(/^LEARNIT_[A-Za-z0-9_]*$/);
   });
 });

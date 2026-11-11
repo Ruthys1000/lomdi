@@ -14,12 +14,12 @@ import type { AssetMeta, Course, ProjectFile } from '@/model/types';
  */
 
 /*
- * שם המסד נשאר 'learnit' אף שהמוצר נקרא "לומדי".
+ * שם המסד הוא 'learnit' מהיום הראשון, גם בתקופה שהמוצר נקרא "לומדי".
  *
  * שינוי השם פותח מסד *חדש וריק*: IndexedDB ממופתח בשם, ואין מנגנון שמעביר
  * רשומות ממסד אחד לשני. כל לומדה ששמורה בדפדפן של מישהו הייתה נעלמת
  * מ"הלומדות שלי" בלי שום הודעה — אובדן עבודה בשביל אסתטיקה של מחרוזת
- * שהמשתמש לעולם אינו רואה.
+ * שהמשתמש לעולם אינו רואה. לכן השם אינו נגזר מ-`APP_NAME` ואינו משתנה איתו.
  */
 const DB_NAME = 'learnit';
 const DB_VERSION = 1;
@@ -48,7 +48,7 @@ export interface ProjectSummary {
   blockCount: number;
 }
 
-interface LomdiDb extends DBSchema {
+interface LearnitDb extends DBSchema {
   projects: {
     key: string;
     value: StoredProject;
@@ -82,14 +82,14 @@ export class PersistenceError extends Error {
   }
 }
 
-let dbPromise: Promise<IDBPDatabase<LomdiDb>> | null = null;
+let dbPromise: Promise<IDBPDatabase<LearnitDb>> | null = null;
 
-function connect(): Promise<IDBPDatabase<LomdiDb>> {
+function connect(): Promise<IDBPDatabase<LearnitDb>> {
   if (!dbPromise) {
     // עטיפה ב-async: בדפדפן שחוסם אחסון `openDB` זורק סינכרונית, וזריקה
     // כזו הייתה עוקפת את ה-catch שלמטה ומגיעה לממשק בלי ההודעה הנכונה
     dbPromise = (async () =>
-      openDB<LomdiDb>(DB_NAME, DB_VERSION, {
+      openDB<LearnitDb>(DB_NAME, DB_VERSION, {
         upgrade(db) {
           if (!db.objectStoreNames.contains('projects')) {
             const projects = db.createObjectStore('projects', { keyPath: 'id' });
@@ -120,7 +120,7 @@ function connect(): Promise<IDBPDatabase<LomdiDb>> {
 }
 
 /** עוטף כל גישה, כדי שכשל מכסה יגיע לממשק כהודעה ולא כ-Promise דחוי אנונימי */
-async function withDb<T>(fn: (db: IDBPDatabase<LomdiDb>) => Promise<T>, action: string): Promise<T> {
+async function withDb<T>(fn: (db: IDBPDatabase<LearnitDb>) => Promise<T>, action: string): Promise<T> {
   try {
     return await fn(await connect());
   } catch (error) {

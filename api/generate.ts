@@ -1307,7 +1307,7 @@ const SHARED_RULES = [
   '  לחרוג מהבלוקים המותרים לפורמט.',
   '',
   '═══ תמונות / query ═══',
-  'Lomdi לא מייצר תמונות. כל image/textImage ו-hero עם backgroundType="image" חייב',
+  'Learnit לא מייצר תמונות. כל image/textImage ו-hero עם backgroundType="image" חייב',
   '"query" באנגלית + "alt" בעברית. ה-query מוצג למשתמש כהמלצה ליצירה חיצונית.',
   '- query יצירתי וספציפי (כ־12–28 מילים): נושא + קומפוזיציה + תאורה/מצב רוח + סגנון.',
   '- גוון סגנונות בין לומדות ובתוך לומדה — אל תחזור תמיד על "flat vector illustration".',

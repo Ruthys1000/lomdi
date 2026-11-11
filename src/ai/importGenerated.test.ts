@@ -32,7 +32,7 @@ describe('importGeneratedCourse', () => {
     const validation = validateProjectFile(
       roundTrip({
         version: SCHEMA_VERSION,
-        generator: { name: 'לומדי', version: '0.1.0' },
+        generator: { name: 'Learnit', version: '0.1.0' },
         savedAt: new Date().toISOString(),
         course,
         assets: [],
